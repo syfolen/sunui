@@ -23,19 +23,19 @@ module sunui {
          * 应用展示缓动
          */
         protected $showProps(view: IView, props: IViewProps, duration: number): void {
-            if (props.x !== void 0) { view.x = props.x; };
-            if (props.y !== void 0) { view.y = props.y; };
+            if (props.x !== void 0) { view.x = props.x; }
+            if (props.y !== void 0) { view.y = props.y; }
 
-            if (props.centerX !== void 0) { view.centerX = props.centerX; };
-            if (props.centerY !== void 0) { view.centerY = props.centerY; };
+            if (props.centerX !== void 0) { view.centerX = props.centerX; }
+            if (props.centerY !== void 0) { view.centerY = props.centerY; }
 
             // 没有缓动
             if (duration == 0) {
-                if (props.left !== void 0) { view.left = props.left; };
-                if (props.right !== void 0) { view.right = props.right; };
+                if (props.left !== void 0) { view.left = props.left; }
+                if (props.right !== void 0) { view.right = props.right; }
 
-                if (props.top !== void 0) { view.top = props.top; };
-                if (props.bottom !== void 0) { view.bottom = props.bottom; };
+                if (props.top !== void 0) { view.top = props.top; }
+                if (props.bottom !== void 0) { view.bottom = props.bottom; }
             }
             else {
                 // 从左或右滑入

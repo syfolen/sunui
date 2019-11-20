@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 /**
  * @license suncore.d.ts (c) 2013 Binfeng Sun <christon.sun@qq.com>
  * Released under the Apache License, Version 2.0
@@ -277,7 +277,7 @@ declare module suncore {
      * 系统时间戳接口
      */
     export interface ITimeStamp extends ITimeline {
-        
+
     }
 
     /**
@@ -340,8 +340,8 @@ declare module suncore {
         // 系统命令
         static readonly STARTUP: string;
         static readonly SHUTDOWN: string;
-        static readonly FRAME_ENTER: string;
-        static readonly FRAME_LATER: string;
+        static readonly ENTER_FRAME: string;
+        static readonly LATER_FRAME: string;
 
         // 时间轴命令
         static readonly CREATE_TIMELINE: string;

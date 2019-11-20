@@ -39,7 +39,7 @@ var sunui;
          * 进入新场景，并将当前场景压入历史
          */
         UIManager.prototype.enterScene = function (name, args) {
-            this.sceneLayer.enterScene(name);
+            this.sceneLayer.enterScene(name, args);
         };
         /**
          * 退出当前场景，并返回历史
@@ -52,7 +52,7 @@ var sunui;
          * 说明：被替换的场景不会进入历史
          */
         UIManager.prototype.replaceScene = function (name, args) {
-            this.sceneLayer.replaceScene(name);
+            this.sceneLayer.replaceScene(name, args);
         };
         /**
          * 判断当前场景是否为指定类型的场景

@@ -86,9 +86,9 @@ module sunui {
         }
 
         /**
-         * 获取场景对象
+         * 获取场景对象 any | Laya.Scene3D
          */
-        get d3Scene(): Laya.Scene3D {
+        get d3Scene(): any {
             return this.sceneLayer.d3Scene;
         }
 

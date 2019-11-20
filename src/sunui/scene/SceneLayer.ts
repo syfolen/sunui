@@ -17,9 +17,9 @@ module sunui {
         private $uiScene: Laya.Scene = null;
 
         /**
-         * 当前场景对象
+         * 当前场景对象 any | Laya.Scene3D;
          */
-        private $d3Scene: Laya.Scene3D;
+        private $d3Scene: any;
 
         /**
          * 当前场景名字
@@ -81,8 +81,9 @@ module sunui {
 
         /**
          * 成功进入场景
+         * @d3Scene: any | Laya.Scene3D
          */
-        private $onEnterScene(uiScene: Laya.Scene, d3Scene: Laya.Scene3D): void {
+        private $onEnterScene(uiScene: Laya.Scene, d3Scene: any): void {
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 suncom.Logger.log(`SceneLayer=>$onSceneEnter, name:${this.$sceneName}`);
             }

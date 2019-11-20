@@ -23,25 +23,38 @@ var sunui;
         /**
          * 进入指定场景
          */
-        SceneLayer.prototype.$enterScene = function (name) {
+        SceneLayer.prototype.$enterScene = function (name, args) {
+            var str = null;
+            if (typeof args === "object") {
+                try {
+                    str = JSON.stringify(args);
+                }
+                catch (error) {
+                    str = args;
+                    suncom.Logger.warn("\u53C2\u6570\u65E0\u6CD5\u8F6C\u5316\u4E3AJSON");
+                }
+            }
+            else {
+                str = args;
+            }
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log("SceneLayer=>$enterScene, name:" + name);
+                suncom.Logger.log("SceneLayer=>$enterScene, name:" + name + ", args:" + str);
             }
             var info = sunui.SceneManager.getConfigByName(name);
             // 初始化场景（场景初始化应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeLoadScene, [info]));
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeLoadScene, [info, args]));
             // 加载当前场景（场景加载应当被无限延后，因为初始化方法中可能会增加一些加载资源的任务）
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$loadScene, [info]));
         };
         /**
          * 在初始化场景之前，需要先设置当前场景的名字
          */
-        SceneLayer.prototype.$beforeLoadScene = function (info) {
+        SceneLayer.prototype.$beforeLoadScene = function (info, args) {
             this.$sceneName = info.name;
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 suncom.Logger.log("SceneLayer=>$beforeInitScene, name:" + info.name);
             }
-            info.iniCls && new info.iniCls().run();
+            info.iniCls && new info.iniCls(args).run();
         };
         /**
          * 加载场景
@@ -55,7 +68,7 @@ var sunui;
         /**
          * 成功进入场景
          */
-        SceneLayer.prototype.$onEnterScene = function (uiScene, d3Scene) {
+        SceneLayer.prototype.$onEnterScene = function (uiScene, d3Scene /** Laya.Scene3D */) {
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 suncom.Logger.log("SceneLayer=>$onSceneEnter, name:" + this.$sceneName);
             }
@@ -93,7 +106,7 @@ var sunui;
         /**
          * 进入新场景，并将当前场景压入历史
          */
-        SceneLayer.prototype.enterScene = function (name) {
+        SceneLayer.prototype.enterScene = function (name, args) {
             // 未就绪时不允许跳转场景
             if (this.$ready == false) {
                 return false;
@@ -105,9 +118,9 @@ var sunui;
             // 退出当前场景
             this.$sceneName != 0 && this.$exitScene();
             // 进入新场景
-            this.$enterScene(name);
+            this.$enterScene(name, args);
             // 将新场景压入历史
-            sunui.SceneHeap.addHistory(name);
+            sunui.SceneHeap.addHistory(name, args);
             // 执行成功时返回true，此参数在replaceScene中会用到
             return true;
         };
@@ -128,26 +141,26 @@ var sunui;
             // 移除历史
             sunui.SceneHeap.removeHistory(this.$sceneName);
             // 获取历史场景
-            var historySceneName = sunui.SceneHeap.pop();
+            var info = sunui.SceneHeap.pop();
             // 进入历史场景
-            historySceneName != 0 && this.$enterScene(historySceneName);
+            info !== null && this.$enterScene(info.name, info.args);
         };
         /**
          * 替换当前场景
          * 说明：被替换的场景不会进入历史
          */
-        SceneLayer.prototype.replaceScene = function (name) {
+        SceneLayer.prototype.replaceScene = function (name, args) {
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 suncom.Logger.log("SceneLayer=>replaceScene, name:" + name);
             }
             // 获取当前场景的历史
-            var historySceneName = sunui.SceneHeap.pop();
+            var info = sunui.SceneHeap.pop();
             // 进入新场景
-            if (this.enterScene(name) == false) {
+            if (this.enterScene(name, args) == false) {
                 return;
             }
             // 进入新场景
-            historySceneName != 0 && sunui.SceneHeap.removeHistory(historySceneName);
+            info !== null && sunui.SceneHeap.removeHistory(info.name);
         };
         /**
          * 判断当前场景是否为指定类型的场景

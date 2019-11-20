@@ -25,16 +25,16 @@ module sunui {
         constructor(item: any, mod: suncore.ModuleEnum) {
             this.$mod = mod;
             this.$item = item;
-            puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.FRAME_ENTER, this.$onFrameEnter, this);
-
+            puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.ENTER_FRAME, this.$onFrameEnter, this);
             // 若时间轴停止，则终止缓动
             mod == suncore.ModuleEnum.CUSTOM && puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMESTAMP_STOPPED, this.destroy, this);
             mod == suncore.ModuleEnum.TIMELINE && puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMELINE_STOPPED, this.destroy, this);
         }
 
         destroy(): void {
-            puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.FRAME_ENTER, this.$onFrameEnter, this);
-            puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.FRAME_ENTER, this.$onFrameEnter, this);
+            puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.ENTER_FRAME, this.$onFrameEnter, this);
+            this.$mod == suncore.ModuleEnum.CUSTOM && puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMESTAMP_STOPPED, this.destroy, this);
+            this.$mod == suncore.ModuleEnum.TIMELINE && puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMELINE_STOPPED, this.destroy, this);
         }
 
         /**
