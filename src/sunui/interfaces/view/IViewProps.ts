@@ -3,6 +3,7 @@ module sunui {
 
     /**
      * 弹出缓动信息接口
+     * export
      */
     export interface IViewProps {
         x?: number;

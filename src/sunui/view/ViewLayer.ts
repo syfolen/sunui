@@ -1,6 +1,8 @@
 
 module sunui {
-
+    /**
+     * export
+     */
     export abstract class ViewLayer {
         /**
          * 视图栈信息
@@ -12,20 +14,44 @@ module sunui {
             puremvc.Facade.getInstance().registerObserver(NotifyKey.UNLOAD_SCENE, this.$onUnloadScene, this, false, 5);
         }
 
+        /**
+         * export
+         */
         abstract addChild(view: IView): void;
 
+        /**
+         * export
+         */
         abstract addChildAt(view: IView, index: number): void;
 
+        /**
+         * export
+         */
         abstract removeChild(view: IView): void;
 
+        /**
+         * export
+         */
         abstract removeChildAt(index: number): void;
 
+        /**
+         * export
+         */
         abstract createMask(view: IView): IView;
 
+        /**
+         * export
+         */
         abstract destroyMask(mask: IView): void;
 
+        /**
+         * export
+         */
         abstract createViewByClass(cls: new () => IView): IView;
 
+        /**
+         * export
+         */
         abstract destroyView(view: IView): void;
 
         /**

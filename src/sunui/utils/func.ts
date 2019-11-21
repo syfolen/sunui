@@ -3,6 +3,7 @@ module sunui {
 
     /**
      * 在对象或子对象中查找
+     * export
      */
     export function find(path: string, parent: Laya.Node): any {
         const array: Array<string> = path.split("/");

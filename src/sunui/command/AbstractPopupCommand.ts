@@ -1,6 +1,8 @@
 
 module sunui {
-
+    /**
+     * export
+     */
     export abstract class AbstractPopupCommand extends puremvc.SimpleCommand {
 
         /**
@@ -56,7 +58,7 @@ module sunui {
                     props.scaleY = 1;
                 }
 
-                Tween.get(view).to(props, duration);
+                Tween.get(view, suncore.ModuleEnum.CUSTOM).to(props, duration);
             }
         }
 
@@ -79,7 +81,7 @@ module sunui {
                 props.scaleY = 0;
             }
 
-            Tween.get(view).to(props, duration);
+            Tween.get(view, suncore.ModuleEnum.CUSTOM).to(props, duration);
         }
     }
 }

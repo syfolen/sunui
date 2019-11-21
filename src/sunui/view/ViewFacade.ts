@@ -1,6 +1,8 @@
 
 module sunui {
-
+    /**
+     * export
+     */
     export class ViewFacade extends puremvc.Notifier {
         /**
          * 弹出对象
@@ -21,6 +23,7 @@ module sunui {
          * 弹出框外观
          * @param view 弹出对象
          * @param duration 缓动时间，默认为200
+         * export
          */
         constructor(view: IView, duration?: number) {
             super();
@@ -41,6 +44,7 @@ module sunui {
 
         /**
          * 执行弹出逻辑
+         * export
          */
         popup(trans: boolean = false, props: IViewProps = {}): ViewFacade {
             if (this.facade.hasCommand(NotifyKey.SHOW_POPUP) == true) {
@@ -51,6 +55,7 @@ module sunui {
 
         /**
          * 执行关闭逻辑
+         * export
          */
         close(destroy?: boolean): void {
             if (this.facade.hasCommand(NotifyKey.CLOSE_POPUP) == true) {
@@ -60,10 +65,14 @@ module sunui {
 
         /**
          * 设置是否允许取消
+         * export
          */
         get cancelAllowed(): boolean {
             return this.info.cancelAllowed;
         }
+        /**
+         * export
+         */
         set cancelAllowed(yes: boolean) {
             this.info.cancelAllowed = yes;
         }

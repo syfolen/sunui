@@ -1,6 +1,8 @@
 
 module sunui {
-
+    /**
+     * export
+     */
     export interface IPopupView {
 
         $onOpen?(): void;

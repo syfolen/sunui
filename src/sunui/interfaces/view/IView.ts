@@ -1,6 +1,8 @@
 
 module sunui {
-
+    /**
+     * export
+     */
     export interface IView extends IPopupView {
         name: string;
 

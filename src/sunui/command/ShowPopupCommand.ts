@@ -1,8 +1,12 @@
 
 module sunui {
-
+    /**
+     * export
+     */
     export class ShowPopupCommand extends AbstractPopupCommand {
-
+        /**
+         * export
+         */
         execute(view: IView, duration: number, trans: boolean, props: IViewProps): void {
             // 若配置己存在，则说明节点己经被弹出了
             if (UIManager.getInstance().viewLayer.getInfoByView(view) != null) {
@@ -57,9 +61,9 @@ module sunui {
 
                 const currActiveInfo: IViewStackInfo = UIManager.getInstance().viewLayer.getActiveViewInfo();
                 // 若当前活动的视图为TOP或POPUP，且需要显示的视图亦为TOP或POPUP，则隐藏当前顶层视图
-                if (currActiveInfo != null && (currActiveInfo.level == UILevel.TOP || currActiveInfo.level == UILevel.POPUP)) {
-                    UIManager.getInstance().viewLayer.removeChild(currActiveInfo.view);
-                }
+                // if (currActiveInfo != null && (currActiveInfo.level == UILevel.TOP || currActiveInfo.level == UILevel.POPUP)) {
+                //     UIManager.getInstance().viewLayer.removeChild(currActiveInfo.view);
+                // }
                 UIManager.getInstance().viewLayer.addChild(info.view);
 
                 // 应用缓动数据
@@ -67,13 +71,14 @@ module sunui {
 
                 // 遮罩不通透逻辑处理
                 mask[Tween.Alpha.KEY] = 0;
-                Tween.get(mask).to({ alpha: alpha }, duration, null, suncom.Handler.create(this, this.$onPopupFinish, [view]));
+                const handler = suncom.Handler.create(this, this.$onPopupFinish, [view]);
+                Tween.get(mask, suncore.ModuleEnum.CUSTOM).to({ alpha: alpha }, duration, null, handler);
 
-                if (trans == false) {
-                    // 获取上一个不通透的对象
-                    const stack: IViewStackInfo = UIManager.getInstance().viewLayer.returnLatestStackNotTrans(view);
-                    stack != null && Tween.get(stack.mask).to({ alpha: 0 }, duration);
-                }
+                // if (trans == false) {
+                //     // 获取上一个不通透的对象
+                //     const stack: IViewStackInfo = UIManager.getInstance().viewLayer.returnLatestStackNotTrans(view);
+                //     stack != null && Tween.get(stack.mask).to({ alpha: 0 }, duration);
+                // }
             }
 
             // 保存视图信息

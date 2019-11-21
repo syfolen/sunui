@@ -3,6 +3,7 @@ module sunui {
 
     /**
      * 场景层
+     * export
      */
     export class SceneLayer {
 
@@ -17,9 +18,9 @@ module sunui {
         private $uiScene: Laya.Scene = null;
 
         /**
-         * 当前场景对象 any | Laya.Scene3D;
+         * 当前场景对象
          */
-        private $d3Scene: any;
+        private $d3Scene: Laya.Scene3D;
 
         /**
          * 当前场景名字
@@ -55,7 +56,7 @@ module sunui {
             // 初始化场景（场景初始化应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeLoadScene, [info, args]));
             // 加载当前场景（场景加载应当被无限延后，因为初始化方法中可能会增加一些加载资源的任务）
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$loadScene, [info]));
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$loadScene, [info, args]));
         }
 
         /**
@@ -72,18 +73,17 @@ module sunui {
         /**
          * 加载场景
          */
-        private $loadScene(info: ISceneInfo): void {
+        private $loadScene(info: ISceneInfo, args: any): void {
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 suncom.Logger.log(`SceneLayer=>$loadScene, name:${info.name}`);
             }
-            puremvc.Facade.getInstance().sendNotification(NotifyKey.LOAD_SCENE, info);
+            puremvc.Facade.getInstance().sendNotification(NotifyKey.LOAD_SCENE, [info, args]);
         }
 
         /**
          * 成功进入场景
-         * @d3Scene: any | Laya.Scene3D
          */
-        private $onEnterScene(uiScene: Laya.Scene, d3Scene: any): void {
+        private $onEnterScene(uiScene: Laya.Scene, d3Scene: Laya.Scene3D): void {
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 suncom.Logger.log(`SceneLayer=>$onSceneEnter, name:${this.$sceneName}`);
             }

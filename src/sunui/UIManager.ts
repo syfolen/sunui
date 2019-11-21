@@ -1,10 +1,15 @@
 
 module sunui {
-
+    /**
+     * export
+     */
     export class UIManager {
 
         private static inst: UIManager = null;
 
+        /**
+         * export
+         */
         static getInstance(): UIManager {
             if (UIManager.inst == null) {
                 UIManager.inst = new UIManager();
@@ -20,6 +25,7 @@ module sunui {
 
         /**
          * 注册视图层
+         * export
          */
         regViewLayer(layer: ViewLayer): void {
             this.viewLayer = layer;
@@ -27,6 +33,7 @@ module sunui {
 
         /**
          * 注册场景层
+         * export
          */
         regSceneLayer(layer: SceneLayer): void {
             this.sceneLayer = layer;
@@ -51,6 +58,7 @@ module sunui {
 
         /**
          * 进入新场景，并将当前场景压入历史
+         * export
          */
         enterScene(name: number, args?: any): void {
             this.sceneLayer.enterScene(name, args);
@@ -58,6 +66,7 @@ module sunui {
 
         /**
          * 退出当前场景，并返回历史
+         * export
          */
         exitScene(): void {
             this.sceneLayer.exitScene();
@@ -66,6 +75,7 @@ module sunui {
         /**
          * 替换当前场景
          * 说明：被替换的场景不会进入历史
+         * export
          */
         replaceScene(name: number, args?: any): void {
             this.sceneLayer.replaceScene(name, args);
@@ -80,15 +90,17 @@ module sunui {
 
         /**
          * 获取场景对象
+         * export
          */
         get uiScene(): Laya.Scene {
             return this.sceneLayer.uiScene;
         }
 
         /**
-         * 获取场景对象 any | Laya.Scene3D
+         * 获取场景对象
+         * export
          */
-        get d3Scene(): any {
+        get d3Scene(): Laya.Scene3D {
             return this.sceneLayer.d3Scene;
         }
 
