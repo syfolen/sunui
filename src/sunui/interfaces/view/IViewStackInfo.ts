@@ -11,7 +11,7 @@ module sunui {
         view: IView;
 
         /**
-         * 视图类
+         * 视图对象类型
          */
         viewClass: new () => IView;
 
@@ -19,11 +19,6 @@ module sunui {
          * 遮罩对象
          */
         mask?: IView;
-
-        /**
-         * 参数列表
-         */
-        args?: any;
 
         /**
          * 缓动信息
@@ -34,11 +29,6 @@ module sunui {
          * 视图层级
          */
         level: UILevel;
-
-        /**
-         * 背景是否通透
-         */
-        trans?: boolean;
 
         /**
          * 是否己关闭

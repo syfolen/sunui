@@ -1,7 +1,7 @@
 
 module sunui {
-
     /**
+     * 关闭弹框命令
      * export
      */
     export class ClosePopupCommand extends AbstractPopupCommand {
@@ -11,6 +11,10 @@ module sunui {
          */
         execute(view: IView, duration: number, destroy: boolean): void {
             const info: IViewStackInfo = UIManager.getInstance().viewLayer.getInfoByView(view);
+            if (info === null) {
+                console.error(`${view}[${view.name}]'s infomation is not exist.`);
+                return;
+            }
             if (info.closed == true) {
                 return;
             }
@@ -18,47 +22,28 @@ module sunui {
                 info.keepNode = !destroy;
             }
 
+            // 标记弹框己关闭
             info.closed = true;
-
             // 应用缓动
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
-                this.$closeProps(view, info.props, duration);
+                this.$applyCloseProps(view, info.props, duration);
             }
 
-            // 显示上一个视图
-            const stack: IViewStackInfo = UIManager.getInstance().viewLayer.getActiveViewInfo();
-            // // 只有TOP和POPUP类型的视图才需要重新显示
-            // if (stack != null && (stack.level == UILevel.TOP || stack.level == UILevel.POPUP)) {
-            //     UIManager.getInstance().viewLayer.addChild(stack.view);
-            //     this.$showProps(stack.view, stack.props, duration);
-            // }
+            // 调用IPopupView的$onDisable接口
+            UIManager.getInstance().viewLayer.onViewClose(view);
 
-            const popup: IPopupView = view as IPopupView;
-            popup.$onDisable && popup.$onDisable();
-
-            const handler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
+                const handler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
                 Tween.get(info.mask, suncore.ModuleEnum.CUSTOM).to({ alpha: 0 }, duration, null, handler);
             }
-            else {
-                handler.run();
-            }
-            // if (info.trans == false) {
-            //     // 获取上一个不通透的对象
-            //     const stack: IViewStackInfo = UIManager.getInstance().viewLayer.returnLatestStackNotTrans(view);
-            //     stack != null && Tween.get(stack.mask).to({ alpha: 1 }, duration);
-            // }
         }
 
         /**
-         * 关闭结束
+         * 缓动结束
          */
         private $onCloseFinish(view: IView): void {
-            const info: IViewStackInfo = UIManager.getInstance().viewLayer.getInfoByView(view);
-            if (info != null) {
-                UIManager.getInstance().viewLayer.removeStackByInfo(info);
-            }
             // IPopupView的$onRemove方法在ViewLayer中实现
+            UIManager.getInstance().viewLayer.removeStackByView(view);
         }
     }
 }

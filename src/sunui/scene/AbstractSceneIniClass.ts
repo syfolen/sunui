@@ -1,6 +1,5 @@
 
 module sunui {
-
     /**
      * 场景初始化抽象入口类
      * export

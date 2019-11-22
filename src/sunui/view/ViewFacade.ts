@@ -64,7 +64,7 @@ module sunui {
         }
 
         /**
-         * 设置是否允许取消
+         * 设置是否允许取消，默认为false
          * export
          */
         get cancelAllowed(): boolean {

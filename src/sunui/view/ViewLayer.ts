@@ -52,6 +52,26 @@ module sunui {
         /**
          * export
          */
+        abstract onViewCreate(view: IView, args: any): void;
+
+        /**
+         * export
+         */
+        abstract onViewOpen(view: IView): void;
+
+        /**
+         * export
+         */
+        abstract onViewClose(view: IView): void;
+
+        /**
+         * export
+         */
+        abstract onViewRemove(view: IView): void;
+
+        /**
+         * export
+         */
         abstract destroyView(view: IView): void;
 
         /**
@@ -65,11 +85,11 @@ module sunui {
         }
 
         /**
-         * 是否存在TOP类型的视图
+         * 判断是否存在指定层级的视图
          */
-        hasTopView(): boolean {
+        isViewExistInLevel(level: UILevel): boolean {
             const info: IViewStackInfo = this.getActiveViewInfo();
-            if (info != null && info.level == UILevel.TOP) {
+            if (info != null && info.level == level) {
                 return true;
             }
             return false;
@@ -97,20 +117,6 @@ module sunui {
                 if (info.closed == false) {
                     return info;
                 }
-            }
-            return null;
-        }
-
-        /**
-         * 获取上一个背景不通透的节点
-         */
-        returnLatestStackNotTrans(view: IView): IViewStackInfo {
-            for (let i: number = this.$infos.length - 1; i > -1; i--) {
-                const info: IViewStackInfo = this.$infos[i];
-                if (info.view == view || info.trans == true) {
-                    continue;
-                }
-                return info;
             }
             return null;
         }
@@ -145,18 +151,14 @@ module sunui {
                 return;
             }
             this.$infos.splice(index, 1);
+            this.onViewRemove(info.mask);
 
-            const popup: IPopupView = info.view as IPopupView;
-            popup.$onRemove && popup.$onRemove();
-
-            this.removeChild(info.mask);
             this.removeChild(info.view);
+            this.removeChild(info.mask);
 
             if (info.keepNode == false) {
                 this.destroyView(info.view);
             }
-
-            // 若被移除的弹框背景不为通透，则需要找一个不通透的节点，将背景置为不通透
         }
 
         /**
@@ -200,12 +202,7 @@ module sunui {
                 if (info.closed == true) {
                     continue;
                 }
-                if (viewClass !== void 0) {
-                    if (info.viewClass == viewClass) {
-                        return true;
-                    }
-                }
-                else {
+                if (info.viewClass === viewClass) {
                     return true;
                 }
             }

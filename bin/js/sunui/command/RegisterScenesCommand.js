@@ -14,13 +14,18 @@ var __extends = (this && this.__extends) || (function () {
 var sunui;
 (function (sunui) {
     /**
-     * 注册所有场景
+     * 注册场景信息
+     * export
      */
     var RegisterScenesCommand = /** @class */ (function (_super) {
         __extends(RegisterScenesCommand, _super);
         function RegisterScenesCommand() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
+        /**
+         * @infos: 场景信息配置列表
+         * export
+         */
         RegisterScenesCommand.prototype.execute = function (infos) {
             for (var i = 0; i < infos.length; i++) {
                 var info = infos[i];

@@ -45,6 +45,9 @@ var sunui;
             }
             return null;
         };
+        /**
+         * 场景历史栈
+         */
         SceneHeap.$infos = [];
         return SceneHeap;
     }());
