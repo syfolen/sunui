@@ -6,6 +6,7 @@ module sunui {
      */
     export class Tween implements ITween {
         /**
+         * @mod: 缓动挂靠的模块，默认为SYSTEM
          * export
          */
         static get(item: any, mod: suncore.ModuleEnum = suncore.ModuleEnum.SYSTEM): ITween {
@@ -65,7 +66,7 @@ module sunui {
         /**
          * 默认的缓动函数
          */
-        private easeNone(t: number, b: number, c: number, d: number): number {
+        static easeNone(t: number, b: number, c: number, d: number): number {
             let a: number = t / d;
             if (a > 1) {
                 a = 1;
@@ -93,7 +94,7 @@ module sunui {
                 duration = config.duration;
             }
 
-            const func: Function = config.ease || this.easeNone;
+            const func: Function = config.ease || Tween.easeNone;
 
             for (let i: number = 0; i < infos.length; i++) {
                 const info: ITweenInfo = infos[i];

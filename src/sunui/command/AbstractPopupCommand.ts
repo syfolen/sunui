@@ -61,7 +61,7 @@ module sunui {
                     props.scaleY = 1;
                 }
 
-                Tween.get(view, suncore.ModuleEnum.CUSTOM).to(props, duration);
+                Tween.get(view, suncore.ModuleEnum.CUSTOM).to(props, duration, props.ease);
             }
         }
 

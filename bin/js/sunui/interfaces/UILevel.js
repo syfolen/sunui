@@ -37,35 +37,55 @@ var sunui;
          */
         UILevel[UILevel["VIEW"] = 5] = "VIEW";
         /**
+         * 金币获得
+         * export
+         */
+        UILevel[UILevel["GOLD_TIPS"] = 6] = "GOLD_TIPS";
+        /**
+         * 高倍金币
+         * export
+         */
+        UILevel[UILevel["HIGH_GOLD_TIPS"] = 7] = "HIGH_GOLD_TIPS";
+        /**
+         * 播报信息
+         * export
+         */
+        UILevel[UILevel["NOTICE"] = 8] = "NOTICE";
+        /**
+         * 小游戏
+         * export
+         */
+        UILevel[UILevel["MINI_GAME"] = 9] = "MINI_GAME";
+        /**
          * 弹出类型视图，有多个弹出对象时，只会显示最新弹出的视图对象，历史视图将在当前视图被关闭后自动重新弹出
          * export
          */
-        UILevel[UILevel["POPUP"] = 6] = "POPUP";
+        UILevel[UILevel["POPUP"] = 10] = "POPUP";
         /**
          * 异步框对象
          * export
          */
-        UILevel[UILevel["WAITINGBOX"] = 7] = "WAITINGBOX";
+        UILevel[UILevel["WAITINGBOX"] = 11] = "WAITINGBOX";
         /**
          * 加载界面
          * export
          */
-        UILevel[UILevel["LOADING"] = 8] = "LOADING";
+        UILevel[UILevel["LOADING"] = 12] = "LOADING";
         /**
          * 轻提示
          * export
          */
-        UILevel[UILevel["TIPS"] = 9] = "TIPS";
+        UILevel[UILevel["TIPS"] = 13] = "TIPS";
         /**
          * 顶级弹出对象，特性与POPUP相同，一般情况下只适用于警告、错误等信息提示
          * export
          */
-        UILevel[UILevel["TOP"] = 10] = "TOP";
+        UILevel[UILevel["TOP"] = 14] = "TOP";
         /**
          * 测试对象，处在最顶层
          * export
          */
-        UILevel[UILevel["DEBUG"] = 11] = "DEBUG";
+        UILevel[UILevel["DEBUG"] = 15] = "DEBUG";
     })(UILevel = sunui.UILevel || (sunui.UILevel = {}));
 })(sunui || (sunui = {}));
 //# sourceMappingURL=UILevel.js.map

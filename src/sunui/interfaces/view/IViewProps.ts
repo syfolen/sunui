@@ -18,6 +18,12 @@ module sunui {
         y?: number;
 
         /**
+         * 缓动方法
+         * export
+         */
+        ease?: Function;
+
+        /**
          * 透明度
          */
         alpha?: number;

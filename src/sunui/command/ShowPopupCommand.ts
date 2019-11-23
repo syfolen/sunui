@@ -13,7 +13,9 @@ module sunui {
                 console.error(`${view}[${view.name}] was already popup.`);
                 return;
             }
-            // 修正参数
+            // 提供默认的缓动方法
+            if (props.ease === void 0) { props.ease = Laya.Ease.backOut; }
+            // 默认不保存节点
             if (props.keepNode === void 0) { props.keepNode = false; }
 
             // 参数列表

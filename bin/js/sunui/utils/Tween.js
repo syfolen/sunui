@@ -24,6 +24,7 @@ var sunui;
             }
         }
         /**
+         * @mod: 缓动挂靠的模块，默认为SYSTEM
          * export
          */
         Tween.get = function (item, mod) {

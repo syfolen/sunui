@@ -42,6 +42,30 @@ module sunui {
         VIEW,
 
         /**
+         * 金币获得
+         * export
+         */
+        GOLD_TIPS,
+
+        /**
+         * 高倍金币
+         * export
+         */
+        HIGH_GOLD_TIPS,
+
+        /**
+         * 播报信息
+         * export
+         */
+        NOTICE,
+
+        /**
+         * 小游戏
+         * export
+         */
+        MINI_GAME,
+
+        /**
          * 弹出类型视图，有多个弹出对象时，只会显示最新弹出的视图对象，历史视图将在当前视图被关闭后自动重新弹出
          * export
          */

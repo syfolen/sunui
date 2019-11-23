@@ -93,7 +93,7 @@ var sunui;
                     props.scaleX = 1;
                     props.scaleY = 1;
                 }
-                sunui.Tween.get(view, suncore.ModuleEnum.CUSTOM).to(props, duration);
+                sunui.Tween.get(view, suncore.ModuleEnum.CUSTOM).to(props, duration, props.ease);
             }
         };
         /**
