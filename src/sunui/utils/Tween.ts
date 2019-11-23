@@ -6,18 +6,21 @@ module sunui {
      */
     export class Tween implements ITween {
         /**
-         * Alpha最大值
-         */
-        static readonly Alpha: { MAX, KEY } = { MAX: 1, KEY: "alpha" };
-
-        /**
+         * @mod: 缓动挂靠的模块，默认为SYSTEM
          * export
          */
         static get(item: any, mod: suncore.ModuleEnum = suncore.ModuleEnum.SYSTEM): ITween {
             return new Tween(item, mod);
         }
 
+        /**
+         * 缓动所挂靠的模块
+         */
         private $mod: suncore.ModuleEnum;
+
+        /**
+         * 缓动对象
+         */
         private $item: any;
 
         /**
@@ -25,31 +28,45 @@ module sunui {
          */
         private $target: any;
 
+        /**
+         * 缓动队列
+         */
         private $infos: Array<Array<ITweenInfo>> = [];
+
+        /**
+         * 缓动配置列表
+         */
         private $configs: Array<ITweenConfig> = [];
 
         constructor(item: any, mod: suncore.ModuleEnum) {
             this.$mod = mod;
             this.$item = item;
-            suncore.System.addMessage(mod, suncore.MessagePriorityEnum.PRIORITY_FRAME, this.$onEnterFrame, this);
-            // 若时间轴停止，则终止缓动
-            mod == suncore.ModuleEnum.CUSTOM && puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMESTAMP_STOPPED, this.destroy, this);
-            mod == suncore.ModuleEnum.TIMELINE && puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMELINE_STOPPED, this.destroy, this);
+            suncore.System.addMessage(this.$mod, suncore.MessagePriorityEnum.PRIORITY_FRAME, this.$onEnterFrame, this);
+            if (mod === suncore.ModuleEnum.CUSTOM) {
+                puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMESTAMP_STOPPED, this.clear, this);
+            }
+            else if (mod === suncore.ModuleEnum.TIMELINE) {
+                puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMELINE_STOPPED, this.clear, this);
+            }
         }
 
         /**
          * export
          */
-        destroy(): void {
+        clear(): void {
             suncore.System.removeMessage(this.$mod, suncore.MessagePriorityEnum.PRIORITY_FRAME, this.$onEnterFrame, this);
-            this.$mod == suncore.ModuleEnum.CUSTOM && puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.TIMESTAMP_STOPPED, this.destroy, this);
-            this.$mod == suncore.ModuleEnum.TIMELINE && puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.TIMELINE_STOPPED, this.destroy, this);
+            if (this.$mod === suncore.ModuleEnum.CUSTOM) {
+                puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.TIMESTAMP_STOPPED, this.clear, this);
+            }
+            else if (this.$mod === suncore.ModuleEnum.TIMELINE) {
+                puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.TIMELINE_STOPPED, this.clear, this);
+            }
         }
 
         /**
          * 默认的缓动函数
          */
-        private easeNone(t: number, b: number, c: number, d: number): number {
+        static easeNone(t: number, b: number, c: number, d: number): number {
             let a: number = t / d;
             if (a > 1) {
                 a = 1;
@@ -77,7 +94,7 @@ module sunui {
                 duration = config.duration;
             }
 
-            const func: Function = config.ease || this.easeNone;
+            const func: Function = config.ease || Tween.easeNone;
 
             for (let i: number = 0; i < infos.length; i++) {
                 const info: ITweenInfo = infos[i];
@@ -101,7 +118,7 @@ module sunui {
 
             // 缓动己完成
             if (this.$configs.length == 0) {
-                this.destroy();
+                this.clear();
             }
             else {
                 this.$configs[0].time = suncore.System.getModuleTimestamp(this.$mod);
@@ -131,17 +148,6 @@ module sunui {
         private $beforeTween(keys: Array<string>, from: any, to: any, duration: number, ease: Function, handler: suncom.IHandler): void {
             // 计算最终效果
             this.$target = this.$target || {};
-
-            // 修正Alpha的值
-            for (let i: number = 0; i < keys.length; i++) {
-                const key: string = keys[i];
-                if (key == Tween.Alpha.KEY) {
-                    if (Tween.Alpha.MAX > 1) {
-                        to[key] = to[key] * Tween.Alpha.MAX;
-                        from[key] = from[key] * Tween.Alpha.MAX;
-                    }
-                }
-            }
 
             const infos: Array<ITweenInfo> = [];
             for (let i: number = 0; i < keys.length; i++) {

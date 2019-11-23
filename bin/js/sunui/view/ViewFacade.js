@@ -13,12 +13,16 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var sunui;
 (function (sunui) {
+    /**
+     * export
+     */
     var ViewFacade = /** @class */ (function (_super) {
         __extends(ViewFacade, _super);
         /**
          * 弹出框外观
          * @param view 弹出对象
          * @param duration 缓动时间，默认为200
+         * export
          */
         function ViewFacade(view, duration) {
             var _this = _super.call(this) || this;
@@ -42,6 +46,7 @@ var sunui;
         }
         /**
          * 执行弹出逻辑
+         * export
          */
         ViewFacade.prototype.popup = function (trans, props) {
             if (trans === void 0) { trans = false; }
@@ -53,6 +58,7 @@ var sunui;
         };
         /**
          * 执行关闭逻辑
+         * export
          */
         ViewFacade.prototype.close = function (destroy) {
             if (this.facade.hasCommand(sunui.NotifyKey.CLOSE_POPUP) == true) {
@@ -61,11 +67,15 @@ var sunui;
         };
         Object.defineProperty(ViewFacade.prototype, "cancelAllowed", {
             /**
-             * 设置是否允许取消
+             * 设置是否允许取消，默认为false
+             * export
              */
             get: function () {
                 return this.info.cancelAllowed;
             },
+            /**
+             * export
+             */
             set: function (yes) {
                 this.info.cancelAllowed = yes;
             },

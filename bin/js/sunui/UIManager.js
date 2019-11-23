@@ -1,8 +1,14 @@
 var sunui;
 (function (sunui) {
+    /**
+     * export
+     */
     var UIManager = /** @class */ (function () {
         function UIManager() {
         }
+        /**
+         * export
+         */
         UIManager.getInstance = function () {
             if (UIManager.inst == null) {
                 UIManager.inst = new UIManager();
@@ -11,12 +17,14 @@ var sunui;
         };
         /**
          * 注册视图层
+         * export
          */
         UIManager.prototype.regViewLayer = function (layer) {
             this.viewLayer = layer;
         };
         /**
          * 注册场景层
+         * export
          */
         UIManager.prototype.regSceneLayer = function (layer) {
             this.sceneLayer = layer;
@@ -37,12 +45,14 @@ var sunui;
         // 场景相关
         /**
          * 进入新场景，并将当前场景压入历史
+         * export
          */
         UIManager.prototype.enterScene = function (name, args) {
             this.sceneLayer.enterScene(name, args);
         };
         /**
          * 退出当前场景，并返回历史
+         * export
          */
         UIManager.prototype.exitScene = function () {
             this.sceneLayer.exitScene();
@@ -50,6 +60,7 @@ var sunui;
         /**
          * 替换当前场景
          * 说明：被替换的场景不会进入历史
+         * export
          */
         UIManager.prototype.replaceScene = function (name, args) {
             this.sceneLayer.replaceScene(name, args);
@@ -63,6 +74,7 @@ var sunui;
         Object.defineProperty(UIManager.prototype, "uiScene", {
             /**
              * 获取场景对象
+             * export
              */
             get: function () {
                 return this.sceneLayer.uiScene;
@@ -73,6 +85,7 @@ var sunui;
         Object.defineProperty(UIManager.prototype, "d3Scene", {
             /**
              * 获取场景对象
+             * export
              */
             get: function () {
                 return this.sceneLayer.d3Scene;

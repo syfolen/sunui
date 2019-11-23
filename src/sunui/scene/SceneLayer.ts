@@ -1,6 +1,5 @@
 
 module sunui {
-
     /**
      * 场景层
      * export

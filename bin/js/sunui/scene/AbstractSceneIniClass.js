@@ -15,6 +15,7 @@ var sunui;
 (function (sunui) {
     /**
      * 场景初始化抽象入口类
+     * export
      */
     var AbstractSceneIniClass = /** @class */ (function (_super) {
         __extends(AbstractSceneIniClass, _super);
@@ -23,11 +24,15 @@ var sunui;
             puremvc.Facade.getInstance().registerObserver(sunui.NotifyKey.ENTER_SCENE, _this.$onEnterScene, _this, true);
             return _this;
         }
+        /**
+         * export
+         */
         AbstractSceneIniClass.prototype.run = function () {
             return true;
         };
         /**
          * 接收到进入场景通知
+         * export
          */
         AbstractSceneIniClass.prototype.$onEnterScene = function () {
         };

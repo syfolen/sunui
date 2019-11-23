@@ -1,11 +1,12 @@
 
 module sunui {
-
     /**
      * 场景历史管理器
      */
     export class SceneHeap {
-
+        /**
+         * 场景历史栈
+         */
         private static $infos: Array<ISceneHeapInfo> = [];
 
         static addHistory(name: number, args: any): void {

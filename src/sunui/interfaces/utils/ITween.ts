@@ -1,13 +1,17 @@
 
 module sunui {
     /**
+     * 缓动类
      * export
      */
     export interface ITween {
+
         /**
+         * 清除缓动
          * export
          */
-        destroy(): void;
+        clear(): void;
+
         /**
          * export
          */

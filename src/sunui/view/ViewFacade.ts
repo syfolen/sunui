@@ -25,7 +25,7 @@ module sunui {
          * @param duration 缓动时间，默认为200
          * export
          */
-        constructor(view: IView, duration?: number) {
+        constructor(view: any, duration?: number) {
             super();
             this.$view = view;
 
@@ -64,7 +64,7 @@ module sunui {
         }
 
         /**
-         * 设置是否允许取消
+         * 设置是否允许取消，默认为false
          * export
          */
         get cancelAllowed(): boolean {

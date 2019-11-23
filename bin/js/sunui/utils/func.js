@@ -2,6 +2,7 @@ var sunui;
 (function (sunui) {
     /**
      * 在对象或子对象中查找
+     * export
      */
     function find(path, parent) {
         var array = path.split("/");

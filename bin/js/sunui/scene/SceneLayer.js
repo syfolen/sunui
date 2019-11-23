@@ -2,6 +2,7 @@ var sunui;
 (function (sunui) {
     /**
      * 场景层
+     * export
      */
     var SceneLayer = /** @class */ (function () {
         function SceneLayer() {
@@ -44,7 +45,7 @@ var sunui;
             // 初始化场景（场景初始化应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeLoadScene, [info, args]));
             // 加载当前场景（场景加载应当被无限延后，因为初始化方法中可能会增加一些加载资源的任务）
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$loadScene, [info]));
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$loadScene, [info, args]));
         };
         /**
          * 在初始化场景之前，需要先设置当前场景的名字
@@ -59,16 +60,16 @@ var sunui;
         /**
          * 加载场景
          */
-        SceneLayer.prototype.$loadScene = function (info) {
+        SceneLayer.prototype.$loadScene = function (info, args) {
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 suncom.Logger.log("SceneLayer=>$loadScene, name:" + info.name);
             }
-            puremvc.Facade.getInstance().sendNotification(sunui.NotifyKey.LOAD_SCENE, info);
+            puremvc.Facade.getInstance().sendNotification(sunui.NotifyKey.LOAD_SCENE, [info, args]);
         };
         /**
          * 成功进入场景
          */
-        SceneLayer.prototype.$onEnterScene = function (uiScene, d3Scene /** Laya.Scene3D */) {
+        SceneLayer.prototype.$onEnterScene = function (uiScene, d3Scene) {
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 suncom.Logger.log("SceneLayer=>$onSceneEnter, name:" + this.$sceneName);
             }

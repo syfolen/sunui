@@ -1,5 +1,8 @@
 var sunui;
 (function (sunui) {
+    /**
+     * export
+     */
     var ViewLayer = /** @class */ (function () {
         function ViewLayer() {
             /**
@@ -19,11 +22,11 @@ var sunui;
             }
         };
         /**
-         * 是否存在TOP类型的视图
+         * 判断是否存在指定层级的视图
          */
-        ViewLayer.prototype.hasTopView = function () {
+        ViewLayer.prototype.isViewExistInLevel = function (level) {
             var info = this.getActiveViewInfo();
-            if (info != null && info.level == sunui.UILevel.TOP) {
+            if (info != null && info.level == level) {
                 return true;
             }
             return false;
@@ -49,19 +52,6 @@ var sunui;
                 if (info.closed == false) {
                     return info;
                 }
-            }
-            return null;
-        };
-        /**
-         * 获取上一个背景不通透的节点
-         */
-        ViewLayer.prototype.returnLatestStackNotTrans = function (view) {
-            for (var i = this.$infos.length - 1; i > -1; i--) {
-                var info = this.$infos[i];
-                if (info.view == view || info.trans == true) {
-                    continue;
-                }
-                return info;
             }
             return null;
         };
@@ -94,14 +84,12 @@ var sunui;
                 return;
             }
             this.$infos.splice(index, 1);
-            var popup = info.view;
-            popup.$onRemove && popup.$onRemove();
-            this.removeChild(info.mask);
+            this.onViewRemove(info.mask);
             this.removeChild(info.view);
+            this.removeChild(info.mask);
             if (info.keepNode == false) {
                 this.destroyView(info.view);
             }
-            // 若被移除的弹框背景不为通透，则需要找一个不通透的节点，将背景置为不通透
         };
         /**
          * 根据视图对象移除视图信息
@@ -142,12 +130,7 @@ var sunui;
                 if (info.closed == true) {
                     continue;
                 }
-                if (viewClass !== void 0) {
-                    if (info.viewClass == viewClass) {
-                        return true;
-                    }
-                }
-                else {
+                if (info.viewClass === viewClass) {
                     return true;
                 }
             }
