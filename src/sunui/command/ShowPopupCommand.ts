@@ -40,6 +40,8 @@ module sunui {
             // 通透值
             const alpha: number = trans == true ? 0 : mask.alpha;
 
+            mask.name = view.name;
+
             // 生成弹框信息
             const info: IViewStackInfo = {
                 view: view,
