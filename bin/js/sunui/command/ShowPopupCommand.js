@@ -30,14 +30,18 @@ var sunui;
                 console.error(view + "[" + view.name + "] was already popup.");
                 return;
             }
-            // 修正参数
+            // 提供默认的缓动方法
+            if (props.ease === void 0) {
+                props.ease = Laya.Ease.backOut;
+            }
+            // 默认不保存节点
             if (props.keepNode === void 0) {
                 props.keepNode = false;
             }
             // 参数列表
             var args = props.args;
             // 显示层级
-            var level = view.level || props.level || sunui.UILevel.POPUP;
+            var level = view.zOrder || props.level || sunui.UILevel.POPUP;
             // 是否保留节点
             var keepNode = props.keepNode;
             // 显示对象类型
@@ -52,6 +56,7 @@ var sunui;
             var mask = sunui.UIManager.getInstance().viewLayer.createMask(view);
             // 通透值
             var alpha = trans == true ? 0 : mask.alpha;
+            mask.name = view.name;
             // 生成弹框信息
             var info = {
                 view: view,

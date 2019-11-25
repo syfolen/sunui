@@ -84,7 +84,7 @@ var sunui;
                 return;
             }
             this.$infos.splice(index, 1);
-            this.onViewRemove(info.mask);
+            this.onViewRemove(info.view);
             this.removeChild(info.view);
             this.removeChild(info.mask);
             if (info.keepNode == false) {

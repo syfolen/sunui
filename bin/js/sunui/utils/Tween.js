@@ -46,7 +46,7 @@ var sunui;
         /**
          * 默认的缓动函数
          */
-        Tween.prototype.easeNone = function (t, b, c, d) {
+        Tween.easeNone = function (t, b, c, d) {
             var a = t / d;
             if (a > 1) {
                 a = 1;
@@ -70,7 +70,7 @@ var sunui;
                 done = true;
                 duration = config.duration;
             }
-            var func = config.ease || this.easeNone;
+            var func = config.ease || Tween.easeNone;
             for (var i = 0; i < infos.length; i++) {
                 var info = infos[i];
                 if (done == true) {

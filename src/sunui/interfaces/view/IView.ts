@@ -18,7 +18,7 @@ module sunui {
         /**
          * 弹框显示层级
          */
-        level?: UILevel;
+        zOrder?: UILevel;
 
         /**
          * 弹框坐标

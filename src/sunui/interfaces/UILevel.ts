@@ -60,6 +60,12 @@ module sunui {
         NOTICE,
 
         /**
+         * 大赢家
+         * export
+         */
+        BIGWINNER,
+
+        /**
          * 小游戏
          * export
          */

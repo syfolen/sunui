@@ -21,7 +21,7 @@ module sunui {
             // 参数列表
             const args: any = props.args;
             // 显示层级
-            const level: UILevel = view.level || props.level || UILevel.POPUP;
+            const level: UILevel = view.zOrder || props.level || UILevel.POPUP;
             // 是否保留节点
             const keepNode: boolean = props.keepNode;
             // 显示对象类型
