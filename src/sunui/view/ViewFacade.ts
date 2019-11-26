@@ -54,7 +54,7 @@ module sunui {
         }
 
         /**
-         * 执行关闭逻辑
+         * 执行关闭逻辑，默认为true
          * export
          */
         close(destroy?: boolean): void {
