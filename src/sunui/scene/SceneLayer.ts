@@ -89,7 +89,7 @@ module sunui {
             this.$ready = true;
             this.$uiScene = uiScene;
             this.$d3Scene = d3Scene;
-            suncore.System.timeStamp.resume();
+            puremvc.Facade.getInstance().sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, false]);
         }
 
         /**
@@ -101,7 +101,7 @@ module sunui {
                 suncom.Logger.log(`SceneLayer=>$exitScene, sceneName:${this.$sceneName}`);
             }
             // 暂停场景时间轴
-            suncore.System.timeStamp.stop();
+            puremvc.Facade.getInstance().sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
 
             // 派发退出场景事件
             const info: ISceneInfo = SceneManager.getConfigByName(this.$sceneName);

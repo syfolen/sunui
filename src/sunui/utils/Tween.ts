@@ -41,12 +41,13 @@ module sunui {
         constructor(item: any, mod: suncore.ModuleEnum) {
             this.$mod = mod;
             this.$item = item;
-            suncore.System.addMessage(this.$mod, suncore.MessagePriorityEnum.PRIORITY_FRAME, this.$onEnterFrame, this);
-            if (mod === suncore.ModuleEnum.CUSTOM) {
-                puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMESTAMP_STOPPED, this.clear, this);
-            }
-            else if (mod === suncore.ModuleEnum.TIMELINE) {
-                puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMELINE_STOPPED, this.clear, this);
+            puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
+            puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this);
+        }
+
+        private $onTimelinePause(mod: suncore.ModuleEnum, stop: boolean): void {
+            if (this.$mod === mod && stop === true) {
+                this.clear();
             }
         }
 
@@ -54,13 +55,9 @@ module sunui {
          * export
          */
         clear(): void {
-            suncore.System.removeMessage(this.$mod, suncore.MessagePriorityEnum.PRIORITY_FRAME, this.$onEnterFrame, this);
-            if (this.$mod === suncore.ModuleEnum.CUSTOM) {
-                puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.TIMESTAMP_STOPPED, this.clear, this);
-            }
-            else if (this.$mod === suncore.ModuleEnum.TIMELINE) {
-                puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.TIMELINE_STOPPED, this.clear, this);
-            }
+            this.$item = null;
+            puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
+            puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this);
         }
 
         /**

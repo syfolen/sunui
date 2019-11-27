@@ -2,17 +2,12 @@
 declare module suncore {
     /**
      * 消息优先级
+     * 设计说明：
+     * 1. 使用消息机制的意义主要在于解决游戏表现层的流畅性问题
+     * 2. 由于消息机制中并没有提供由使用者主动取消消息的功能，所以消息机制并不适用于作线性逻辑方面的构建
+     * 3. 消息机制被用于实现场景跳转只是一个意外，因为场景跳转的逻辑是不可回滚的
      */
     enum MessagePriorityEnum {
-        /**
-         * 网络消息
-         * 说明：
-         * 1. 网络消息以帧序号为批次，每帧会派发同一批次中的所有消息
-         * 2. 为了防止被清除，网络消息始终会被添加到系统消息队列中
-         * 3. 当系统被暂停时，网络消息不会被广播
-         */
-        PRIORITY_SOCKET,
-
         /**
          * 始终立即响应
          */
@@ -37,26 +32,23 @@ declare module suncore {
          * 惰性消息
          * 说明：
          * 1. 当前帧若没有处理过任何消息，则会处理此类型的消息
+         * 2. 当消息优先级为 [0, HIGH, NOR, LOW] 的消息回调执行后的返回值为false，则该次执行将会被LAZY忽略
          */
         PRIORITY_LAZY,
-
-        /**
-         * 基于消息列表的帧事件
-         */
-        PRIORITY_FRAME,
 
         /**
          * 触发器消息
          * 说明：
          * 1. 触发器在指定时刻必定会被触发
          * 2. 为了简化系统，同一个触发器只能被触发一次
+         * 3. 此类型的消息存在的唯一原因是消息机制不能感知定时器的存在
          */
         PRIORITY_TRIGGER,
 
         /**
          * 任务消息
          * 说明：
-         * 1. 任务消息会反复执行，直至任务完成
+         * 1. 任务消息在执行时，会阻塞整个消息队列，直至任务完成
          * 2. 新的任务只会在下一帧被开始执行
          */
         PRIORITY_TASK,
@@ -106,61 +98,11 @@ declare module suncore {
          * @return: 为true时表示任务立刻完成
          */
         run(): boolean;
-    }
-
-    /**
-     * 游戏时间轴接口
-     */
-    interface ITimeline {
-        /**
-         * 时间轴是否己暂停
-         */
-        readonly paused: boolean;
 
         /**
-         * 时间轴是否己停止
+         * 取消任务
          */
-        readonly stopped: boolean;
-
-        /**
-         * 帧同步是否己开启
-         */
-        readonly lockStep: boolean;
-
-        /**
-         * 暂停时间轴
-         * 1. 时间轴暂停时，对应的模块允许被添加任务
-         */
-        pause(): void;
-
-        /**
-         * 继续时间轴
-         * @paused: 是否暂停时间轴，默认false
-         */
-        resume(paused?: boolean): void;
-
-        /**
-         * 停止时间轴
-         * 1. 时间轴停止时，对应的模块无法被添加任务
-         * 2. 时间轴上所有的任务都会在时间轴被停止时清空
-         */
-        stop(): void;
-
-        /**
-         * 获取系统时间戳（毫秒）
-         */
-        getTime(): number;
-
-        /**
-         * 获取帧时间间隔（毫秒）
-         */
-        getDelta(): number;
-    }
-
-    /**
-     * 系统时间戳接口
-     */
-    interface ITimeStamp extends ITimeline {
+        cancel(): void;
     }
 
     /**
@@ -182,35 +124,13 @@ declare module suncore {
          * @return: 为true时表示任务立刻完成，若返回false，则需要在其它函数中将done置为true，否则任务永远无法结束
          */
         abstract run(): boolean;
-    }
-
-    /**
-     * 创建游戏时间轴
-     */
-    class CreateTimelineCommand extends puremvc.SimpleCommand {
-
-        execute(): void;
-    }
-
-    /**
-     * 网络消息派发器
-     */
-    abstract class MessageNotifier {
 
         /**
-         * 通知网络消息
+         * 取消任务
+         * 说明：
+         * 1. 当时间轴停止时，此方法会被调用，用以清理资源
          */
-        static notify(name:string, data:any): void;
-
-        /**
-         * 注册网络消息监听
-         */
-        static register(name:string, method:Function, caller:Object): void;
-
-        /**
-         * 移除网络消息监听
-         */
-        static unregister(name:string, method:Function, caller:Object): void;
+        cancel(): void;
     }
 
     /**
@@ -222,6 +142,10 @@ declare module suncore {
 
         static readonly SHUTDOWN: string;
 
+        static readonly START_TIMELINE: string;
+
+        static readonly PAUSE_TIMELINE: string;
+
         static readonly PHYSICS_FRAME: string;
 
         static readonly PHYSICS_PREPARE: string;
@@ -229,22 +153,20 @@ declare module suncore {
         static readonly ENTER_FRAME: string;
 
         static readonly LATER_FRAME: string;
-
-        static readonly CREATE_TIMELINE: string;
-
-        static readonly REMOVE_TIMELINE: string;
-
-        static readonly TIMELINE_STOPPED: string;
-
-        static readonly TIMESTAMP_STOPPED: string;
     }
 
     /**
-     * 移除游戏时间轴
+     * 暂停时间轴
      */
-    class RemoveTimelineCommand extends puremvc.SimpleCommand {
+    class PauseTimelineCommand extends puremvc.SimpleCommand {
 
-        execute(): void;
+        /**
+         * @mod: 时间轴模块
+         * @stop: 是否停止时间轴，默认为true
+         * 1. 时间轴停止时，对应的模块无法被添加任务
+         * 2. 时间轴上所有的任务都会在时间轴被停止时清空
+         */
+        execute(mod:ModuleEnum, stop?:boolean): void;
     }
 
     /**
@@ -260,52 +182,54 @@ declare module suncore {
         run(): boolean;
     }
 
-    abstract class System {
-        /**
-         * 游戏时间轴
-         */
-        static timeline: ITimeline;
+    /**
+     * 开始时间轴，若时间轴不存在，则会自动创建
+     */
+    class StartTimelineCommand extends puremvc.SimpleCommand {
 
         /**
-         * 场景时间轴
+         * @mod: 时间轴模块
+         * @pause: 时间轴在开启时是否处于暂停状态，默认为false
+         * 说明：
+         * 1. 参数pause并不会对SYSTEM模块的时间轴生效
          */
-        static timeStamp: ITimeStamp;
+        execute(mod:ModuleEnum, pause?:boolean): void;
+    }
+
+    /**
+     * 系统接口
+     */
+    namespace System {
 
         /**
          * 判断指定模块是否己停止
          */
-        static isModuleStopped(mod:ModuleEnum): boolean;
+        function isModuleStopped(mod: ModuleEnum): boolean;
 
         /**
          * 判断指定模块是否己暂停
          */
-        static isModulePaused(mod:ModuleEnum): boolean;
+        function isModulePaused(mod: ModuleEnum): boolean;
 
         /**
          * 获取指定模块的时间戳
          */
-        static getModuleTimestamp(mod:ModuleEnum): number;
+        function getModuleTimestamp(mod: ModuleEnum): number;
 
         /**
          * 添加任务
          */
-        static addTask(mod:ModuleEnum, task:ITask): void;
+        function addTask(mod: ModuleEnum, task: ITask): void;
 
         /**
          * 添加触发器
          */
-        static addTrigger(mod:ModuleEnum, delay:number, handler:suncom.IHandler): void;
+        function addTrigger(mod: ModuleEnum, delay: number, handler: suncom.IHandler): void;
 
         /**
          * 添加消息
-         * @handler: 若为帧事件消息，则应当以Function作为参数，否则应当以Handler作为参数
          */
-        static addMessage(mod:ModuleEnum, priority:MessagePriorityEnum, handler:suncom.IHandler | Function, caller?:Object): void;
-
-        /**
-         * 移除消息（目前移除的消息仅可能是帧消息）
-         */
-        static removeMessage(mod:ModuleEnum, priority:MessagePriorityEnum, handler:Function, caller?:Object): void;
+        function addMessage(mod: ModuleEnum, priority: MessagePriorityEnum, handler: suncom.IHandler): void;
 
         /**
          * 添加自定义定时器
@@ -313,13 +237,14 @@ declare module suncore {
          * @delay: 响应延时
          * @method: 回调函数
          * @caller: 回调对象
-         * @loops: 响应次数
+         * @loops: 响应次数，默认为1
+         * @real: 是否计算真实次数，默认为false
          */
-        static addTimer(mod:ModuleEnum, delay:number, method:Function, caller:Object, loops?:number, real?:boolean): number;
+        function addTimer(mod: ModuleEnum, delay: number, method: Function, caller: Object, loops?: number, real?: boolean): number;
 
         /**
          * 移除定时器
          */
-        static removeTimer(timerId:number): number;
+        function removeTimer(timerId: number): number;
     }
 }

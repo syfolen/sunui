@@ -57,7 +57,7 @@ var sunui;
             return this;
         };
         /**
-         * 执行关闭逻辑
+         * 执行关闭逻辑，默认为true
          * export
          */
         ViewFacade.prototype.close = function (destroy) {

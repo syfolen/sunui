@@ -76,7 +76,7 @@ var sunui;
             this.$ready = true;
             this.$uiScene = uiScene;
             this.$d3Scene = d3Scene;
-            suncore.System.timeStamp.resume();
+            puremvc.Facade.getInstance().sendNotification(suncore.NotifyKey.START_TIMELINE, suncore.ModuleEnum.CUSTOM);
         };
         /**
          * 退出当前场景
@@ -87,7 +87,7 @@ var sunui;
                 suncom.Logger.log("SceneLayer=>$exitScene, sceneName:" + this.$sceneName);
             }
             // 暂停场景时间轴
-            suncore.System.timeStamp.stop();
+            puremvc.Facade.getInstance().sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, suncore.ModuleEnum.CUSTOM);
             // 派发退出场景事件
             var info = sunui.SceneManager.getConfigByName(this.$sceneName);
             puremvc.Facade.getInstance().sendNotification(sunui.NotifyKey.EXIT_SCENE, this.$sceneName);

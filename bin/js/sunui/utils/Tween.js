@@ -15,13 +15,8 @@ var sunui;
             this.$configs = [];
             this.$mod = mod;
             this.$item = item;
-            suncore.System.addMessage(this.$mod, suncore.MessagePriorityEnum.PRIORITY_FRAME, this.$onEnterFrame, this);
-            if (mod === suncore.ModuleEnum.CUSTOM) {
-                puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMESTAMP_STOPPED, this.clear, this);
-            }
-            else if (mod === suncore.ModuleEnum.TIMELINE) {
-                puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.TIMELINE_STOPPED, this.clear, this);
-            }
+            puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
+            puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this);
         }
         /**
          * @mod: 缓动挂靠的模块，默认为SYSTEM
@@ -31,17 +26,18 @@ var sunui;
             if (mod === void 0) { mod = suncore.ModuleEnum.SYSTEM; }
             return new Tween(item, mod);
         };
+        Tween.prototype.$onTimelinePause = function (mod, stop) {
+            if (this.$mod === mod && stop === true) {
+                this.clear();
+            }
+        };
         /**
          * export
          */
         Tween.prototype.clear = function () {
-            suncore.System.removeMessage(this.$mod, suncore.MessagePriorityEnum.PRIORITY_FRAME, this.$onEnterFrame, this);
-            if (this.$mod === suncore.ModuleEnum.CUSTOM) {
-                puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.TIMESTAMP_STOPPED, this.clear, this);
-            }
-            else if (this.$mod === suncore.ModuleEnum.TIMELINE) {
-                puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.TIMELINE_STOPPED, this.clear, this);
-            }
+            this.$item = null;
+            puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
+            puremvc.Facade.getInstance().removeObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this);
         };
         /**
          * 默认的缓动函数
