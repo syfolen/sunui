@@ -1,41 +1,42 @@
 
 module sunui {
-
     /**
      * 命令枚举
      * export
      */
-    export abstract class NotifyKey {
+    export namespace NotifyKey {
         /**
          * export
          */
-        static readonly LOAD_SCENE: string = "sunui.NotifyKey.LOAD_SCENE";
+        export const LOAD_SCENE: string = "sunui.NotifyKey.LOAD_SCENE";
         /**
-         * export
+         * depends
          */
-        static readonly UNLOAD_SCENE: string = "sunui.NotifyKey.UNLOAD_SCENE";
+        export const UNLOAD_SCENE: string = "sunui.NotifyKey.UNLOAD_SCENE";
 
         /**
          * export
          */
-        static readonly REGISTER_SCENES: string = "sunui.NotifyKey.REGISTER_SCENES";
+        export const REGISTER_SCENES: string = "sunui.NotifyKey.REGISTER_SCENES";
 
         /**
          * export
          */
-        static readonly EXIT_SCENE: string = "sunui.NotifyKey.EXIT_SCENE";
+        export const ENTER_SCENE: string = "sunui.NotifyKey.ENTER_SCENE";
+
         /**
-         * export
+         * depends
          */
-        static readonly ENTER_SCENE: string = "sunui.NotifyKey.ENTER_SCENE";
+        export const EXIT_SCENE: string = "sunui.NotifyKey.EXIT_SCENE";
 
         /**
          * export
          */
-        static readonly SHOW_POPUP: string = "sunui.NotifyKey.SHOW_POPUP";
+        export const SHOW_POPUP: string = "sunui.NotifyKey.SHOW_POPUP";
+
         /**
-         * export
+         * depends
          */
-        static readonly CLOSE_POPUP: string = "sunui.NotifyKey.CLOSE_POPUP";
+        export const CLOSE_POPUP: string = "sunui.NotifyKey.CLOSE_POPUP";
     }
 }

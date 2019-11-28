@@ -1,6 +1,5 @@
 
 module sunui {
-
     /**
      * 场景信息
      * export
@@ -22,6 +21,6 @@ module sunui {
          * 反初始化类
          * export
          */
-        uniCls?: new () => any;
+        uniCls?: new () => suncore.ITask;
     }
 }

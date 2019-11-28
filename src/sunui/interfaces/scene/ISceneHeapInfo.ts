@@ -1,6 +1,5 @@
 
 module sunui {
-
     /**
      * 场景历史信息
      */
@@ -11,7 +10,7 @@ module sunui {
         name: number;
 
         /**
-         * 参数，可能为空
+         * 参数列表
          */
         args: any;
     }

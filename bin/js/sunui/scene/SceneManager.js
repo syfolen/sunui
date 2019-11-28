@@ -3,35 +3,37 @@ var sunui;
     /**
      * 场景配置信息
      */
-    var SceneManager = /** @class */ (function () {
-        function SceneManager() {
-        }
+    var SceneManager;
+    (function (SceneManager) {
+        /**
+         * 场景配置信息列表
+         */
+        var $infos = [];
         /**
          * 注册场景
          */
-        SceneManager.regScene = function (info) {
-            for (var i = 0; i < SceneManager.$infos.length; i++) {
-                if (SceneManager.$infos[i].name === info.name) {
+        function regScene(info) {
+            for (var i = 0; i < $infos.length; i++) {
+                if ($infos[i].name === info.name) {
                     throw Error("重复注册场景");
                 }
             }
-            SceneManager.$infos.push(info);
-        };
+            $infos.push(info);
+        }
+        SceneManager.regScene = regScene;
         /**
-         * 获取场景配置
+         * 根据名字获取配置
          */
-        SceneManager.getConfigByName = function (name) {
-            for (var i = 0; i < SceneManager.$infos.length; i++) {
-                var info = SceneManager.$infos[i];
+        function getConfigByName(name) {
+            for (var i = 0; i < $infos.length; i++) {
+                var info = $infos[i];
                 if (info.name === name) {
                     return info;
                 }
             }
             throw Error("场景配置不存在");
-        };
-        SceneManager.$infos = [];
-        return SceneManager;
-    }());
-    sunui.SceneManager = SceneManager;
+        }
+        SceneManager.getConfigByName = getConfigByName;
+    })(SceneManager = sunui.SceneManager || (sunui.SceneManager = {}));
 })(sunui || (sunui = {}));
 //# sourceMappingURL=SceneManager.js.map

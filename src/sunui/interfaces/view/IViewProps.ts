@@ -1,6 +1,5 @@
 
 module sunui {
-
     /**
      * 弹出缓动信息接口，接口数据展示了执行弹出时支持的所有属性
      * export
@@ -13,9 +12,14 @@ module sunui {
         x?: number;
 
         /**
-         * export
+         * depends
          */
         y?: number;
+
+        /**
+         * 通透值
+         */
+        alpha?: number;
 
         /**
          * 缓动方法
@@ -24,21 +28,16 @@ module sunui {
         ease?: Function;
 
         /**
-         * 透明度
+         * 背景通透值
+         * export
          */
-        alpha?: number;
+        trans?: number;
 
         /**
          * 显示层级
          * export
          */
         level?: UILevel;
-
-        /**
-         * 是否通透
-         * export
-         */
-        trans?: boolean;
 
         /**
          * 是否允许取消
@@ -53,7 +52,7 @@ module sunui {
         left?: number;
 
         /**
-         * export
+         * depends
          */
         right?: number;
 
@@ -64,7 +63,7 @@ module sunui {
         top?: number;
 
         /**
-         * export
+         * depends
          */
         bottom?: number;
 
@@ -75,7 +74,7 @@ module sunui {
         centerX?: number;
 
         /**
-         * export
+         * depends
          */
         centerY?: number;
 
@@ -86,7 +85,7 @@ module sunui {
         scaleX?: number;
 
         /**
-         * export
+         * depends
          */
         scaleY?: number;
 
@@ -105,6 +104,6 @@ module sunui {
         /**
          * 弹框对象类型
          */
-        viewClass?: new () => IView;
+        viewClass?: string | (new () => IView);
     }
 }

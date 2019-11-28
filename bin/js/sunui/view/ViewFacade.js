@@ -20,8 +20,8 @@ var sunui;
         __extends(ViewFacade, _super);
         /**
          * 弹出框外观
-         * @param view 弹出对象
-         * @param duration 缓动时间，默认为200
+         * @view 弹出对象
+         * @duration 缓动时间，默认为200毫秒
          * export
          */
         function ViewFacade(view, duration) {
@@ -48,16 +48,16 @@ var sunui;
          * 执行弹出逻辑
          * export
          */
-        ViewFacade.prototype.popup = function (trans, props) {
-            if (trans === void 0) { trans = false; }
+        ViewFacade.prototype.popup = function (props) {
             if (props === void 0) { props = {}; }
             if (this.facade.hasCommand(sunui.NotifyKey.SHOW_POPUP) == true) {
-                this.facade.sendNotification(sunui.NotifyKey.SHOW_POPUP, [this.$view, this.$duration, trans, props]);
+                this.facade.sendNotification(sunui.NotifyKey.SHOW_POPUP, [this.$view, this.$duration, props]);
             }
             return this;
         };
         /**
-         * 执行关闭逻辑，默认为true
+         * 执行关闭逻辑
+         * @destroy: 关闭后是否销毁节点，默认为true
          * export
          */
         ViewFacade.prototype.close = function (destroy) {
@@ -74,7 +74,7 @@ var sunui;
                 return this.info.cancelAllowed;
             },
             /**
-             * export
+             * depends
              */
             set: function (yes) {
                 this.info.cancelAllowed = yes;
@@ -88,7 +88,7 @@ var sunui;
              */
             get: function () {
                 if (this.$info == null) {
-                    this.$info = sunui.UIManager.getInstance().viewLayer.getInfoByView(this.$view);
+                    this.$info = sunui.M.viewLayer.getInfoByView(this.$view);
                 }
                 return this.$info;
             },

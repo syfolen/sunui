@@ -13,9 +13,6 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var sunui;
 (function (sunui) {
-    /**
-     * export
-     */
     var AbstractPopupCommand = /** @class */ (function (_super) {
         __extends(AbstractPopupCommand, _super);
         function AbstractPopupCommand() {

@@ -14,20 +14,17 @@ var __extends = (this && this.__extends) || (function () {
 var sunui;
 (function (sunui) {
     /**
-     * export
+     * 打开弹框命令
      */
     var ShowPopupCommand = /** @class */ (function (_super) {
         __extends(ShowPopupCommand, _super);
         function ShowPopupCommand() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        /**
-         * export
-         */
-        ShowPopupCommand.prototype.execute = function (view, duration, trans, props) {
+        ShowPopupCommand.prototype.execute = function (view, duration, props) {
             // 若配置己存在，则说明节点己经被弹出了
-            if (sunui.UIManager.getInstance().viewLayer.getInfoByView(view) !== null) {
-                console.error(view + "[" + view.name + "] was already popup.");
+            if (sunui.M.viewLayer.getInfoByView(view) !== null) {
+                console.error(view + "[" + view.name + "] is already popup.");
                 return;
             }
             // 提供默认的缓动方法
@@ -40,6 +37,8 @@ var sunui;
             }
             // 参数列表
             var args = props.args;
+            // 背景通透值
+            var trans = props.trans;
             // 显示层级
             var level = view.zOrder || props.level || sunui.UILevel.POPUP;
             // 是否保留节点
@@ -47,16 +46,17 @@ var sunui;
             // 显示对象类型
             var viewClass = props.viewClass;
             delete props.args;
+            delete props.trans;
             delete props.level;
             delete props.keepNode;
             delete props.viewClass;
             // 避免props的默认属性不存在
             props = this.$makeProps(props);
             // 创建遮罩
-            var mask = sunui.UIManager.getInstance().viewLayer.createMask(view);
-            // 通透值
-            var alpha = trans == true ? 0 : mask.alpha;
-            mask.name = view.name;
+            var mask = sunui.M.viewLayer.createMask(view);
+            mask.name = "Mask$" + view.name;
+            mask.alpha = trans;
+            mask.zOrder = view.zOrder = level;
             // 生成弹框信息
             var info = {
                 view: view,
@@ -71,15 +71,15 @@ var sunui;
                 cancelAllowed: false
             };
             // 保存视图信息
-            sunui.UIManager.getInstance().viewLayer.addStack(info);
+            sunui.M.viewLayer.addStack(info);
             // 显示视图
-            sunui.UIManager.getInstance().viewLayer.addChild(mask);
-            sunui.UIManager.getInstance().viewLayer.addChild(view);
+            sunui.M.viewLayer.addChild(mask);
+            sunui.M.viewLayer.addChild(view);
             // 应用缓动数据
             this.$applyShowProps(view, props, duration);
             // 调用IPopupView的$onOpen接口
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
-                sunui.UIManager.getInstance().viewLayer.onViewCreate(view, args);
+                sunui.M.viewLayer.onViewCreate(view, args);
             }
             // 遮罩不通透逻辑处理
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
@@ -91,10 +91,10 @@ var sunui;
          * 缓动结束
          */
         ShowPopupCommand.prototype.$onPopupFinish = function (view) {
-            var info = sunui.UIManager.getInstance().viewLayer.getInfoByView(view);
+            var info = sunui.M.viewLayer.getInfoByView(view);
             if (info !== null) {
                 info.displayed = true;
-                sunui.UIManager.getInstance().viewLayer.onViewOpen(view);
+                sunui.M.viewLayer.onViewOpen(view);
             }
         };
         return ShowPopupCommand;

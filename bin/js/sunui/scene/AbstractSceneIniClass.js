@@ -19,19 +19,23 @@ var sunui;
      */
     var AbstractSceneIniClass = /** @class */ (function (_super) {
         __extends(AbstractSceneIniClass, _super);
+        /**
+         * 可为构造函数指定参数来实现场景间的数据传递
+         */
         function AbstractSceneIniClass() {
             var _this = _super.call(this) || this;
-            puremvc.Facade.getInstance().registerObserver(sunui.NotifyKey.ENTER_SCENE, _this.$onEnterScene, _this, true);
+            _this.facade.registerObserver(sunui.NotifyKey.ENTER_SCENE, _this.$onEnterScene, _this, true);
             return _this;
         }
         /**
+         * 初始化执行函数，场景资源建议在此方法中加载
          * export
          */
         AbstractSceneIniClass.prototype.run = function () {
             return true;
         };
         /**
-         * 接收到进入场景通知
+         * 进入场景回调，场景元素建议在此方法中初始化
          * export
          */
         AbstractSceneIniClass.prototype.$onEnterScene = function () {

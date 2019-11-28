@@ -1,77 +1,42 @@
 
 module sunui {
     /**
-     * export
+     * 视图层抽象类
      */
-    export abstract class ViewLayer {
+    export abstract class ViewLayer extends puremvc.Notifier {
         /**
          * 视图栈信息
          */
         private $infos: Array<IViewStackInfo> = [];
 
         constructor() {
-            // 监听场景被卸载消息，此消息应当优先被响应
-            puremvc.Facade.getInstance().registerObserver(NotifyKey.UNLOAD_SCENE, this.$onUnloadScene, this, false, 5);
+            super();
+            // 监听场景被卸载消息，此消息最后被响应
+            this.facade.registerObserver(NotifyKey.UNLOAD_SCENE, this.$onUnloadScene, this, false, 0);
         }
 
-        /**
-         * export
-         */
         abstract addChild(view: IView): void;
 
-        /**
-         * export
-         */
         abstract addChildAt(view: IView, index: number): void;
 
-        /**
-         * export
-         */
         abstract removeChild(view: IView): void;
 
-        /**
-         * export
-         */
         abstract removeChildAt(index: number): void;
 
-        /**
-         * export
-         */
         abstract createMask(view: IView): IView;
 
-        /**
-         * export
-         */
         abstract destroyMask(mask: IView): void;
 
-        /**
-         * export
-         */
-        abstract createViewByClass(cls: new () => IView): IView;
+        abstract createViewByClass(cls: string | (new () => IView)): IView;
 
-        /**
-         * export
-         */
         abstract onViewCreate(view: IView, args: any): void;
 
-        /**
-         * export
-         */
         abstract onViewOpen(view: IView): void;
 
-        /**
-         * export
-         */
         abstract onViewClose(view: IView): void;
 
-        /**
-         * export
-         */
         abstract onViewRemove(view: IView): void;
 
-        /**
-         * export
-         */
         abstract destroyView(view: IView): void;
 
         /**
@@ -85,27 +50,35 @@ module sunui {
         }
 
         /**
-         * 判断是否存在指定层级的视图
+         * 根据视图信息直接移除视图
          */
-        isViewExistInLevel(level: UILevel): boolean {
-            const info: IViewStackInfo = this.getActiveViewInfo();
-            if (info != null && info.level == level) {
-                return true;
+        removeStackByInfo(info: IViewStackInfo): void {
+            const index: number = this.$infos.indexOf(info);
+            if (index < 0) {
+                return;
             }
-            return false;
+            this.$infos.splice(index, 1);
+            this.onViewRemove(info.view);
+
+            this.removeChild(info.view);
+            this.removeChild(info.mask);
+
+            if (info.keepNode == false) {
+                this.destroyView(info.view);
+            }
         }
 
         /**
-         * 根据视图获取弹出信息
+         * 判断是否存在指定层级的视图
          */
-        getInfoByView(view: IView): IViewStackInfo {
-            for (let i: number = this.$infos.length - 1; i > -1; i--) {
+        isViewExistInLevel(level: UILevel): boolean {
+            for (let i: number = 0; i < this.$infos.length; i++) {
                 const info: IViewStackInfo = this.$infos[i];
-                if (info.view == view) {
-                    return info;
+                if (info.closed === false && info.level === level) {
+                    return true;
                 }
             }
-            return null;
+            return false;
         }
 
         /**
@@ -115,6 +88,19 @@ module sunui {
             for (let i: number = this.$infos.length - 1; i > -1; i--) {
                 const info: IViewStackInfo = this.$infos[i];
                 if (info.closed == false) {
+                    return info;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * 根据视图获取弹出信息
+         */
+        getInfoByView(view: IView): IViewStackInfo {
+            for (let i: number = this.$infos.length - 1; i > -1; i--) {
+                const info: IViewStackInfo = this.$infos[i];
+                if (info.view === view) {
                     return info;
                 }
             }
@@ -139,25 +125,6 @@ module sunui {
             }
             else {
                 this.$infos.splice(index, 0, newInfo);
-            }
-        }
-
-        /**
-         * 根据视图信息直接移除视图
-         */
-        removeStackByInfo(info: IViewStackInfo): void {
-            const index: number = this.$infos.indexOf(info);
-            if (index < 0) {
-                return;
-            }
-            this.$infos.splice(index, 1);
-            this.onViewRemove(info.view);
-
-            this.removeChild(info.view);
-            this.removeChild(info.mask);
-
-            if (info.keepNode == false) {
-                this.destroyView(info.view);
             }
         }
 
@@ -210,19 +177,17 @@ module sunui {
         }
 
         /**
-         * 显示新视图，若需要，则隐藏当前视图
-         * @viewClass: 视图类型
+         * 显示新视图
+         * @viewClass: 视图类型，允许为string或new ()=> IView 类型
          * @args: 参数列表
          * @props: 视图属性
          */
-        showView(viewClass: new () => IView, args?: any, props: IViewProps = {}): IView {
+        showView(viewClass: string | (new () => IView), args?: any, props: IViewProps = {}): IView {
             // 修正参数
             if (props.cancelAllowed === void 0) { props.cancelAllowed = true; }
 
-            const trans: boolean = props.trans;
             const cancelAllowed: boolean = props.cancelAllowed;
 
-            delete props.trans;
             delete props.cancelAllowed;
 
             // 创建视图
@@ -234,30 +199,16 @@ module sunui {
             props.viewClass = viewClass;
 
             // 执行弹出逻辑
-            new ViewFacade(view).popup(trans, props).cancelAllowed = cancelAllowed;
+            new ViewFacade(view).popup(props).cancelAllowed = cancelAllowed;
 
             return view;
         }
 
         /**
-         * 关闭当前视图，并显示上一个视图
+         * 关闭当前视图
          */
         closeView(view: IView): void {
             new ViewFacade(view).close();
-        }
-
-        /**
-         * 根据提示内容来搜索提示框视图对象
-         */
-        searchPopupViewByMessage(message: string): IView {
-            for (let i: number = this.$infos.length - 1; i > -1; i--) {
-                const info: IViewStackInfo = this.$infos[i];
-                // 必须是通用提示框类型
-                if (info.view instanceof UIManager.getInstance().baseViewClass) {
-
-                }
-            }
-            return null;
         }
 
         /**
@@ -265,7 +216,7 @@ module sunui {
          */
         get isCurrentViewCancelAllowed(): boolean {
             const info: IViewStackInfo = this.getActiveViewInfo();
-            if (info != null && info.cancelAllowed == true) {
+            if (info != null && info.cancelAllowed === true) {
                 return true;
             }
             return false;

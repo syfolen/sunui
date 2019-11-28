@@ -1,16 +1,33 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var sunui;
 (function (sunui) {
     /**
+     * 视图层抽象类
      * export
      */
-    var ViewLayer = /** @class */ (function () {
+    var ViewLayer = /** @class */ (function (_super) {
+        __extends(ViewLayer, _super);
         function ViewLayer() {
+            var _this = _super.call(this) || this;
             /**
              * 视图栈信息
              */
-            this.$infos = [];
-            // 监听场景被卸载消息，此消息应当优先被响应
-            puremvc.Facade.getInstance().registerObserver(sunui.NotifyKey.UNLOAD_SCENE, this.$onUnloadScene, this, false, 5);
+            _this.$infos = [];
+            // 监听场景被卸载消息，此消息最后被响应
+            _this.facade.registerObserver(sunui.NotifyKey.UNLOAD_SCENE, _this.$onUnloadScene, _this, false, 0);
+            return _this;
         }
         /**
          * 场景被卸载时，应当移除所有视图
@@ -22,26 +39,32 @@ var sunui;
             }
         };
         /**
+         * 根据视图信息直接移除视图
+         */
+        ViewLayer.prototype.removeStackByInfo = function (info) {
+            var index = this.$infos.indexOf(info);
+            if (index < 0) {
+                return;
+            }
+            this.$infos.splice(index, 1);
+            this.onViewRemove(info.view);
+            this.removeChild(info.view);
+            this.removeChild(info.mask);
+            if (info.keepNode == false) {
+                this.destroyView(info.view);
+            }
+        };
+        /**
          * 判断是否存在指定层级的视图
          */
         ViewLayer.prototype.isViewExistInLevel = function (level) {
-            var info = this.getActiveViewInfo();
-            if (info != null && info.level == level) {
-                return true;
-            }
-            return false;
-        };
-        /**
-         * 根据视图获取弹出信息
-         */
-        ViewLayer.prototype.getInfoByView = function (view) {
-            for (var i = this.$infos.length - 1; i > -1; i--) {
+            for (var i = 0; i < this.$infos.length; i++) {
                 var info = this.$infos[i];
-                if (info.view == view) {
-                    return info;
+                if (info.closed === false && info.level === level) {
+                    return true;
                 }
             }
-            return null;
+            return false;
         };
         /**
          * 获取当前第一个活动的视图信息
@@ -50,6 +73,18 @@ var sunui;
             for (var i = this.$infos.length - 1; i > -1; i--) {
                 var info = this.$infos[i];
                 if (info.closed == false) {
+                    return info;
+                }
+            }
+            return null;
+        };
+        /**
+         * 根据视图获取弹出信息
+         */
+        ViewLayer.prototype.getInfoByView = function (view) {
+            for (var i = this.$infos.length - 1; i > -1; i--) {
+                var info = this.$infos[i];
+                if (info.view === view) {
                     return info;
                 }
             }
@@ -73,22 +108,6 @@ var sunui;
             }
             else {
                 this.$infos.splice(index, 0, newInfo);
-            }
-        };
-        /**
-         * 根据视图信息直接移除视图
-         */
-        ViewLayer.prototype.removeStackByInfo = function (info) {
-            var index = this.$infos.indexOf(info);
-            if (index < 0) {
-                return;
-            }
-            this.$infos.splice(index, 1);
-            this.onViewRemove(info.view);
-            this.removeChild(info.view);
-            this.removeChild(info.mask);
-            if (info.keepNode == false) {
-                this.destroyView(info.view);
             }
         };
         /**
@@ -137,8 +156,8 @@ var sunui;
             return false;
         };
         /**
-         * 显示新视图，若需要，则隐藏当前视图
-         * @viewClass: 视图类型
+         * 显示新视图
+         * @viewClass: 视图类型，允许为string或new ()=> IView 类型
          * @args: 参数列表
          * @props: 视图属性
          */
@@ -148,9 +167,7 @@ var sunui;
             if (props.cancelAllowed === void 0) {
                 props.cancelAllowed = true;
             }
-            var trans = props.trans;
             var cancelAllowed = props.cancelAllowed;
-            delete props.trans;
             delete props.cancelAllowed;
             // 创建视图
             var view = this.createViewByClass(viewClass);
@@ -159,26 +176,14 @@ var sunui;
             props.keepNode = false;
             props.viewClass = viewClass;
             // 执行弹出逻辑
-            new sunui.ViewFacade(view).popup(trans, props).cancelAllowed = cancelAllowed;
+            new sunui.ViewFacade(view).popup(props).cancelAllowed = cancelAllowed;
             return view;
         };
         /**
-         * 关闭当前视图，并显示上一个视图
+         * 关闭当前视图
          */
         ViewLayer.prototype.closeView = function (view) {
             new sunui.ViewFacade(view).close();
-        };
-        /**
-         * 根据提示内容来搜索提示框视图对象
-         */
-        ViewLayer.prototype.searchPopupViewByMessage = function (message) {
-            for (var i = this.$infos.length - 1; i > -1; i--) {
-                var info = this.$infos[i];
-                // 必须是通用提示框类型
-                if (info.view instanceof sunui.UIManager.getInstance().baseViewClass) {
-                }
-            }
-            return null;
         };
         Object.defineProperty(ViewLayer.prototype, "isCurrentViewCancelAllowed", {
             /**
@@ -186,7 +191,7 @@ var sunui;
              */
             get: function () {
                 var info = this.getActiveViewInfo();
-                if (info != null && info.cancelAllowed == true) {
+                if (info != null && info.cancelAllowed === true) {
                     return true;
                 }
                 return false;
@@ -195,7 +200,7 @@ var sunui;
             configurable: true
         });
         return ViewLayer;
-    }());
+    }(puremvc.Notifier));
     sunui.ViewLayer = ViewLayer;
 })(sunui || (sunui = {}));
 //# sourceMappingURL=ViewLayer.js.map

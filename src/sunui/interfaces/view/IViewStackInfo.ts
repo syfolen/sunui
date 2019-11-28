@@ -1,6 +1,5 @@
 
 module sunui {
-
     /**
      * 弹出框配置信息
      */
@@ -13,12 +12,12 @@ module sunui {
         /**
          * 视图对象类型
          */
-        viewClass: new () => IView;
+        viewClass: any;
 
         /**
          * 遮罩对象
          */
-        mask?: IView;
+        mask: IView;
 
         /**
          * 缓动信息
@@ -33,26 +32,26 @@ module sunui {
         /**
          * 是否己关闭
          */
-        closed?: boolean;
+        closed: boolean;
 
         /**
          * 是否己显示
          */
-        displayed?: boolean;
+        displayed: boolean;
 
         /**
          * 缓动时间
          */
-        duration?: number;
+        duration: number;
 
         /**
          * 是否保留节点
          */
-        keepNode?: boolean;
+        keepNode: boolean;
 
         /**
          * 是否允许点击背景取消弹框
          */
-        cancelAllowed?: boolean;
+        cancelAllowed: boolean;
     }
 }

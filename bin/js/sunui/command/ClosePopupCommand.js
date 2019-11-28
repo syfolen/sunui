@@ -15,18 +15,14 @@ var sunui;
 (function (sunui) {
     /**
      * 关闭弹框命令
-     * export
      */
     var ClosePopupCommand = /** @class */ (function (_super) {
         __extends(ClosePopupCommand, _super);
         function ClosePopupCommand() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        /**
-         * export
-         */
         ClosePopupCommand.prototype.execute = function (view, duration, destroy) {
-            var info = sunui.UIManager.getInstance().viewLayer.getInfoByView(view);
+            var info = sunui.M.viewLayer.getInfoByView(view);
             if (info === null) {
                 console.error(view + "[" + view.name + "]'s infomation is not exist.");
                 return;
@@ -44,7 +40,7 @@ var sunui;
                 this.$applyCloseProps(view, info.props, duration);
             }
             // 调用IPopupView的$onDisable接口
-            sunui.UIManager.getInstance().viewLayer.onViewClose(view);
+            sunui.M.viewLayer.onViewClose(view);
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
                 var handler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
                 sunui.Tween.get(info.mask, suncore.ModuleEnum.CUSTOM).to({ alpha: 0 }, duration, null, handler);
@@ -55,7 +51,7 @@ var sunui;
          */
         ClosePopupCommand.prototype.$onCloseFinish = function (view) {
             // IPopupView的$onRemove方法在ViewLayer中实现
-            sunui.UIManager.getInstance().viewLayer.removeStackByView(view);
+            sunui.M.viewLayer.removeStackByView(view);
         };
         return ClosePopupCommand;
     }(sunui.AbstractPopupCommand));

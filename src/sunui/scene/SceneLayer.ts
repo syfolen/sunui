@@ -2,14 +2,17 @@
 module sunui {
     /**
      * 场景层
-     * export
      */
-    export class SceneLayer {
-
+    export class SceneLayer extends puremvc.Notifier {
         /**
          * 是否己就绪，为false时不会响应场景跳转请求
          */
         private $ready: boolean = true;
+
+        /**
+         * 当前场景名字
+         */
+        private $sceneName: number = 0;
 
         /**
          * ui场景对象
@@ -19,23 +22,21 @@ module sunui {
         /**
          * 当前场景对象
          */
-        private $d3Scene: Laya.Scene3D;
-
-        /**
-         * 当前场景名字
-         */
-        private $sceneName: number = 0;
+        private $d3Scene: Laya.Scene3D = null;
 
         constructor() {
+            super();
             // 场景管理器应该对此消息优先响应
-            puremvc.Facade.getInstance().registerObserver(NotifyKey.ENTER_SCENE, this.$onEnterScene, this, false, 5);
+            this.facade.registerObserver(NotifyKey.ENTER_SCENE, this.$onEnterScene, this, false, 5);
         }
 
         /**
          * 进入指定场景
+         * @args: 参数列表，参数为任意类型
+         * 说明：场景参数在进入下一个场景时会自动被保存，在返回场景时会被重新传入，在返回上一个场景时被丢弃
          */
         private $enterScene(name: number, args: any): void {
-            let str = null;
+            let str: any = null;
             if (typeof args === "object") {
                 try {
                     str = JSON.stringify(args);
@@ -48,9 +49,7 @@ module sunui {
             else {
                 str = args;
             }
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log(`SceneLayer=>$enterScene, name:${name}, args:${str}`);
-            }
+            // 获取场景配置信息
             const info: ISceneInfo = SceneManager.getConfigByName(name);
             // 初始化场景（场景初始化应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeLoadScene, [info, args]));
@@ -59,37 +58,29 @@ module sunui {
         }
 
         /**
-         * 在初始化场景之前，需要先设置当前场景的名字
+         * 在初始化场景之前，需要先设置当前场景的名字，并执行iniCls
          */
         private $beforeLoadScene(info: ISceneInfo, args: any): void {
             this.$sceneName = info.name;
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log(`SceneLayer=>$beforeInitScene, name:${info.name}`);
-            }
-            info.iniCls && new info.iniCls(args).run();
+            const task: suncore.ITask = new info.iniCls(args);
+            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, task);
         }
 
         /**
          * 加载场景
          */
         private $loadScene(info: ISceneInfo, args: any): void {
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log(`SceneLayer=>$loadScene, name:${info.name}`);
-            }
-            puremvc.Facade.getInstance().sendNotification(NotifyKey.LOAD_SCENE, [info, args]);
+            this.facade.sendNotification(NotifyKey.LOAD_SCENE, [info, args]);
         }
 
         /**
          * 成功进入场景
          */
         private $onEnterScene(uiScene: Laya.Scene, d3Scene: Laya.Scene3D): void {
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log(`SceneLayer=>$onSceneEnter, name:${this.$sceneName}`);
-            }
             this.$ready = true;
             this.$uiScene = uiScene;
             this.$d3Scene = d3Scene;
-            puremvc.Facade.getInstance().sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, false]);
+            this.facade.sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, false]);
         }
 
         /**
@@ -97,15 +88,12 @@ module sunui {
          * 说明：不会将场景从历史中移除
          */
         private $exitScene(): void {
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log(`SceneLayer=>$exitScene, sceneName:${this.$sceneName}`);
-            }
             // 暂停场景时间轴
-            puremvc.Facade.getInstance().sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
+            this.facade.sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
 
             // 派发退出场景事件
             const info: ISceneInfo = SceneManager.getConfigByName(this.$sceneName);
-            puremvc.Facade.getInstance().sendNotification(NotifyKey.EXIT_SCENE, this.$sceneName);
+            this.facade.sendNotification(NotifyKey.EXIT_SCENE, this.$sceneName);
 
             // 执行反初始化任务
             info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new info.uniCls());
@@ -116,11 +104,8 @@ module sunui {
         }
 
         private $onExitScene(): void {
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log(`SceneLayer=>$onExitScene, name:${this.$sceneName}`);
-            }
             const info: ISceneInfo = SceneManager.getConfigByName(this.$sceneName);
-            puremvc.Facade.getInstance().sendNotification(NotifyKey.UNLOAD_SCENE, info);
+            this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, info);
             this.$sceneName = 0;
         }
 
@@ -133,9 +118,6 @@ module sunui {
                 return false;
             }
             this.$ready = false;
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log(`SceneLayer=>enterScene, name:${name}`);
-            }
             // 退出当前场景
             this.$sceneName != 0 && this.$exitScene();
             // 进入新场景
@@ -155,9 +137,6 @@ module sunui {
                 return;
             }
             this.$ready = false;
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log(`SceneLayer=>exitScene, name:${this.$sceneName}`);
-            }
             // 退出当前场景
             this.$sceneName != 0 && this.$exitScene();
             // 移除历史
@@ -173,9 +152,6 @@ module sunui {
          * 说明：被替换的场景不会进入历史
          */
         replaceScene(name: number, args?: any): void {
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log(`SceneLayer=>replaceScene, name:${name}`);
-            }
             // 获取当前场景的历史
             const info: ISceneHeapInfo = SceneHeap.pop();
             // 进入新场景
@@ -187,23 +163,22 @@ module sunui {
         }
 
         /**
-         * 判断当前场景是否为指定类型的场景
+         * 获取ui场景对象
          */
-        isCurrentSceneMatch(sceneClass: any): boolean {
-            if (this.$uiScene != null && this.$uiScene instanceof sceneClass) {
-                return true;
-            }
-            return false;
-        }
-
         get uiScene(): any {
             return this.$uiScene;
         }
 
+        /**
+         * 获取3d场景对象
+         */
         get d3Scene(): any {
             return this.$d3Scene;
         }
 
+        /**
+         * 获取场景名字
+         */
         get sceneName(): number {
             return this.$sceneName;
         }

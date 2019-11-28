@@ -21,14 +21,13 @@ module sunui {
 
         /**
          * 弹出框外观
-         * @param view 弹出对象
-         * @param duration 缓动时间，默认为200
+         * @view 弹出对象
+         * @duration 缓动时间，默认为200毫秒
          * export
          */
         constructor(view: any, duration?: number) {
             super();
             this.$view = view;
-
             // 若存在配置
             if (this.info) {
                 this.$duration = this.info.duration;
@@ -46,15 +45,16 @@ module sunui {
          * 执行弹出逻辑
          * export
          */
-        popup(trans: boolean = false, props: IViewProps = {}): ViewFacade {
+        popup(props: IViewProps = {}): ViewFacade {
             if (this.facade.hasCommand(NotifyKey.SHOW_POPUP) == true) {
-                this.facade.sendNotification(NotifyKey.SHOW_POPUP, [this.$view, this.$duration, trans, props]);
+                this.facade.sendNotification(NotifyKey.SHOW_POPUP, [this.$view, this.$duration, props]);
             }
             return this;
         }
 
         /**
-         * 执行关闭逻辑，默认为true
+         * 执行关闭逻辑
+         * @destroy: 关闭后是否销毁节点，默认为true
          * export
          */
         close(destroy?: boolean): void {
@@ -70,8 +70,9 @@ module sunui {
         get cancelAllowed(): boolean {
             return this.info.cancelAllowed;
         }
+
         /**
-         * export
+         * depends
          */
         set cancelAllowed(yes: boolean) {
             this.info.cancelAllowed = yes;
@@ -82,7 +83,7 @@ module sunui {
          */
         get info(): IViewStackInfo {
             if (this.$info == null) {
-                this.$info = UIManager.getInstance().viewLayer.getInfoByView(this.$view);
+                this.$info = M.viewLayer.getInfoByView(this.$view);
             }
             return this.$info;
         }

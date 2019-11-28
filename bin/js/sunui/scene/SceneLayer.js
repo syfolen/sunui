@@ -1,28 +1,49 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var sunui;
 (function (sunui) {
     /**
      * 场景层
-     * export
      */
-    var SceneLayer = /** @class */ (function () {
+    var SceneLayer = /** @class */ (function (_super) {
+        __extends(SceneLayer, _super);
         function SceneLayer() {
+            var _this = _super.call(this) || this;
             /**
              * 是否己就绪，为false时不会响应场景跳转请求
              */
-            this.$ready = true;
-            /**
-             * ui场景对象
-             */
-            this.$uiScene = null;
+            _this.$ready = true;
             /**
              * 当前场景名字
              */
-            this.$sceneName = 0;
+            _this.$sceneName = 0;
+            /**
+             * ui场景对象
+             */
+            _this.$uiScene = null;
+            /**
+             * 当前场景对象
+             */
+            _this.$d3Scene = null;
             // 场景管理器应该对此消息优先响应
-            puremvc.Facade.getInstance().registerObserver(sunui.NotifyKey.ENTER_SCENE, this.$onEnterScene, this, false, 5);
+            _this.facade.registerObserver(sunui.NotifyKey.ENTER_SCENE, _this.$onEnterScene, _this, false, 5);
+            return _this;
         }
         /**
          * 进入指定场景
+         * @args: 参数列表，参数为任意类型
+         * 说明：场景参数在进入下一个场景时会自动被保存，在返回场景时会被重新传入，在返回上一个场景时被丢弃
          */
         SceneLayer.prototype.$enterScene = function (name, args) {
             var str = null;
@@ -38,9 +59,7 @@ var sunui;
             else {
                 str = args;
             }
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log("SceneLayer=>$enterScene, name:" + name + ", args:" + str);
-            }
+            // 获取场景配置信息
             var info = sunui.SceneManager.getConfigByName(name);
             // 初始化场景（场景初始化应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeLoadScene, [info, args]));
@@ -48,60 +67,46 @@ var sunui;
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$loadScene, [info, args]));
         };
         /**
-         * 在初始化场景之前，需要先设置当前场景的名字
+         * 在初始化场景之前，需要先设置当前场景的名字，并执行iniCls
          */
         SceneLayer.prototype.$beforeLoadScene = function (info, args) {
             this.$sceneName = info.name;
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log("SceneLayer=>$beforeInitScene, name:" + info.name);
-            }
-            info.iniCls && new info.iniCls(args).run();
+            var task = new info.iniCls(args);
+            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, task);
         };
         /**
          * 加载场景
          */
         SceneLayer.prototype.$loadScene = function (info, args) {
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log("SceneLayer=>$loadScene, name:" + info.name);
-            }
-            puremvc.Facade.getInstance().sendNotification(sunui.NotifyKey.LOAD_SCENE, [info, args]);
+            this.facade.sendNotification(sunui.NotifyKey.LOAD_SCENE, [info, args]);
         };
         /**
          * 成功进入场景
          */
         SceneLayer.prototype.$onEnterScene = function (uiScene, d3Scene) {
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log("SceneLayer=>$onSceneEnter, name:" + this.$sceneName);
-            }
             this.$ready = true;
             this.$uiScene = uiScene;
             this.$d3Scene = d3Scene;
-            puremvc.Facade.getInstance().sendNotification(suncore.NotifyKey.START_TIMELINE, suncore.ModuleEnum.CUSTOM);
+            this.facade.sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, false]);
         };
         /**
          * 退出当前场景
          * 说明：不会将场景从历史中移除
          */
         SceneLayer.prototype.$exitScene = function () {
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log("SceneLayer=>$exitScene, sceneName:" + this.$sceneName);
-            }
             // 暂停场景时间轴
-            puremvc.Facade.getInstance().sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, suncore.ModuleEnum.CUSTOM);
+            this.facade.sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
             // 派发退出场景事件
             var info = sunui.SceneManager.getConfigByName(this.$sceneName);
-            puremvc.Facade.getInstance().sendNotification(sunui.NotifyKey.EXIT_SCENE, this.$sceneName);
+            this.facade.sendNotification(sunui.NotifyKey.EXIT_SCENE, this.$sceneName);
             // 执行反初始化任务
             info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new info.uniCls());
             // 退出成功（此时场景并未销毁）
             suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new suncore.SimpleTask(suncom.Handler.create(this, this.$onExitScene)));
         };
         SceneLayer.prototype.$onExitScene = function () {
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log("SceneLayer=>$onExitScene, name:" + this.$sceneName);
-            }
             var info = sunui.SceneManager.getConfigByName(this.$sceneName);
-            puremvc.Facade.getInstance().sendNotification(sunui.NotifyKey.UNLOAD_SCENE, info);
+            this.facade.sendNotification(sunui.NotifyKey.UNLOAD_SCENE, info);
             this.$sceneName = 0;
         };
         /**
@@ -113,9 +118,6 @@ var sunui;
                 return false;
             }
             this.$ready = false;
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log("SceneLayer=>enterScene, name:" + name);
-            }
             // 退出当前场景
             this.$sceneName != 0 && this.$exitScene();
             // 进入新场景
@@ -134,9 +136,6 @@ var sunui;
                 return;
             }
             this.$ready = false;
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log("SceneLayer=>exitScene, name:" + this.$sceneName);
-            }
             // 退出当前场景
             this.$sceneName != 0 && this.$exitScene();
             // 移除历史
@@ -151,9 +150,6 @@ var sunui;
          * 说明：被替换的场景不会进入历史
          */
         SceneLayer.prototype.replaceScene = function (name, args) {
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                suncom.Logger.log("SceneLayer=>replaceScene, name:" + name);
-            }
             // 获取当前场景的历史
             var info = sunui.SceneHeap.pop();
             // 进入新场景
@@ -163,16 +159,10 @@ var sunui;
             // 进入新场景
             info !== null && sunui.SceneHeap.removeHistory(info.name);
         };
-        /**
-         * 判断当前场景是否为指定类型的场景
-         */
-        SceneLayer.prototype.isCurrentSceneMatch = function (sceneClass) {
-            if (this.$uiScene != null && this.$uiScene instanceof sceneClass) {
-                return true;
-            }
-            return false;
-        };
         Object.defineProperty(SceneLayer.prototype, "uiScene", {
+            /**
+             * 获取ui场景对象
+             */
             get: function () {
                 return this.$uiScene;
             },
@@ -180,6 +170,9 @@ var sunui;
             configurable: true
         });
         Object.defineProperty(SceneLayer.prototype, "d3Scene", {
+            /**
+             * 获取3d场景对象
+             */
             get: function () {
                 return this.$d3Scene;
             },
@@ -187,6 +180,9 @@ var sunui;
             configurable: true
         });
         Object.defineProperty(SceneLayer.prototype, "sceneName", {
+            /**
+             * 获取场景名字
+             */
             get: function () {
                 return this.$sceneName;
             },
@@ -194,7 +190,7 @@ var sunui;
             configurable: true
         });
         return SceneLayer;
-    }());
+    }(puremvc.Notifier));
     sunui.SceneLayer = SceneLayer;
 })(sunui || (sunui = {}));
 //# sourceMappingURL=SceneLayer.js.map

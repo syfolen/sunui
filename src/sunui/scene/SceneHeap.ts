@@ -1,55 +1,73 @@
 
 module sunui {
     /**
-     * 场景历史管理器
+     * 场景历史栈
      */
-    export class SceneHeap {
+    export namespace SceneHeap {
         /**
-         * 场景历史栈
+         * 历史场景信息列表
          */
-        private static $infos: Array<ISceneHeapInfo> = [];
+        const $infos: Array<ISceneHeapInfo> = [];
 
-        static addHistory(name: number, args: any): void {
-            const info: ISceneHeapInfo = {
-                name: name,
-                args: args
-            }
-            SceneHeap.$infos.push(info);
-        }
-
-        static removeHistory(name: number): boolean {
-            const index: number = SceneHeap.findHeapIndexByName(name);
-            if (index > -1) {
-                SceneHeap.$infos.splice(index, 1);
-            }
-            return index > -1;
-        }
-
-        private static findHeapIndexByName(name: number): number {
-            for (let i = SceneHeap.$infos.length - 1; i > -1; i--) {
-                const info = SceneHeap.$infos[i];
-                if (info.name === name) {
+        /**
+         * 根据场景名字获取信息索引
+         */
+        function findHeapIndexByName(name: number): number {
+            for (let i: number = $infos.length - 1; i > -1; i--) {
+                if ($infos[i].name === name) {
                     return i;
                 }
             }
             return -1;
         }
 
-        static hasHistory(name: number): boolean {
-            return SceneHeap.findHeapIndexByName(name) > -1;
+        /**
+         * 添加历史
+         * @args: 参数列表，允许为任意类型
+         */
+        export function addHistory(name: number, args: any): void {
+            const info: ISceneHeapInfo = {
+                name: name,
+                args: args
+            }
+            $infos.push(info);
         }
 
-        static pop(): ISceneHeapInfo {
-            if (SceneHeap.$infos.length > 0) {
-                return SceneHeap.$infos[SceneHeap.$infos.length - 1];
+        /**
+         * 移除历史
+         */
+        export function removeHistory(name: number): boolean {
+            const index: number = findHeapIndexByName(name);
+            if (index > -1) {
+                $infos.splice(index, 1);
+            }
+            return index > -1;
+        }
+
+        /**
+         * 是否存在指定历史
+         */
+        export function hasHistory(name: number): boolean {
+            return findHeapIndexByName(name) > -1;
+        }
+
+        /**
+         * 返回上一个历史场景信息
+         */
+        export function pop(): ISceneHeapInfo {
+            if ($infos.length > 0) {
+                return $infos[$infos.length - 1];
             }
             return null;
         }
 
-        static popByName(name: number): ISceneHeapInfo {
-            const index = SceneHeap.findHeapIndexByName(name);
+        /**
+         * 根据名字返回历史场景信息
+         */
+        export function popByName(name: number): ISceneHeapInfo {
+            const index: number = findHeapIndexByName(name);
             if (index > -1) {
-                return SceneHeap.$infos[index];
+                return $infos[index];
             }
             return null;
         }

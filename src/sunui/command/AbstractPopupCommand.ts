@@ -1,8 +1,6 @@
 
 module sunui {
-    /**
-     * export
-     */
+
     export abstract class AbstractPopupCommand extends puremvc.SimpleCommand {
 
         /**

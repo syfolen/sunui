@@ -4,15 +4,14 @@ var sunui;
      * 命令枚举
      * export
      */
-    var NotifyKey = /** @class */ (function () {
-        function NotifyKey() {
-        }
+    var NotifyKey;
+    (function (NotifyKey) {
         /**
          * export
          */
         NotifyKey.LOAD_SCENE = "sunui.NotifyKey.LOAD_SCENE";
         /**
-         * export
+         * depends
          */
         NotifyKey.UNLOAD_SCENE = "sunui.NotifyKey.UNLOAD_SCENE";
         /**
@@ -22,21 +21,19 @@ var sunui;
         /**
          * export
          */
-        NotifyKey.EXIT_SCENE = "sunui.NotifyKey.EXIT_SCENE";
-        /**
-         * export
-         */
         NotifyKey.ENTER_SCENE = "sunui.NotifyKey.ENTER_SCENE";
+        /**
+         * depends
+         */
+        NotifyKey.EXIT_SCENE = "sunui.NotifyKey.EXIT_SCENE";
         /**
          * export
          */
         NotifyKey.SHOW_POPUP = "sunui.NotifyKey.SHOW_POPUP";
         /**
-         * export
+         * depends
          */
         NotifyKey.CLOSE_POPUP = "sunui.NotifyKey.CLOSE_POPUP";
-        return NotifyKey;
-    }());
-    sunui.NotifyKey = NotifyKey;
+    })(NotifyKey = sunui.NotifyKey || (sunui.NotifyKey = {}));
 })(sunui || (sunui = {}));
 //# sourceMappingURL=NotifyKey.js.map

@@ -3,65 +3,40 @@ module sunui {
     /**
      * export
      */
-    export class UIManager {
-
-        private static inst: UIManager = null;
+    export class UIManager extends puremvc.Notifier {
+        /**
+         * 单例对象
+         */
+        private static $inst: UIManager = null;
 
         /**
          * export
          */
         static getInstance(): UIManager {
-            if (UIManager.inst == null) {
-                UIManager.inst = new UIManager();
+            if (UIManager.$inst == null) {
+                UIManager.$inst = new UIManager();
             }
-            return UIManager.inst;
+            return UIManager.$inst;
         }
 
-        viewLayer: ViewLayer;
-        sceneLayer: SceneLayer;
-
-        baseViewClass: new () => any;
-        baseSceneClass: new () => any;
-
-        /**
-         * 注册视图层
-         * export
-         */
-        regViewLayer(layer: ViewLayer): void {
-            this.viewLayer = layer;
+        constructor() {
+            super();
+            if (UIManager.$inst !== null) {
+                throw Error(`UIManager不可实例化！！！`);
+            }
+            M.viewLayer = new ViewLayerLaya3D();
+            M.sceneLayer = new SceneLayer();
+            this.facade.registerCommand(NotifyKey.SHOW_POPUP, ShowPopupCommand);
+            this.facade.registerCommand(NotifyKey.CLOSE_POPUP, ClosePopupCommand);
         }
-
-        /**
-         * 注册场景层
-         * export
-         */
-        regSceneLayer(layer: SceneLayer): void {
-            this.sceneLayer = layer;
-        }
-
-        /**
-         * 注册视图基类
-         */
-        regBaseViewClass(cls: new () => any): void {
-            this.baseViewClass = cls;
-        }
-
-        /**
-         * 注册场景基类
-         */
-        regBaseSceneClass(cls: new () => any): void {
-            this.baseSceneClass = cls;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////////////
-        // 场景相关
 
         /**
          * 进入新场景，并将当前场景压入历史
+         * @args: 参数列表，场景参数列表在进入下一个场景时会自动被保存，在返回场景时会被重新传入，在返回上一个场景时被丢弃
          * export
          */
         enterScene(name: number, args?: any): void {
-            this.sceneLayer.enterScene(name, args);
+            M.sceneLayer.enterScene(name, args);
         }
 
         /**
@@ -69,7 +44,7 @@ module sunui {
          * export
          */
         exitScene(): void {
-            this.sceneLayer.exitScene();
+            M.sceneLayer.exitScene();
         }
 
         /**
@@ -78,14 +53,7 @@ module sunui {
          * export
          */
         replaceScene(name: number, args?: any): void {
-            this.sceneLayer.replaceScene(name, args);
-        }
-
-        /**
-         * 判断当前场景是否为指定类型的场景
-         */
-        isCurrentSceneMatch(sceneClass: new () => any): boolean {
-            return this.sceneLayer.isCurrentSceneMatch(sceneClass);
+            M.sceneLayer.replaceScene(name, args);
         }
 
         /**
@@ -93,7 +61,7 @@ module sunui {
          * export
          */
         get uiScene(): Laya.Scene {
-            return this.sceneLayer.uiScene;
+            return M.sceneLayer.uiScene;
         }
 
         /**
@@ -101,47 +69,44 @@ module sunui {
          * export
          */
         get d3Scene(): Laya.Scene3D {
-            return this.sceneLayer.d3Scene;
+            return M.sceneLayer.d3Scene;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////////////
-        // 视图相关
 
         /**
          * 是否存在指定类型的视图
          * @viewClass:视图类型
          */
         hasView(viewClass?: new () => IView): boolean {
-            return this.viewLayer.hasView(viewClass);
+            return M.viewLayer.hasView(viewClass);
         }
 
         /**
          * 显示普通类型视图
          */
         showView(viewClass: new () => IView, args?: any, props: IViewProps = {}): void {
-            props.level = UILevel.VIEW;
-            this.viewLayer.showView(viewClass, args, props);
+            props.level = UILevel.POPUP;
+            M.viewLayer.showView(viewClass, args, props);
         }
 
         /**
          * 关闭普通类型视图
          */
         closeView(view: IView): void {
-            this.viewLayer.closeView(view);
+            M.viewLayer.closeView(view);
         }
 
         /**
          * 移除普通类型视图
          */
         removeView(view: IView): void {
-            this.viewLayer.removeStackByView(view);
+            M.viewLayer.removeStackByView(view);
         }
 
         /**
          * 根据视图类型移除视图
          */
         removeViewByClass(viewClass: any): void {
-            this.viewLayer.removeStackByViewClass(viewClass);
+            M.viewLayer.removeStackByViewClass(viewClass);
         }
 
         /**
@@ -149,15 +114,7 @@ module sunui {
          */
         showPanel(viewClass: any, args?: any, props: IViewProps = {}): void {
             props.level = UILevel.PANEL;
-            this.viewLayer.showView(viewClass, args, props);
-        }
-
-        /**
-         * 显示POPUP类型视图
-         */
-        showPopup(viewClass: new () => IView, args?: any, props: IViewProps = {}): void {
-            props.level = UILevel.POPUP;
-            this.viewLayer.showView(viewClass, args, props);
+            M.viewLayer.showView(viewClass, args, props);
         }
 
         /**
@@ -165,14 +122,7 @@ module sunui {
          */
         showTopView(viewClass: new () => IView, args?: any, props: IViewProps = {}): void {
             props.level = UILevel.TOP;
-            this.viewLayer.showView(viewClass, args, props);
-        }
-
-        /**
-         * 根据消息内容获取提示框
-         */
-        searchPopupViewByMessage(message: string): IView {
-            return this.viewLayer.searchPopupViewByMessage(message);
+            M.viewLayer.showView(viewClass, args, props);
         }
     }
 }
