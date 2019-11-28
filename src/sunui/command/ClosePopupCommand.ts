@@ -29,7 +29,7 @@ module sunui {
             M.viewLayer.onViewClose(view);
 
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
-                const handler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
+                const handler: suncom.IHandler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
                 Tween.get(info.mask, suncore.ModuleEnum.CUSTOM).to({ alpha: 0 }, duration, null, handler);
             }
         }

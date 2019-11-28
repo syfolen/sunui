@@ -27,7 +27,7 @@ module sunui {
             // 是否保留节点
             const keepNode: boolean = props.keepNode;
             // 显示对象类型
-            const viewClass: string | (new () => IView) = props.viewClass;
+            const viewClass: any = props.viewClass;
 
             delete props.args;
             delete props.trans;
@@ -74,7 +74,7 @@ module sunui {
 
             // 遮罩不通透逻辑处理
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
-                const handler = suncom.Handler.create(this, this.$onPopupFinish, [view]);
+                const handler: suncom.IHandler = suncom.Handler.create(this, this.$onPopupFinish, [view]);
                 Tween.get(mask, suncore.ModuleEnum.CUSTOM).from({ alpha: 0 }, duration, null, handler);
             }
         }

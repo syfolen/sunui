@@ -102,7 +102,9 @@ module sunui {
         keepNode?: boolean;
 
         /**
-         * 弹框对象类型
+         * 弹框对象类型，支持string和new ()=>IView类型
+         * 说明：
+         * 1. 当参数为string类型时，将被视为Laya.Prefab
          */
         viewClass?: string | (new () => IView);
     }

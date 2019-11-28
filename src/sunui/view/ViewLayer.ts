@@ -27,6 +27,9 @@ module sunui {
 
         abstract destroyMask(mask: IView): void;
 
+        /**
+         * 不同的平台中，实现的方法不一样
+         */
         abstract createViewByClass(cls: string | (new () => IView)): IView;
 
         abstract onViewCreate(view: IView, args: any): void;
@@ -178,11 +181,11 @@ module sunui {
 
         /**
          * 显示新视图
-         * @viewClass: 视图类型，允许为string或new ()=> IView 类型
+         * @viewClass: 视图类型
          * @args: 参数列表
          * @props: 视图属性
          */
-        showView(viewClass: string | (new () => IView), args?: any, props: IViewProps = {}): IView {
+        showView(viewClass: any, args?: any, props: IViewProps = {}): IView {
             // 修正参数
             if (props.cancelAllowed === void 0) { props.cancelAllowed = true; }
 

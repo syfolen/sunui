@@ -29,7 +29,7 @@ module sunui {
         }
 
         onViewCreate(view: sunui.IView, args: any): void {
-            const node = view as any;
+            const node: any = view;
             const components: sunui.IPopupView[] = node.getComponents(Laya.Component) || [];
             for (const component of components) {
                 if (component.$onCreate) {
@@ -44,7 +44,7 @@ module sunui {
         }
 
         onViewOpen(view: sunui.IView): void {
-            const node = view as any;
+            const node: any = view;
             const components: sunui.IPopupView[] = node.getComponents(Laya.Component) || [];
             for (const component of components) {
                 if (component.$onOpen) {
@@ -54,7 +54,7 @@ module sunui {
         }
 
         onViewClose(view: sunui.IView): void {
-            const node = view as any;
+            const node: any = view;
             const components: sunui.IPopupView[] = node.getComponents(Laya.Component) || [];
             for (const component of components) {
                 if (component.$onClose) {
@@ -64,7 +64,7 @@ module sunui {
         }
 
         onViewRemove(view: sunui.IView): void {
-            const node = view as any;
+            const node: any = view;
             const components: sunui.IPopupView[] = node.getComponents(Laya.Component) || [];
             for (const component of components) {
                 if (component.$onRemove) {
@@ -73,9 +73,9 @@ module sunui {
             }
         }
 
-        destroyMask(mask: sunui.IView): void {
-            const temp = mask as any;
-            temp.destroy();
+        destroyMask(view: sunui.IView): void {
+            const mask: any = view;
+            mask.destroy();
         }
 
         createViewByClass(cls: string | (new () => IView)): sunui.IView {
@@ -90,8 +90,8 @@ module sunui {
         }
 
         destroyView(view: sunui.IView): void {
-            const temp = view as any;
-            temp.destroy();
+            const node: any = view;
+            node.destroy();
         }
     }
 }

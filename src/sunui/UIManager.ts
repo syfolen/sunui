@@ -19,15 +19,26 @@ module sunui {
             return UIManager.$inst;
         }
 
-        constructor() {
-            super();
-            if (UIManager.$inst !== null) {
-                throw Error(`UIManager不可实例化！！！`);
-            }
+        /**
+         * 注册sunui模块
+         * export
+         */
+        register(): void {
             M.viewLayer = new ViewLayerLaya3D();
             M.sceneLayer = new SceneLayer();
             this.facade.registerCommand(NotifyKey.SHOW_POPUP, ShowPopupCommand);
             this.facade.registerCommand(NotifyKey.CLOSE_POPUP, ClosePopupCommand);
+        }
+
+        /**
+         * 注销sunui模块
+         * export
+         */
+        unregister(): void {
+            this.facade.removeCommand(NotifyKey.SHOW_POPUP);
+            this.facade.removeCommand(NotifyKey.CLOSE_POPUP);
+            M.viewLayer = null;
+            M.sceneLayer = null;
         }
 
         /**
@@ -54,22 +65,6 @@ module sunui {
          */
         replaceScene(name: number, args?: any): void {
             M.sceneLayer.replaceScene(name, args);
-        }
-
-        /**
-         * 获取场景对象
-         * export
-         */
-        get uiScene(): Laya.Scene {
-            return M.sceneLayer.uiScene;
-        }
-
-        /**
-         * 获取场景对象
-         * export
-         */
-        get d3Scene(): Laya.Scene3D {
-            return M.sceneLayer.d3Scene;
         }
 
         /**
@@ -110,19 +105,19 @@ module sunui {
         }
 
         /**
-         * 显示PANEL类型的视图
+         * 获取场景对象
+         * export
          */
-        showPanel(viewClass: any, args?: any, props: IViewProps = {}): void {
-            props.level = UILevel.PANEL;
-            M.viewLayer.showView(viewClass, args, props);
+        get uiScene(): Laya.Scene {
+            return M.sceneLayer.uiScene;
         }
 
         /**
-         * 显示TOP类型视图
+         * 获取场景对象
+         * export
          */
-        showTopView(viewClass: new () => IView, args?: any, props: IViewProps = {}): void {
-            props.level = UILevel.TOP;
-            M.viewLayer.showView(viewClass, args, props);
+        get d3Scene(): Laya.Scene3D {
+            return M.sceneLayer.d3Scene;
         }
     }
 }
