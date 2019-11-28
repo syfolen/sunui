@@ -41,6 +41,7 @@ module sunui {
             const alpha: number = trans == true ? 0 : mask.alpha;
 
             mask.name = view.name;
+            view.zOrder = level;
 
             // 生成弹框信息
             const info: IViewStackInfo = {
