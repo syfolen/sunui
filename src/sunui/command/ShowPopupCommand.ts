@@ -70,6 +70,16 @@ module sunui {
             // 调用IPopupView的$onOpen接口
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
                 M.viewLayer.onViewCreate(view, args);
+                // 派发弹框创建完成事件
+                if (args === void 0) {
+                    this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, view);
+                }
+                else if (args instanceof Array) {
+                    this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, [view].concat(args));
+                }
+                else {
+                    this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, [view, args]);
+                }
             }
 
             // 遮罩不通透逻辑处理
@@ -87,6 +97,7 @@ module sunui {
             if (info !== null) {
                 info.displayed = true;
                 M.viewLayer.onViewOpen(view);
+                this.facade.sendNotification(NotifyKey.ON_POPUP_OPENED, view);
             }
         }
     }

@@ -32,45 +32,50 @@ module sunui {
 
         /**
          * 进入指定场景
-         * @args: 参数列表，参数为任意类型
+         * @data: 参数对象
          * 说明：场景参数在进入下一个场景时会自动被保存，在返回场景时会被重新传入，在返回上一个场景时被丢弃
          */
-        private $enterScene(name: number, args: any): void {
+        private $enterScene(name: number, data: any): void {
             let str: any = null;
-            if (typeof args === "object") {
+            if (typeof data === "object") {
                 try {
-                    str = JSON.stringify(args);
+                    str = JSON.stringify(data);
                 }
                 catch (error) {
-                    str = args;
+                    str = data;
                     suncom.Logger.warn(`参数无法转化为JSON`);
                 }
             }
             else {
-                str = args;
+                str = data;
             }
             // 获取场景配置信息
             const info: ISceneInfo = SceneManager.getConfigByName(name);
             // 初始化场景（场景初始化应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeLoadScene, [info, args]));
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeLoadScene, [info, data]));
             // 加载当前场景（场景加载应当被无限延后，因为初始化方法中可能会增加一些加载资源的任务）
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$loadScene, [info, args]));
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$loadScene, [info, data]));
         }
 
         /**
          * 在初始化场景之前，需要先设置当前场景的名字，并执行iniCls
          */
-        private $beforeLoadScene(info: ISceneInfo, args: any): void {
+        private $beforeLoadScene(info: ISceneInfo, data: any): void {
             this.$sceneName = info.name;
-            const task: suncore.ITask = new info.iniCls(args);
+            const task: suncore.ITask = data === void 0 ? new info.iniCls() : new info.iniCls(data);
             suncore.System.addTask(suncore.ModuleEnum.SYSTEM, task);
         }
 
         /**
          * 加载场景
          */
-        private $loadScene(info: ISceneInfo, args: any): void {
-            this.facade.sendNotification(NotifyKey.LOAD_SCENE, [info, args]);
+        private $loadScene(info: ISceneInfo, data: any): void {
+            if (data === void 0) {
+                this.facade.sendNotification(NotifyKey.LOAD_SCENE, info);
+            }
+            else {
+                this.facade.sendNotification(NotifyKey.LOAD_SCENE, [info, data]);
+            }
         }
 
         /**
@@ -111,8 +116,9 @@ module sunui {
 
         /**
          * 进入新场景，并将当前场景压入历史
+         * @data: 参数对象，保存在此对象中的数据的生命周期与场景历史的生命周期一致，当场景存在于当前或存在于历史时，数据就不会被销毁
          */
-        enterScene(name: number, args?: any): boolean {
+        enterScene(name: number, data?: any): boolean {
             // 未就绪时不允许跳转场景
             if (this.$ready == false) {
                 return false;
@@ -121,9 +127,9 @@ module sunui {
             // 退出当前场景
             this.$sceneName != 0 && this.$exitScene();
             // 进入新场景
-            this.$enterScene(name, args);
+            this.$enterScene(name, data);
             // 将新场景压入历史
-            SceneHeap.addHistory(name, args);
+            SceneHeap.addHistory(name, data);
             // 执行成功时返回true，此参数在replaceScene中会用到
             return true;
         }
@@ -144,18 +150,19 @@ module sunui {
             // 获取历史场景
             const info: ISceneHeapInfo = SceneHeap.pop();
             // 进入历史场景
-            info !== null && this.$enterScene(info.name, info.args);
+            info !== null && this.$enterScene(info.name, info.data);
         }
 
         /**
          * 替换当前场景
+         * @data: 参数说明请参考enterScene方法的注释
          * 说明：被替换的场景不会进入历史
          */
-        replaceScene(name: number, args?: any): void {
+        replaceScene(name: number, data?: any): void {
             // 获取当前场景的历史
             const info: ISceneHeapInfo = SceneHeap.pop();
             // 进入新场景
-            if (this.enterScene(name, args) == false) {
+            if (this.enterScene(name, data) == false) {
                 return;
             }
             // 进入新场景

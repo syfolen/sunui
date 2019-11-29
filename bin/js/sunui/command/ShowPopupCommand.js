@@ -31,6 +31,10 @@ var sunui;
             if (props.ease === void 0) {
                 props.ease = Laya.Ease.backOut;
             }
+            // 默认背景通透为0.6
+            if (props.trans === void 0) {
+                props.trans = 0.6;
+            }
             // 默认不保存节点
             if (props.keepNode === void 0) {
                 props.keepNode = false;
@@ -80,6 +84,16 @@ var sunui;
             // 调用IPopupView的$onOpen接口
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
                 sunui.M.viewLayer.onViewCreate(view, args);
+                // 派发弹框创建完成事件
+                if (args === void 0) {
+                    this.facade.sendNotification(sunui.NotifyKey.ON_POPUP_CREATED, view);
+                }
+                else if (args instanceof Array) {
+                    this.facade.sendNotification(sunui.NotifyKey.ON_POPUP_CREATED, [view].concat(args));
+                }
+                else {
+                    this.facade.sendNotification(sunui.NotifyKey.ON_POPUP_CREATED, [view, args]);
+                }
             }
             // 遮罩不通透逻辑处理
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
@@ -95,6 +109,7 @@ var sunui;
             if (info !== null) {
                 info.displayed = true;
                 sunui.M.viewLayer.onViewOpen(view);
+                this.facade.sendNotification(sunui.NotifyKey.ON_POPUP_OPENED, view);
             }
         };
         return ShowPopupCommand;

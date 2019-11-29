@@ -84,9 +84,9 @@ var sunui;
                 }
             }
         };
-        ViewLayerLaya3D.prototype.destroyMask = function (mask) {
-            var temp = mask;
-            temp.destroy();
+        ViewLayerLaya3D.prototype.destroyMask = function (view) {
+            var mask = view;
+            mask.destroy();
         };
         ViewLayerLaya3D.prototype.createViewByClass = function (cls) {
             if (typeof cls === "string") {
@@ -99,8 +99,8 @@ var sunui;
             }
         };
         ViewLayerLaya3D.prototype.destroyView = function (view) {
-            var temp = view;
-            temp.destroy();
+            var node = view;
+            node.destroy();
         };
         return ViewLayerLaya3D;
     }(sunui.ViewLayer));

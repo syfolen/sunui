@@ -15,6 +15,7 @@ var sunui;
 (function (sunui) {
     /**
      * 注册场景信息
+     * export
      */
     var RegisterScenesCommand = /** @class */ (function (_super) {
         __extends(RegisterScenesCommand, _super);
@@ -23,6 +24,7 @@ var sunui;
         }
         /**
          * @infos: 场景信息配置列表
+         * export
          */
         RegisterScenesCommand.prototype.execute = function (infos) {
             for (var i = 0; i < infos.length; i++) {

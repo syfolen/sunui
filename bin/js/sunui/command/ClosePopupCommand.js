@@ -41,6 +41,7 @@ var sunui;
             }
             // 调用IPopupView的$onDisable接口
             sunui.M.viewLayer.onViewClose(view);
+            this.facade.sendNotification(sunui.NotifyKey.ON_POPUP_CLOSED, view);
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
                 var handler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
                 sunui.Tween.get(info.mask, suncore.ModuleEnum.CUSTOM).to({ alpha: 0 }, duration, null, handler);

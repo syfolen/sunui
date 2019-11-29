@@ -15,7 +15,7 @@ module sunui {
          * 初始化类
          * export
          */
-        iniCls?: new (args?: any) => suncore.ITask;
+        iniCls?: new (data?: any) => suncore.ITask;
 
         /**
          * 反初始化类

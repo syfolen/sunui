@@ -20,10 +20,10 @@ module sunui {
         }
 
         /**
-         * 注册sunui模块
-         * export
+         * 弹框命令应当在此处被注册
          */
-        register(): void {
+        constructor() {
+            super();
             M.viewLayer = new ViewLayerLaya3D();
             M.sceneLayer = new SceneLayer();
             this.facade.registerCommand(NotifyKey.SHOW_POPUP, ShowPopupCommand);
@@ -31,23 +31,12 @@ module sunui {
         }
 
         /**
-         * 注销sunui模块
-         * export
-         */
-        unregister(): void {
-            this.facade.removeCommand(NotifyKey.SHOW_POPUP);
-            this.facade.removeCommand(NotifyKey.CLOSE_POPUP);
-            M.viewLayer = null;
-            M.sceneLayer = null;
-        }
-
-        /**
          * 进入新场景，并将当前场景压入历史
-         * @args: 参数列表，场景参数列表在进入下一个场景时会自动被保存，在返回场景时会被重新传入，在返回上一个场景时被丢弃
+         * @data: 参数对象，保存在此对象中的数据的生命周期与场景历史的生命周期一致，当场景存在于当前或存在于历史时，数据就不会被销毁
          * export
          */
-        enterScene(name: number, args?: any): void {
-            M.sceneLayer.enterScene(name, args);
+        enterScene(name: number, data?: any): void {
+            M.sceneLayer.enterScene(name, data);
         }
 
         /**
@@ -60,11 +49,12 @@ module sunui {
 
         /**
          * 替换当前场景
+         * @data: 参数说明请参考enterScene方法的注释
          * 说明：被替换的场景不会进入历史
          * export
          */
-        replaceScene(name: number, args?: any): void {
-            M.sceneLayer.replaceScene(name, args);
+        replaceScene(name: number, data?: any): void {
+            M.sceneLayer.replaceScene(name, data);
         }
 
         /**

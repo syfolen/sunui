@@ -23,12 +23,12 @@ module sunui {
 
         /**
          * 添加历史
-         * @args: 参数列表，允许为任意类型
+         * @data: 参数对象，场景历史会暂时地持有场景数据，直到场景从历史中被移除
          */
-        export function addHistory(name: number, args: any): void {
+        export function addHistory(name: number, data: any): void {
             const info: ISceneHeapInfo = {
                 name: name,
-                args: args
+                data: data
             }
             $infos.push(info);
         }

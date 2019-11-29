@@ -69,6 +69,8 @@ module sunui {
             if (info.keepNode == false) {
                 this.destroyView(info.view);
             }
+            // 为了避免不同的弹框之间的销毁业务相互形成干扰，此事件被设计成在弹框对象被销毁之后被派发
+            this.facade.sendNotification(NotifyKey.ON_POPUP_REMOVED, info.view);
         }
 
         /**

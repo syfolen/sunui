@@ -1,10 +1,33 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var sunui;
 (function (sunui) {
     /**
      * export
      */
-    var UIManager = /** @class */ (function () {
+    var UIManager = /** @class */ (function (_super) {
+        __extends(UIManager, _super);
+        /**
+         * 弹框命令应当在此处被注册
+         */
         function UIManager() {
+            var _this = _super.call(this) || this;
+            sunui.M.viewLayer = new sunui.ViewLayerLaya3D();
+            sunui.M.sceneLayer = new sunui.SceneLayer();
+            _this.facade.registerCommand(sunui.NotifyKey.SHOW_POPUP, sunui.ShowPopupCommand);
+            _this.facade.registerCommand(sunui.NotifyKey.CLOSE_POPUP, sunui.ClosePopupCommand);
+            return _this;
         }
         /**
          * export
@@ -38,28 +61,6 @@ var sunui;
         UIManager.prototype.replaceScene = function (name, args) {
             sunui.M.sceneLayer.replaceScene(name, args);
         };
-        Object.defineProperty(UIManager.prototype, "uiScene", {
-            /**
-             * 获取场景对象
-             * export
-             */
-            get: function () {
-                return sunui.M.sceneLayer.uiScene;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(UIManager.prototype, "d3Scene", {
-            /**
-             * 获取场景对象
-             * export
-             */
-            get: function () {
-                return sunui.M.sceneLayer.d3Scene;
-            },
-            enumerable: true,
-            configurable: true
-        });
         /**
          * 是否存在指定类型的视图
          * @viewClass:视图类型
@@ -93,28 +94,34 @@ var sunui;
         UIManager.prototype.removeViewByClass = function (viewClass) {
             sunui.M.viewLayer.removeStackByViewClass(viewClass);
         };
-        /**
-         * 显示PANEL类型的视图
-         */
-        UIManager.prototype.showPanel = function (viewClass, args, props) {
-            if (props === void 0) { props = {}; }
-            props.level = sunui.UILevel.PANEL;
-            sunui.M.viewLayer.showView(viewClass, args, props);
-        };
-        /**
-         * 显示TOP类型视图
-         */
-        UIManager.prototype.showTopView = function (viewClass, args, props) {
-            if (props === void 0) { props = {}; }
-            props.level = sunui.UILevel.TOP;
-            sunui.M.viewLayer.showView(viewClass, args, props);
-        };
+        Object.defineProperty(UIManager.prototype, "uiScene", {
+            /**
+             * 获取场景对象
+             * export
+             */
+            get: function () {
+                return sunui.M.sceneLayer.uiScene;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(UIManager.prototype, "d3Scene", {
+            /**
+             * 获取场景对象
+             * export
+             */
+            get: function () {
+                return sunui.M.sceneLayer.d3Scene;
+            },
+            enumerable: true,
+            configurable: true
+        });
         /**
          * 单例对象
          */
         UIManager.$inst = null;
         return UIManager;
-    }());
+    }(puremvc.Notifier));
     sunui.UIManager = UIManager;
 })(sunui || (sunui = {}));
 //# sourceMappingURL=UIManager.js.map

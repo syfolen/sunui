@@ -15,7 +15,6 @@ var sunui;
 (function (sunui) {
     /**
      * 视图层抽象类
-     * export
      */
     var ViewLayer = /** @class */ (function (_super) {
         __extends(ViewLayer, _super);
@@ -53,6 +52,8 @@ var sunui;
             if (info.keepNode == false) {
                 this.destroyView(info.view);
             }
+            // 为了避免不同的弹框之间的销毁业务相互形成干扰，此事件被设计成在弹框对象被销毁之后被派发
+            this.facade.sendNotification(sunui.NotifyKey.ON_POPUP_REMOVED, info.view);
         };
         /**
          * 判断是否存在指定层级的视图
@@ -157,7 +158,7 @@ var sunui;
         };
         /**
          * 显示新视图
-         * @viewClass: 视图类型，允许为string或new ()=> IView 类型
+         * @viewClass: 视图类型
          * @args: 参数列表
          * @props: 视图属性
          */

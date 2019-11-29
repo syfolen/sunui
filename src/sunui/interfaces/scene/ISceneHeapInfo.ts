@@ -10,8 +10,8 @@ module sunui {
         name: number;
 
         /**
-         * 参数列表
+         * 参数对象，场景历史会暂时地持有场景数据，直到场景从历史中被移除
          */
-        args: any;
+        data: any;
     }
 }
