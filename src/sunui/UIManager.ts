@@ -109,5 +109,13 @@ module sunui {
         get d3Scene(): Laya.Scene3D {
             return M.sceneLayer.d3Scene;
         }
+
+        /**
+         * 获取场景名字
+         * export
+         */
+        get sceneName(): number {
+            return M.sceneLayer.sceneName;
+        }
     }
 }
