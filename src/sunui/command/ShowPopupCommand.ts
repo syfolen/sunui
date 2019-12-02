@@ -23,7 +23,7 @@ module sunui {
             // 背景通透值
             const trans: number = props.trans;
             // 显示层级
-            const level: UILevel = view.zOrder || props.level || UILevel.POPUP;
+            const level: UILevel = props.level || view.zOrder || UILevel.POPUP;
             // 是否保留节点
             const keepNode: boolean = props.keepNode;
             // 显示对象类型
@@ -85,7 +85,16 @@ module sunui {
             // 遮罩不通透逻辑处理
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
                 const handler: suncom.IHandler = suncom.Handler.create(this, this.$onPopupFinish, [view]);
-                Tween.get(mask, suncore.ModuleEnum.CUSTOM).from({ alpha: 0 }, duration, null, handler);
+                /**
+                 * TODO:
+                 * 这里按要求将duration改成固定200
+                 */
+                Tween.get(mask, suncore.ModuleEnum.CUSTOM).from({ alpha: 0 }, 200);
+                /**
+                 * TODO:
+                 * 由于duration的更改，故需要将Tween的回调改成由message调用
+                 */
+                suncore.System.addTrigger(suncore.ModuleEnum.CUSTOM, duration, handler);
             }
         }
 

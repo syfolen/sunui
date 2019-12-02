@@ -31,7 +31,11 @@ module sunui {
 
             if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
                 const handler: suncom.IHandler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
-                Tween.get(info.mask, suncore.ModuleEnum.CUSTOM).to({ alpha: 0 }, duration, null, handler);
+                /**
+                 * TODO:
+                 * 这里按要求将duration改成固定200，此处的回调，应当亦延时200毫秒触发，否则关闭逻辑会出现问题
+                 */
+                Tween.get(info.mask, suncore.ModuleEnum.CUSTOM).to({ alpha: 200 }, duration, null, handler);
             }
         }
 
