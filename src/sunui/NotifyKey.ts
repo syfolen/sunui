@@ -80,6 +80,14 @@ module sunui {
         export const ON_POPUP_CLOSED: string = "sunui.NotifyKey.ON_POPUP_CLOSED";
 
         /**
+         * 弹框销毁之前
+         * 说明：
+         * 1. 此事件会在IPopupView的$onRemove方法执行之前被派发
+         * export
+         */
+        export const BEFORE_POPUP_REMOVED: string = "sunui.NotifyKey.BEFORE_POPUP_REMOVED";
+
+        /**
          * 弹框己移除
          * 说明：
          * 1. 此事件会在IPopupView的$onRemove方法执行完毕之后被派发

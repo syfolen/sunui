@@ -74,8 +74,8 @@ module sunui {
         }
 
         destroyMask(view: sunui.IView): void {
-            const mask: any = view;
-            mask.destroy();
+            const mask: Laya.Image = view as any;
+            mask.dispose();
         }
 
         createViewByClass(cls: string | (new () => IView)): sunui.IView {
@@ -90,7 +90,7 @@ module sunui {
         }
 
         destroyView(view: sunui.IView): void {
-            const node: any = view;
+            const node = view as any;
             node.destroy();
         }
     }

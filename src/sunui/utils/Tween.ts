@@ -40,8 +40,10 @@ module sunui {
         constructor(item: any, mod: suncore.ModuleEnum) {
             this.$mod = mod;
             this.$item = item;
-            puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
-            puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this);
+            if (suncore.System.isModuleStopped(mod) === false) {
+                puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
+                puremvc.Facade.getInstance().registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this);
+            }
         }
 
         private $onTimelinePause(mod: suncore.ModuleEnum, stop: boolean): void {
@@ -74,8 +76,12 @@ module sunui {
          * 执行缓动
          */
         private $onEnterFrame(): void {
+            if (suncore.System.isModuleStopped(this.$mod) === true) {
+                this.clear();
+                return;
+            }
             // 若挂靠的模块停止工作了，则不执行缓动
-            if (suncore.System.isModulePaused(this.$mod) == true) {
+            if (suncore.System.isModulePaused(this.$mod) === true) {
                 return;
             }
             const time: number = suncore.System.getModuleTimestamp(this.$mod);
@@ -125,6 +131,9 @@ module sunui {
          * export
          */
         to(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
+            if (suncore.System.isModuleStopped(this.$mod) === true) {
+                return this;
+            }
             const keys: Array<string> = Object.keys(props);
             const item: any = this.$target ? this.$target : this.$item;
             this.$beforeTween(keys, item, props, duration, ease, handler);
@@ -135,6 +144,9 @@ module sunui {
          * export
          */
         from(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
+            if (suncore.System.isModuleStopped(this.$mod) === true) {
+                return this;
+            }
             const keys: Array<string> = Object.keys(props);
             const item: any = this.$target ? this.$target : this.$item;
             this.$beforeTween(keys, props, item, duration, ease, handler);

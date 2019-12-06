@@ -67,6 +67,8 @@ module sunui {
             this.removeChild(info.mask);
 
             if (info.keepNode == false) {
+                this.facade.sendNotification(NotifyKey.BEFORE_POPUP_REMOVED, info.view);
+                this.destroyMask(info.mask);
                 this.destroyView(info.view);
             }
             // 为了避免不同的弹框之间的销毁业务相互形成干扰，此事件被设计成在弹框对象被销毁之后被派发
