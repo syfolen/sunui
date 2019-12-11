@@ -3,6 +3,8 @@ module sunui {
 
     export class TempletGroup {
 
+        private $id: number = 0;
+
         private $urls: string[] = null;
 
         private $handler: Laya.Handler = null;
@@ -11,13 +13,12 @@ module sunui {
 
         private $undoList: string[] = [];
 
-        private $retryTimes: number = 0;
-
         private $prepared: boolean = false;
 
         private $released: boolean = false;
 
-        constructor(urls: string[], handler: Laya.Handler) {
+        constructor(id: number, urls: string[], handler: Laya.Handler) {
+            this.$id = id;
             this.$handler = handler;
             this.$doPrepare(urls);
         }
@@ -48,22 +49,18 @@ module sunui {
         private $checkList(): void {
             if (this.$released === true) {
                 this.$releaseResources(this.$doneList, this.$onResourceCreated, this);
+                Resource.release(this.$id);
             }
             else if (this.$undoList.length === 0) {
                 Resource.prepare(this.$doneList, null, null);
                 this.$releaseResources(this.$doneList, this.$onResourceCreated, this);
                 this.$prepared = true;
-                this.$handler.runWith(true);
-            }
-            else if (this.$retryTimes === 0) {
-                const urls: string[] = this.$undoList.slice(0);
-                this.$undoList.length = 0;
-                this.$retryTimes = 1;
-                this.$doPrepare(urls);
+                this.$handler.runWith([true, this.$id]);
             }
             else {
                 this.$releaseResources(this.$doneList, this.$onResourceCreated, this);
-                this.$handler.runWith(false);
+                Resource.release(this.$id);
+                this.$handler.runWith([false, this.$id]);
             }
         }
 

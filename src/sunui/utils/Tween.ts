@@ -5,10 +5,10 @@ module sunui {
      */
     export class Tween implements ITween {
         /**
-         * @mod: 缓动挂靠的模块，默认为SYSTEM
+         * @mod: 缓动挂靠的模块，默认为CUSTOM
          * export
          */
-        static get(item: any, mod: suncore.ModuleEnum = suncore.ModuleEnum.SYSTEM): ITween {
+        static get(item: any, mod: suncore.ModuleEnum = suncore.ModuleEnum.CUSTOM): ITween {
             return new Tween(item, mod);
         }
 

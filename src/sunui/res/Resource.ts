@@ -74,6 +74,7 @@ module sunui {
 
         /**
          * 资源预加载
+         * @return: 返回资源组ID
          * export
          */
         export function prepare(urls: string[], method: Function, caller: Object): number {
@@ -86,7 +87,7 @@ module sunui {
             }
             else {
                 const id: number = createGroupId();
-                $groups[id] = new TempletGroup(urls, Laya.Handler.create(caller, method));
+                $groups[id] = new TempletGroup(id, urls, Laya.Handler.create(caller, method));
                 return id;
             }
         }
@@ -94,11 +95,23 @@ module sunui {
         /**
          * 释放资源组
          * @id: 资源组ID
+         * @return: 始终返回0
          * export
          */
-        export function release(id: number): void {
-            $groups[id] !== void 0 && $groups[id].release();
-            delete $groups[id];
+        export function release(id: number): number {
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, suncom.Handler.create(null, releaseEx, [id]));
+            return 0;
+        }
+
+        /**
+         * 资源组释放执行函数，此方法由release方法异步调用执行，以避免create回调中的释放请求不生效的问题
+         */
+        function releaseEx(id: number): void {
+            const group: TempletGroup = $groups[id] || null;
+            if (group !== null) {
+                delete $groups[id];
+                group.release();
+            }
         }
     }
 }
