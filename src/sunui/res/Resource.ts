@@ -5,78 +5,100 @@ module sunui {
      * export
      */
     export namespace Resource {
-        /**
-         * 查询是否存在资源
-         */
-        export function has(url: string): boolean {
-            const templet: Templet = M.templets[url] || null;
-            return templet !== null;
+
+        let $seedId: number = 0;
+
+        const $groups: { [id: number]: TempletGroup } = {};
+
+        const $templets: { [url: string]: Templet } = {};
+
+        function createGroupId(): number {
+            $seedId++;
+            return $seedId;
         }
 
         /**
-         * 加载资源
+         * 根据url创建对象
+         * @flag: 目前仅用于代替aniMode的值
+         * 说明：
+         * 1. 调用此接口创建对象时，会产生一个计数，当计数为0时，资源会被彻底释放
+         * 2. 见destroy方法
+         * export
          */
-        export function load(url: string, handler: suncom.IHandler): void {
-            let templet: Templet = M.templets[url] || null;
+        export function create(url: string, method: Function = null, caller: Object = null, flag: number = 0): any {
+            console.log(`create ${url}`);
+            let templet: Templet = $templets[url] || null;
             if (templet === null) {
-                templet = M.templets[url] = new Templet();
+                templet = $templets[url] = new Templet();
             }
-            templet.load(url, handler);
-        }
-
-        /**
-         * 卸载资源
-         */
-        export function unload(url: string): void {
-
-        }
-
-        /**
-         * 根据资源创建
-         */
-        export function create(url: string, handler: suncom.IHandler): void {
+            templet.create(url, method, caller, flag);
+            if ((suncom.Global.debugMode & suncom.DebugMode.DEBUG) === suncom.DebugMode.DEBUG) {
+                console.log("================== resouce debug ==================");
+                const keys: string[] = Object.keys($templets);
+                for (const key of keys) {
+                    const templet: Templet = $templets[key];
+                    console.log(`url:${key}, references:${templet.referenceCount}`);
+                }
+                console.log("================== resouce debug ==================");
+            }
         }
 
         /**
          * 销毁对象
+         * 说明：
+         * 1. 见create方法
+         * 2. 调用此接口销毁对象时，会移除一个计数，当计数为0时，当计数为0时，资源会被彻底释放
+         * 3. 若此方法执行完之后，计数依然大于0，且loading尚未完成，则create中指定的回调依然会在资源加载完成之后被执行，UI应当自行避免回调的这种执行
+         * 4. 若存在有部分逻辑未使用此接口加载资源，却调用此接口销毁资源，则可能会导致该资源被卸载或不可用，请注意
          * export
          */
-        export function destroy(node: any): void {
-
-        }
-
-        /**
-         * 
-         */
-        function createObjectByUrl(url: string, handler: suncom.IHandler): void {
-
-        }
-
-        /**
-         * 创建预置对象
-         */
-        function createPrefab(url: string, handler: suncom.IHandler): void {
-            const res: any = Laya.loader.getRes(url) || null;
-
-            // 若资源不存在，则加载资源
-            if (res === null) {
-                load(url, suncom.Handler.create(null, createPrefab, [url, handler]));
-                return;
+        export function destroy(url: string, method: Function = null, caller: Object = null): void {
+            console.log(`destroy ${url}`);
+            let templet: Templet = $templets[url] || null;
+            if (templet !== null) {
+                templet.destroy(url, method, caller);
+                if (templet.referenceCount === 0) {
+                    delete $templets[url];
+                }
+            }
+            if ((suncom.Global.debugMode & suncom.DebugMode.DEBUG) === suncom.DebugMode.DEBUG) {
+                console.log("================== resouce debug ==================");
+                const keys: string[] = Object.keys($templets);
+                for (const key of keys) {
+                    const templet: Templet = $templets[key];
+                    console.log(`url:${key}, references:${templet.referenceCount}`);
+                }
+                console.log("================== resouce debug ==================");
             }
         }
 
         /**
-         * 创建龙骨对象
+         * 资源预加载
+         * export
          */
-        function createSkeleton(url: string, handler: suncom.IHandler): void {
-
+        export function prepare(urls: string[], method: Function, caller: Object): number {
+            if (method === null) {
+                for (let i: number = 0; i < urls.length; i++) {
+                    const url: string = urls[i];
+                    create(url);
+                }
+                return 0;
+            }
+            else {
+                const id: number = createGroupId();
+                $groups[id] = new TempletGroup(urls, Laya.Handler.create(caller, method));
+                return id;
+            }
         }
 
         /**
-         * 创建3D对象
+         * 释放资源组
+         * @id: 资源组ID
+         * export
          */
-        function createSprite3D(url: string, handler: suncom.IHandler): void {
-            Laya.Skeleton;
+        export function release(id: number): void {
+            $groups[id] !== void 0 && $groups[id].release();
+            delete $groups[id];
         }
     }
 }

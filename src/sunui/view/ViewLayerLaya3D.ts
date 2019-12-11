@@ -75,7 +75,7 @@ module sunui {
 
         destroyMask(view: sunui.IView): void {
             const mask: Laya.Image = view as any;
-            mask.dispose();
+            mask.destroy();
         }
 
         createViewByClass(cls: string | (new () => IView)): sunui.IView {
