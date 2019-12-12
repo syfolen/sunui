@@ -20,19 +20,19 @@ module sunui {
         /**
          * 根据url创建对象
          * @method: 创建失败时res为null，仅支持Skeleton和Texture的创建
-         * @flag: 目前仅用于代替aniMode的值
+         * @flag: 目前仅用于代替aniMode的值（己弃用）
          * 说明：
          * 1. 调用此接口创建对象时，会产生一个计数，当计数为0时，资源会被彻底释放
          * 2. 见destroy方法
          * export
          */
         export function create(url: string, method: (res: any, url: string) => void = null, caller: Object = null, flag: number = 0): any {
-            console.log(`create ${url}`);
+            // console.log(`create ${url}`);
             let templet: Templet = $templets[url] || null;
             if (templet === null) {
                 templet = $templets[url] = new Templet();
             }
-            templet.create(url, method, caller, flag);
+            templet.create(url, method, caller);
             if ((suncom.Global.debugMode & suncom.DebugMode.DEBUG) === suncom.DebugMode.DEBUG) {
                 console.log("================== resouce debug ==================");
                 const keys: string[] = Object.keys($templets);
@@ -53,7 +53,7 @@ module sunui {
          * export
          */
         export function destroy(url: string, method: (res: any, url: string) => void = null, caller: Object = null): void {
-            console.log(`destroy ${url}`);
+            // console.log(`destroy ${url}`);
             let templet: Templet = $templets[url] || null;
             if (templet !== null) {
                 templet.destroy(url, method, caller);

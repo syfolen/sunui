@@ -1,6 +1,6 @@
 
 module sunui {
-    
+
     export class Templet {
 
         private $res: any = null;
@@ -11,18 +11,16 @@ module sunui {
 
         private $loading: boolean = false;
 
-        create(url: string, method: Function, caller: Object, flag: number): void {
+        create(url: string, method: Function, caller: Object): void {
             this.$referenceCount++;
             if (method !== null) {
                 this.$handlers.push(Laya.Handler.create(caller, method));
             }
-            if (this.$res === null) {
-                this.$load(url, flag);
-            }
-            // 排除龙骨模版正在构建的情况
-            else if (this.$loading === false) {
-                this.$doCreate(url, flag, true);
-            }
+            /**
+             * 说明：
+             * 1. 此处无论资源是否己得到缓存，都应当重新加载，因为如果不重新加载而直接回调，则回调的发生有可能在外部类的构造函数执行结束之前，这种情况就会引发一些错误
+             */
+            this.$load(url);
         }
 
         destroy(url: string, method: Function, caller: Object): void {
@@ -58,14 +56,14 @@ module sunui {
             }
         }
 
-        private $load(url: string, flag: number): void {
+        private $load(url: string): void {
             if (this.$loading === false) {
                 this.$loading = true;
-                Laya.loader.load(this.$getLoadList(url), Laya.Handler.create(this, this.$onLoad, [url, flag]));
+                Laya.loader.load(this.$getLoadList(url), Laya.Handler.create(this, this.$onLoad, [url]));
             }
         }
 
-        private $onLoad(url: string, flag: number, ok: boolean): void {
+        private $onLoad(url: string, ok: boolean): void {
             this.$loading = false;
 
             if (ok === false) {
@@ -75,7 +73,7 @@ module sunui {
                 else {
                     console.error(`龙骨载入失败 url:${url}`);
                 }
-                this.$doCreate(url, flag, false);
+                this.$doCreate(url, false);
                 return;
             }
 
@@ -89,20 +87,20 @@ module sunui {
                     return;
                 }
             }
-            else {
+            else if (this.$res === null) {
                 this.$res = Laya.loader.getRes(url);
             }
 
             if (this.$res !== null) {
-                this.$doCreate(url, flag, true);
+                this.$doCreate(url, true);
             }
             else {
                 console.error(`资源加载失败：url:`);
-                this.$doCreate(url, flag, false);
+                this.$doCreate(url, false);
             }
         }
 
-        private $doCreate(url: string, flag: number, ok: boolean): void {
+        private $doCreate(url: string, ok: boolean): void {
             const handlers: Laya.Handler[] = this.$handlers.slice(0);
             this.$handlers = [];
 
@@ -118,7 +116,7 @@ module sunui {
                     handler.runWith([null, url]);
                 }
                 else if (ext === "sk") {
-                    const ske: Laya.Skeleton = this.$res.buildArmature(flag);
+                    const ske: Laya.Skeleton = this.$res.buildArmature(2);
                     handler.runWith([ske, url]);
                 }
                 else if (ext === "png" || ext === "jpg") {
