@@ -2,7 +2,6 @@
 module sunui {
     /**
      * 弹出对象属性接口，接口数据展示了弹出对象自身支持的所有属性
-     * export
      */
     export interface IView {
         /**
