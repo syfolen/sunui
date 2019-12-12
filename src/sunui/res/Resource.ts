@@ -19,13 +19,14 @@ module sunui {
 
         /**
          * 根据url创建对象
+         * @method: 创建失败时res为null，仅支持Skeleton和Texture的创建
          * @flag: 目前仅用于代替aniMode的值
          * 说明：
          * 1. 调用此接口创建对象时，会产生一个计数，当计数为0时，资源会被彻底释放
          * 2. 见destroy方法
          * export
          */
-        export function create(url: string, method: Function = null, caller: Object = null, flag: number = 0): any {
+        export function create(url: string, method: (res: any, url: string) => void = null, caller: Object = null, flag: number = 0): any {
             console.log(`create ${url}`);
             let templet: Templet = $templets[url] || null;
             if (templet === null) {
@@ -51,7 +52,7 @@ module sunui {
          * 3. 若存在有部分逻辑未使用此接口加载资源，却调用此接口销毁资源，则可能会导致该资源被卸载或不可用，请注意
          * export
          */
-        export function destroy(url: string, method: Function = null, caller: Object = null): void {
+        export function destroy(url: string, method: (res: any, url: string) => void = null, caller: Object = null): void {
             console.log(`destroy ${url}`);
             let templet: Templet = $templets[url] || null;
             if (templet !== null) {
@@ -73,10 +74,11 @@ module sunui {
 
         /**
          * 资源预加载
+         * @method: 预加载完成时，ok为true，id大于0，仅支持Skeleton和Texture
          * @return: 返回资源组ID
          * export
          */
-        export function prepare(urls: string[], method: Function, caller: Object): number {
+        export function prepare(urls: string[], method: (ok: boolean, id: number) => void, caller: Object): number {
             if (method === null) {
                 for (let i: number = 0; i < urls.length; i++) {
                     const url: string = urls[i];
