@@ -36,7 +36,9 @@ module sunui {
                 return;
             }
             else if (this.$referenceCount < 0) {
-                throw Error(`资源计数不应当小于0 url:${url}, references:${this.$referenceCount}`);
+                this.$referenceCount = 0;
+                console.error(`资源计数不应当小于0 url:${url}, references:${this.$referenceCount}`);
+                return;
             }
             if (this.$referenceCount === 0) {
                 this.$cancel(url);
