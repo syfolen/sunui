@@ -1,4 +1,9 @@
-
+/**
+ * @license suncore (c) 2013 Binfeng Sun <christon.sun@qq.com>
+ * Released under the Apache License, Version 2.0
+ * https://blog.csdn.net/syfolen
+ * https://github.com/syfolen/suncore
+ */
 declare module suncore {
     /**
      * 消息优先级
@@ -69,7 +74,7 @@ declare module suncore {
          * 系统模块
          * 此模块为常驻模块，该模块下的消息永远不会被清理
          */
-        SYSTEM,
+        SYSTEM = 0,
 
         /**
          * 通用模块
@@ -82,6 +87,89 @@ declare module suncore {
          * 此模块下的消息会在时间轴被销毁的同时被清理
          */
         TIMELINE,
+    }
+
+    /**
+     * MsgQId枚举
+     */
+    enum MsgQIdEnum {
+        /**
+         * 网络层消息枚举
+         */
+        NET_MSG_ID_BEGIN = 1,
+
+        NET_MSG_ID_END = 10,
+
+        /**
+         * CUI消息枚举
+         */
+        CUI_MSG_ID_BEGIN = NET_MSG_ID_END,
+
+        CUI_MSG_ID_END = 100,
+
+        /**
+         * GUI消息枚举
+         */
+        GUI_MSG_ID_BEGIN = CUI_MSG_ID_END,
+
+        GUI_MSG_ID_END = 200,
+
+        /**
+         * 逻辑层消息枚举
+         */
+        OSL_MSG_ID_BEGIN = GUI_MSG_ID_END,
+
+        OSL_MSG_ID_END = 300
+    }
+
+    /**
+     * MsgQ的模块枚举
+     */
+    enum MsgQModEnum {
+        /**
+         * 通用界面
+         */
+        CUI = 1,
+
+        /**
+         * 游戏界面
+         */
+        GUI,
+
+        /**
+         * 逻辑层
+         */
+        OSL,
+
+        /**
+         * 网络层
+         */
+        NET
+    }
+
+    /**
+     * MsgQ的消息对象
+     */
+    interface IMsgQMsg {
+        /**
+         * 发送消息的模块
+         */
+        src: MsgQModEnum;
+
+        /**
+         * 接收消息的模块
+         */
+        dest: MsgQModEnum;
+
+        /**
+         * 消息编号
+         */
+        id: number;
+
+        /**
+         * 消息挂载的数据
+         */
+        data: any;
     }
 
     /**
@@ -126,11 +214,73 @@ declare module suncore {
         abstract run(): boolean;
 
         /**
-         * 取消任务
+         * 任务取消
          * 说明：
-         * 1. 当时间轴停止时，此方法会被调用，用以清理资源
+         * 1. 当消息因时间轴停止而被清理时，此方法会被自动执行
          */
         cancel(): void;
+    }
+
+    /**
+     * 服务（主要用于逻辑层架构）
+     * 说明：
+     * 1. 每个服务均有独立的生命周期。
+     * 2. 服务被设计用来处理与表现层无关的有状态的业务。
+     */
+    abstract class BaseService extends puremvc.Notifier {
+
+        /**
+         * 服务启动入口
+         */
+        run(): void;
+
+        /**
+         * 服务停止接口
+         */
+        stop(): void;
+
+        /**
+         * 启动回调
+         */
+        protected abstract $onRun(): void;
+
+        /**
+         * 停止回调
+         */
+        protected abstract $onStop(): void;
+
+        /**
+         * 服务是否正在运行
+         */
+        readonly running: boolean;
+    }
+
+    /**
+     * MsgQ服务类（主要用于模块间的解偶）
+     * 说明：
+     * 1. 理论上每个MsgQ模块都必须实现一个MsgQService对象，否则此模块的消息不能被处理
+     */
+    abstract class MsgQService extends BaseService {
+
+        /**
+         * MsgQService在被构建时必须指定MsgQ消息模块
+         */
+        constructor(msgQMod:MsgQModEnum);
+
+        /**
+         * 启动回调
+         */
+        protected $onRun(): void;
+
+        /**
+         * 停止回调
+         */
+        protected $onStop(): void;
+
+        /**
+         * 处理MsgQ消息
+         */
+        protected abstract $dealMsgQMsg(msg:IMsgQMsg): void;
     }
 
     /**
@@ -189,11 +339,37 @@ declare module suncore {
 
         /**
          * @mod: 时间轴模块
-         * @pause: 时间轴在开启时是否处于暂停状态，默认为false
+         * @pause: 时间轴在开启时是否处于暂停状态
          * 说明：
          * 1. 参数pause并不会对SYSTEM模块的时间轴生效
          */
         execute(mod:ModuleEnum, pause?:boolean): void;
+    }
+
+    /**
+     * MsgQ接口类
+     * 设计说明：
+     * 1. 设计MsgQ的主要目的是为了对不同的模块进行彻底的解耦
+     * 2. 考虑到在实际环境中，网络可能存在波动，而UI层可能会涉及到资源的动态加载与释放管理，故MsgQ中的消息是以异步的形式进行派发的
+     * 3. 由于MsgQ的异步机制，故每条消息的处理都必须考虑并避免因模块间的数据可能的不同步而带来的报错问题
+     */
+    namespace MsgQ {
+
+        /**
+         * 发送消息（异步）
+         */
+        function send(src: MsgQModEnum, dest: MsgQModEnum, id: number, data: any): void;
+
+        /**
+         * 获取消息
+         * @id: 只获取指定ID消息，若为void 0则不校验
+         */
+        function fetch(mod: MsgQModEnum, id?: number): IMsgQMsg;
+
+        /**
+         * 判断模块是否己激活
+         */
+        function isModuleActive(mod: MsgQModEnum): boolean;
     }
 
     /**
@@ -210,6 +386,11 @@ declare module suncore {
          * 判断指定模块是否己暂停
          */
         function isModulePaused(mod: ModuleEnum): boolean;
+
+        /**
+         * 获取时间间隔（所有模块共享）
+         */
+        function getDelta(): number;
 
         /**
          * 获取指定模块的时间戳

@@ -73,6 +73,21 @@ declare module puremvc {
 
         static getInstance(): IFacade;
 
+        protected $initMsgQ(): void;
+
+        protected $initializeModel(): void;
+
+        protected $initializeView(): void;
+
+        protected $initializeController(): void;
+
+        /**
+         * 为MMI层模块注册命令前缀
+         * 说明：
+         * 1. 只有通过此方法注册过的MsgQ模块才允许使用模型或视图接口
+         */
+        protected $regMMICmd(msgQMod:number, prefix:string): void;
+
         registerObserver(name:string, method:Function, caller:Object, receiveOnce?:boolean, priority?:number): void;
 
         removeObserver(name:string, method:Function, caller:Object): void;
@@ -104,9 +119,13 @@ declare module puremvc {
         notifyCancel(): void;
     }
 
-    class Notifier {
+    class Notifier implements INotifier {
 
-        protected facade: IFacade;
+        private $facade: IFacade;
+
+        constructor(msgQMod?:number);
+
+        protected readonly facade: IFacade;
     }
 
     class Proxy extends Notifier implements IProxy {
