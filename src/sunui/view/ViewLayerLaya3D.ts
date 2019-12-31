@@ -19,7 +19,7 @@ module sunui {
         }
 
         createMask(view: sunui.IView): sunui.IView {
-            const mask: Laya.Image = new Laya.Image("game/mask.png");
+            const mask: Laya.Image = new Laya.Image("common/mask.png");
             mask.left = mask.right = mask.top = mask.bottom = 0;
             mask.sizeGrid = "1,1,1,1";
             mask.alpha = 0.5;
