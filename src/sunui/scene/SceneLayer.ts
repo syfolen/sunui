@@ -93,12 +93,12 @@ module sunui {
          * 说明：不会将场景从历史中移除
          */
         private $exitScene(): void {
-            // 暂停场景时间轴
-            this.facade.sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
-
             // 派发退出场景事件
             const info: ISceneInfo = SceneManager.getConfigByName(this.$sceneName);
             this.facade.sendNotification(NotifyKey.EXIT_SCENE, this.$sceneName);
+
+            // 暂停场景时间轴
+            this.facade.sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
 
             // 执行反初始化任务
             info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new info.uniCls());
