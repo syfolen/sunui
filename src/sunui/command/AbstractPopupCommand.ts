@@ -15,6 +15,13 @@ module sunui {
             if (props.y === void 0 && props.top === void 0 && props.bottom === void 0) {
                 props.centerY = 0;
             }
+            // 为弹框默认时间模块
+            if (M.sceneLayer.uiScene === null) {
+                props.mod = suncore.ModuleEnum.SYSTEM;
+            }
+            else {
+                props.mod = suncore.ModuleEnum.CUSTOM;
+            }
             return props;
         }
 
@@ -59,7 +66,7 @@ module sunui {
                     props.scaleY = 1;
                 }
 
-                Tween.get(view, suncore.ModuleEnum.CUSTOM).to(props, duration, props.ease);
+                Tween.get(view, props.mod).to(props, duration, props.ease);
             }
         }
 
@@ -85,7 +92,7 @@ module sunui {
                     props.scaleY = 0;
                 }
 
-                Tween.get(view, suncore.ModuleEnum.CUSTOM).to(props, duration);
+                Tween.get(view, props.mod).to(props, duration);
             }
         }
     }

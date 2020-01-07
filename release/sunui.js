@@ -171,6 +171,117 @@ var sunui;
         return ClosePopupCommand;
     }(AbstractPopupCommand));
     sunui.ClosePopupCommand = ClosePopupCommand;
+    var Loader = (function () {
+        function Loader() {
+            this.$templet = null;
+            this.$url = null;
+            this.$handler = null;
+            this.$loading = false;
+            this.$retryTimerId = 0;
+        }
+        Loader.prototype.load = function (url, handler) {
+            if (this.$loading === false) {
+                this.$loading = true;
+                this.$url = url;
+                this.$handler = handler;
+                Laya.loader.load(this.$getLoadList(url), Laya.Handler.create(this, this.$onLoad));
+            }
+        };
+        Loader.prototype.$onLoad = function (ok) {
+            if (ok === false) {
+                if (this.$templet === null) {
+                    console.log("\u8D44\u6E90\u52A0\u8F7D\u5931\u8D25\uFF1Aurl:" + this.$url + "\uFF0C1\u79D2\u540E\u91CD\u65B0\u5C1D\u8BD5...");
+                }
+                else {
+                    console.log("\u52A8\u753B\u521D\u59CB\u5316\u5931\u8D25\uFF1Aurl:" + this.$url + "\uFF0C1\u79D2\u540E\u91CD\u65B0\u5C1D\u8BD5...");
+                }
+                this.$retryTimerId = suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, 1000, this.$reload, this);
+                return;
+            }
+            if (this.getResExtByUrl(this.$url) === "sk") {
+                if (this.$templet === null) {
+                    this.$templet = new Laya.Templet();
+                    this.$templet.on(Laya.Event.ERROR, this, this.$onLoad, [false]);
+                    this.$templet.on(Laya.Event.COMPLETE, this, this.$onLoad, [true]);
+                    this.$templet.loadAni(this.$url);
+                    return;
+                }
+            }
+            this.$handler.run();
+        };
+        Loader.prototype.$reload = function () {
+            if (this.$templet === null) {
+                Laya.loader.load(this.$getLoadList(this.$url), Laya.Handler.create(this, this.$onLoad));
+            }
+            else {
+                this.$templet.loadAni(this.$url);
+            }
+            this.$retryTimerId = 0;
+        };
+        Loader.prototype.destroy = function () {
+            this.$handler = null;
+            this.$loading = false;
+            if (this.$templet !== null) {
+                this.$templet.off(Laya.Event.ERROR, this, this.$onLoad);
+                this.$templet.off(Laya.Event.COMPLETE, this, this.$onLoad);
+                this.$templet.destroy();
+                this.$templet = null;
+            }
+            var loadList = this.$getLoadList(this.$url);
+            for (var i = 0; i < loadList.length; i++) {
+                var url = loadList[i];
+                Laya.loader.clearRes(url);
+            }
+            Laya.loader.cancelLoadByUrls(this.$getLoadList(this.$url));
+            this.$retryTimerId = suncore.System.removeTimer(this.$retryTimerId);
+        };
+        Loader.prototype.$getLoadList = function (url) {
+            var index = url.lastIndexOf(".");
+            var str = url.substr(0, index);
+            var ext = url.substr(index + 1);
+            if (ext === "sk") {
+                return [
+                    str + ".sk",
+                    str + ".png"
+                ];
+            }
+            else {
+                return [url];
+            }
+        };
+        Loader.prototype.getResExtByUrl = function (url) {
+            return url.substr(url.lastIndexOf(".") + 1);
+        };
+        Loader.prototype.create = function () {
+            var res = null;
+            if (this.$templet === null) {
+                res = Laya.loader.getRes(this.$url) || null;
+            }
+            else {
+                res = this.$templet.buildArmature(2) || null;
+            }
+            if (res === null) {
+                throw Error("\u8D44\u6E90\u9884\u52A0\u8F7D\u51FA\u9519 url:" + this.$url);
+            }
+            return res;
+        };
+        Object.defineProperty(Loader.prototype, "loading", {
+            get: function () {
+                return this.$loading;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Loader.prototype, "url", {
+            get: function () {
+                return this.$url;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Loader;
+    }());
+    sunui.Loader = Loader;
     var RegisterScenesCommand = (function (_super) {
         __extends(RegisterScenesCommand, _super);
         function RegisterScenesCommand() {
@@ -234,9 +345,9 @@ var sunui;
             this.facade.sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, false]);
         };
         SceneLayer.prototype.$exitScene = function () {
-            this.facade.sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
             var info = SceneManager.getConfigByName(this.$sceneName);
             this.facade.sendNotification(NotifyKey.EXIT_SCENE, this.$sceneName);
+            this.facade.sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
             info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new info.uniCls());
             suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new suncore.SimpleTask(suncom.Handler.create(this, this.$onExitScene)));
         };
@@ -377,17 +488,24 @@ var sunui;
     sunui.ShowPopupCommand = ShowPopupCommand;
     var Templet = (function () {
         function Templet() {
-            this.$res = null;
-            this.$handlers = [];
+            this.$loader = new Loader();
             this.$referenceCount = 0;
-            this.$loading = false;
+            this.$handlers = [];
         }
         Templet.prototype.create = function (url, method, caller) {
             this.$referenceCount++;
             if (method !== null) {
-                this.$handlers.push(Laya.Handler.create(caller, method));
+                this.$handlers.push(suncom.Handler.create(caller, method));
             }
-            this.$load(url);
+            this.$loader.loading === false && this.$loader.load(url, suncom.Handler.create(this, this.$doCreate));
+        };
+        Templet.prototype.$doCreate = function () {
+            var handlers = this.$handlers.slice(0);
+            this.$handlers = [];
+            while (handlers.length > 0) {
+                var handler = handlers.shift();
+                handler.runWith([this.$loader.create(), this.$loader.url]);
+            }
         };
         Templet.prototype.destroy = function (url, method, caller) {
             for (var i = 0; i < this.$handlers.length; i++) {
@@ -402,116 +520,11 @@ var sunui;
                 return;
             }
             else if (this.$referenceCount < 0) {
-                this.$referenceCount = 0;
-                console.error("\u8D44\u6E90\u8BA1\u6570\u4E0D\u5E94\u5F53\u5C0F\u4E8E0 url:" + url + ", references:" + this.$referenceCount);
-                return;
+                throw Error("\u8D44\u6E90\u8BA1\u6570\u4E0D\u5E94\u5F53\u5C0F\u4E8E0 url:" + url + ", references:" + this.$referenceCount);
             }
             if (this.$referenceCount === 0) {
-                this.$cancel(url);
+                this.$loader.destroy();
             }
-            if (this.$res !== null) {
-                if (this.$getResExt(url) === "sk") {
-                    this.$res.off(Laya.Event.COMPLETE, this, this.$onLoad);
-                    this.$res.off(Laya.Event.ERROR, this, this.$onLoad);
-                    this.$res.destroy();
-                }
-                this.$res = null;
-            }
-            var loadList = this.$getLoadList(url);
-            for (var i = 0; i < loadList.length; i++) {
-                var str = loadList[i];
-                Laya.loader.clearRes(str);
-            }
-        };
-        Templet.prototype.$load = function (url) {
-            if (this.$loading === false) {
-                this.$loading = true;
-                Laya.loader.load(this.$getLoadList(url), Laya.Handler.create(this, this.$onLoad, [url]));
-            }
-        };
-        Templet.prototype.$onLoad = function (url, ok) {
-            this.$loading = false;
-            if (ok === false) {
-                if (this.$res === null) {
-                    console.error("\u8D44\u6E90\u52A0\u8F7D\u5931\u8D25 url:" + url);
-                }
-                else {
-                    console.error("\u9F99\u9AA8\u8F7D\u5165\u5931\u8D25 url:" + url);
-                }
-                this.$doCreate(url, false);
-                return;
-            }
-            if (this.$getResExt(url) === "sk") {
-                if (this.$res === null) {
-                    var templet = this.$res = new Laya.Templet();
-                    templet.on(Laya.Event.COMPLETE, this, this.$onLoad, [url, true]);
-                    templet.on(Laya.Event.ERROR, this, this.$onLoad, [url, false]);
-                    templet.loadAni(url);
-                    this.$loading = true;
-                    return;
-                }
-            }
-            else if (this.$res === null) {
-                this.$res = Laya.loader.getRes(url);
-            }
-            if (this.$res !== null) {
-                this.$doCreate(url, true);
-            }
-            else {
-                console.error("\u8D44\u6E90\u52A0\u8F7D\u5931\u8D25\uFF1Aurl:");
-                this.$doCreate(url, false);
-            }
-        };
-        Templet.prototype.$doCreate = function (url, ok) {
-            var handlers = this.$handlers.slice(0);
-            this.$handlers = [];
-            if (ok === false) {
-                this.$referenceCount = 1;
-                this.destroy(url, null, null);
-            }
-            var ext = this.$getResExt(url);
-            while (handlers.length > 0) {
-                var handler = handlers.shift();
-                if (ok === false) {
-                    handler.runWith([null, url]);
-                }
-                else if (ext === "sk") {
-                    var ske = this.$res.buildArmature(2);
-                    handler.runWith([ske, url]);
-                }
-                else if (ext === "png" || ext === "jpg") {
-                    handler.runWith([Laya.loader.getRes(url), url]);
-                }
-                else {
-                    console.error("\u6682\u65F6\u4E0D\u652F\u6301\u8FD9\u79CD\u8D44\u6E90\u7C7B\u578B\u7684\u7BA1\u7406 url:" + url);
-                    handler.runWith([null, url]);
-                }
-            }
-        };
-        Templet.prototype.$cancel = function (url) {
-            if (this.$loading === true) {
-                this.$loading = false;
-                Laya.loader.cancelLoadByUrl(url);
-            }
-        };
-        Templet.prototype.$getLoadList = function (url) {
-            var index = url.lastIndexOf(".");
-            var str = url.substr(0, index);
-            var ext = url.substr(index + 1);
-            if (ext === "sk") {
-                return [
-                    str + ".sk",
-                    str + ".png"
-                ];
-            }
-            else {
-                return [url];
-            }
-        };
-        Templet.prototype.$getResExt = function (url) {
-            var index = url.lastIndexOf(".");
-            var exten = url.substr(index + 1);
-            return exten;
         };
         Object.defineProperty(Templet.prototype, "referenceCount", {
             get: function () {
@@ -529,61 +542,28 @@ var sunui;
             this.$urls = null;
             this.$handler = null;
             this.$doneList = [];
-            this.$undoList = [];
-            this.$prepared = false;
-            this.$released = false;
             this.$id = id;
-            this.$handler = handler;
-            this.$doPrepare(urls);
-        }
-        TempletGroup.prototype.$doPrepare = function (urls) {
             this.$urls = urls;
+            this.$handler = handler;
             for (var i = 0; i < this.$urls.length; i++) {
                 var url = this.$urls[i];
                 Resource.create(url, this.$onResourceCreated, this);
             }
-        };
+        }
         TempletGroup.prototype.$onResourceCreated = function (res, url) {
             if (res instanceof Laya.Skeleton) {
                 res.destroy();
             }
-            if (res === null) {
-                this.$undoList.push(url);
+            this.$doneList.push(url);
+            if (this.$doneList.length < this.$urls.length) {
+                return;
             }
-            else {
-                this.$doneList.push(url);
-            }
-            if (this.$doneList.length + this.$undoList.length === this.$urls.length) {
-                this.$checkList();
-            }
-        };
-        TempletGroup.prototype.$checkList = function () {
-            if (this.$released === true) {
-                this.$releaseResources(this.$doneList, this.$onResourceCreated, this);
-                Resource.release(this.$id);
-            }
-            else if (this.$undoList.length === 0) {
-                Resource.prepare(this.$doneList, null, null);
-                this.$releaseResources(this.$doneList, this.$onResourceCreated, this);
-                this.$prepared = true;
-                this.$handler.runWith([true, this.$id]);
-            }
-            else {
-                this.$releaseResources(this.$doneList, this.$onResourceCreated, this);
-                Resource.release(this.$id);
-                this.$handler.runWith([false, this.$id]);
-            }
-        };
-        TempletGroup.prototype.$releaseResources = function (urls, method, caller) {
-            for (var i = 0; i < urls.length; i++) {
-                var url = urls[i];
-                Resource.destroy(url, this.$onResourceCreated, this);
-            }
+            this.$handler.runWith([this.$id]);
         };
         TempletGroup.prototype.release = function () {
-            this.$released = true;
-            if (this.$prepared === true) {
-                this.$checkList();
+            for (var i = 0; i < this.$urls.length; i++) {
+                var url = this.$urls[i];
+                Resource.destroy(url, this.$onResourceCreated, this);
             }
         };
         return TempletGroup;
@@ -831,24 +811,24 @@ var sunui;
             }
             this.$onCallerDestroy(this.$caller);
         };
-        ViewContact.prototype.onPopupClosed = function (method, caller) {
+        ViewContact.prototype.onPopupClosed = function (method, caller, args) {
             if (this.$caller !== caller) {
                 throw Error("caller\u4E0E\u6267\u884C\u8005\u4E0D\u4E00\u81F4");
             }
             if (this.$closedHandler === null) {
-                this.$closedHandler = suncom.Handler.create(caller, method);
+                this.$closedHandler = suncom.Handler.create(caller, method, args);
             }
             else {
                 throw Error("\u91CD\u590D\u76D1\u542C\u5F39\u51FA\u5BF9\u8C61\u7684\u5173\u95ED\u4E8B\u4EF6");
             }
             return this;
         };
-        ViewContact.prototype.onPopupRemoved = function (method, caller) {
+        ViewContact.prototype.onPopupRemoved = function (method, caller, args) {
             if (this.$caller !== caller) {
                 throw Error("caller\u4E0E\u6267\u884C\u8005\u4E0D\u4E00\u81F4");
             }
             if (this.$removedHandler === null) {
-                this.$removedHandler = suncom.Handler.create(caller, method);
+                this.$removedHandler = suncom.Handler.create(caller, method, args);
             }
             else {
                 throw Error("\u91CD\u590D\u76D1\u542C\u5F39\u51FA\u5BF9\u8C61\u7684\u79FB\u9664\u4E8B\u4EF6");
@@ -1065,7 +1045,7 @@ var sunui;
             M.sceneLayer.uiScene.removeChildAt(index);
         };
         ViewLayerLaya3D.prototype.createMask = function (view) {
-            var mask = new Laya.Image("game/mask.png");
+            var mask = new Laya.Image("common/mask.png");
             mask.left = mask.right = mask.top = mask.bottom = 0;
             mask.sizeGrid = "1,1,1,1";
             mask.alpha = 0.5;
@@ -1212,26 +1192,32 @@ var sunui;
         }
         Resource.destroy = destroy;
         function prepare(urls, method, caller) {
+            var handler = null;
             if (method === null) {
-                for (var i = 0; i < urls.length; i++) {
-                    var url = urls[i];
-                    create(url);
-                }
-                return 0;
+                handler = suncom.Handler.create(null, function (id) { });
             }
             else {
-                var id = createGroupId();
-                $groups[id] = new TempletGroup(id, urls, Laya.Handler.create(caller, method));
-                return id;
+                handler = suncom.Handler.create(caller, method);
             }
+            var id = createGroupId();
+            $groups[id] = new TempletGroup(id, urls, handler);
+            return id;
         }
         Resource.prepare = prepare;
-        function release(id) {
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, suncom.Handler.create(null, releaseEx, [id]));
+        function release(id, node) {
+            if (node === void 0) { node = null; }
+            if (id > 0) {
+                if (node !== null) {
+                    new ViewContact(null, node).onPopupRemoved(release, null, [id]);
+                }
+                else {
+                    suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, suncom.Handler.create(null, releaseTempletGroup, [id]));
+                }
+            }
             return 0;
         }
         Resource.release = release;
-        function releaseEx(id) {
+        function releaseTempletGroup(id) {
             var group = $groups[id] || null;
             if (group !== null) {
                 delete $groups[id];

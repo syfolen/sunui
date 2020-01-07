@@ -21,22 +21,19 @@ module sunui {
             // 标记弹框己关闭
             info.closed = true;
             // 应用缓动
-            if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
-                this.$applyCloseProps(view, info.props, duration);
-            }
+            this.$applyCloseProps(view, info.props, duration);
 
             // 调用IPopupView的$onDisable接口
             M.viewLayer.onViewClose(view);
             this.facade.sendNotification(NotifyKey.ON_POPUP_CLOSED, view);
 
-            if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
-                const handler: suncom.IHandler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
-                /**
-                 * TODO:
-                 * 这里按要求将duration改成固定200，此处的回调，应当亦延时200毫秒触发，否则关闭逻辑会出现问题
-                 */
-                Tween.get(info.mask, suncore.ModuleEnum.CUSTOM).to({ alpha: 200 }, duration, null, handler);
-            }
+            // 弹框移除回调
+            const handler: suncom.IHandler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
+            /**
+             * TODO:
+             * 这里按要求将duration改成固定200，此处的回调，应当亦延时200毫秒触发，否则关闭逻辑会出现问题
+             */
+            Tween.get(info.mask, info.props.mod).to({ alpha: 200 }, duration, null, handler);
         }
 
         /**

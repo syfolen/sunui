@@ -6,6 +6,12 @@ module sunui {
      */
     export interface IViewProps {
         /**
+         * 弹框的时间模块
+         * export
+         */
+        mod?: suncore.ModuleEnum;
+
+        /**
          * 坐标
          * export
          */

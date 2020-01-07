@@ -10,6 +10,11 @@ module sunui {
         name: string;
 
         /**
+         * 父级对象
+         */
+        parent?: Laya.Node;
+
+        /**
          * 透明度
          */
         alpha?: number;

@@ -4,18 +4,18 @@ module sunui {
     export class ViewLayerLaya3D extends ViewLayer {
 
         addChild(view: sunui.IView): void {
-            M.sceneLayer.uiScene.addChild(view as any);
-        }
-
-        addChildAt(view: sunui.IView, index: number): void {
-            M.sceneLayer.uiScene.addChildAt(view as any, index);
+            const child: Laya.Node = view as any;
+            const parent: Laya.Node = M.sceneLayer.uiScene || Laya.stage;
+            parent.addChild(child);
         }
 
         removeChild(view: sunui.IView): void {
-            M.sceneLayer.uiScene.removeChild(view as any);
-        }
-        removeChildAt(index: number): void {
-            M.sceneLayer.uiScene.removeChildAt(index);
+            const child: Laya.Node = view as any;
+            const parent: Laya.Node = child.parent || null;
+            if (parent === null) {
+                throw Error(`无法移除显示对象，因为父节点不存在 ${child.name}`);
+            }
+            parent.removeChild(child);
         }
 
         createMask(view: sunui.IView): sunui.IView {

@@ -313,12 +313,12 @@ declare module sunui {
         /**
          * 注册弹框被关闭时需要执行的回调
          */
-        onPopupClosed(method:Function, caller:any): ViewContact;
+        onPopupClosed(method:Function, caller:any, args?:any[]): ViewContact;
 
         /**
          * 注册弹框被销毁时需要执行的回调
          */
-        onPopupRemoved(method:Function, caller:any): ViewContact;
+        onPopupRemoved(method:Function, caller:any, args?:any[]): ViewContact;
     }
 
     class ViewFacade extends puremvc.Notifier {
@@ -429,8 +429,8 @@ declare module sunui {
 
         /**
          * 根据url创建对象
-         * @method: 创建失败时res为null，仅支持Skeleton和Texture的创建
-         * @flag: 目前仅用于代替aniMode的值（己弃用）
+         * @method: 仅支持Skeleton和Texture的创建
+         * @flag: 目前仅用于代替aniMode的值
          * 说明：
          * 1. 调用此接口创建对象时，会产生一个计数，当计数为0时，资源会被彻底释放
          * 2. 见destroy方法
@@ -448,17 +448,18 @@ declare module sunui {
 
         /**
          * 资源预加载
-         * @method: 预加载完成时，ok为true，id大于0，仅支持Skeleton和Texture
+         * @method: 预加载完成时，id大于0，否则等于0，仅支持Skeleton和Texture
          * @return: 返回资源组ID
          */
-        function prepare(urls: string[], method: (ok: boolean, id: number) => void, caller: Object): number;
+        function prepare(urls: string[], method: (id: number) => void, caller: Object): number;
 
         /**
          * 释放资源组
          * @id: 资源组ID
+         * @node: 显示对象节点，若节点有效，则资源会延时到节点被销毁后再释放
          * @return: 始终返回0
          */
-        function release(id: number): number;
+        function release(id: number, node?: Laya.Node): number;
     }
 
     /**

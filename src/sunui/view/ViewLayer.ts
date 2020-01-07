@@ -17,11 +17,7 @@ module sunui {
 
         abstract addChild(view: IView): void;
 
-        abstract addChildAt(view: IView, index: number): void;
-
         abstract removeChild(view: IView): void;
-
-        abstract removeChildAt(index: number): void;
 
         abstract createMask(view: IView): IView;
 

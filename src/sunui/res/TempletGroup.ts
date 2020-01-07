@@ -1,30 +1,34 @@
 
 module sunui {
-
+    /**
+     * 资源模版组
+     */
     export class TempletGroup {
-
+        /**
+         * 模版组ID
+         */
         private $id: number = 0;
 
+        /**
+         * 资源列表
+         */
         private $urls: string[] = null;
 
-        private $handler: Laya.Handler = null;
+        /**
+         * 回调执行器
+         */
+        private $handler: suncom.IHandler = null;
 
+        /**
+         * 完成加载的资源列表
+         */
         private $doneList: string[] = [];
 
-        private $undoList: string[] = [];
-
-        private $prepared: boolean = false;
-
-        private $released: boolean = false;
-
-        constructor(id: number, urls: string[], handler: Laya.Handler) {
+        constructor(id: number, urls: string[], handler: suncom.IHandler) {
             this.$id = id;
-            this.$handler = handler;
-            this.$doPrepare(urls);
-        }
-
-        private $doPrepare(urls: string[]): void {
             this.$urls = urls;
+            this.$handler = handler;
+            // 预加载资源
             for (let i: number = 0; i < this.$urls.length; i++) {
                 const url: string = this.$urls[i];
                 Resource.create(url, this.$onResourceCreated, this);
@@ -35,46 +39,19 @@ module sunui {
             if (res instanceof Laya.Skeleton) {
                 res.destroy();
             }
-            if (res === null) {
-                this.$undoList.push(url);
-            }
-            else {
-                this.$doneList.push(url);
-            }
-            if (this.$doneList.length + this.$undoList.length === this.$urls.length) {
-                this.$checkList();
-            }
-        }
+            this.$doneList.push(url);
 
-        private $checkList(): void {
-            if (this.$released === true) {
-                this.$releaseResources(this.$doneList, this.$onResourceCreated, this);
-                Resource.release(this.$id);
+            // 预加载未完成
+            if (this.$doneList.length < this.$urls.length) {
+                return;
             }
-            else if (this.$undoList.length === 0) {
-                Resource.prepare(this.$doneList, null, null);
-                this.$releaseResources(this.$doneList, this.$onResourceCreated, this);
-                this.$prepared = true;
-                this.$handler.runWith([true, this.$id]);
-            }
-            else {
-                this.$releaseResources(this.$doneList, this.$onResourceCreated, this);
-                Resource.release(this.$id);
-                this.$handler.runWith([false, this.$id]);
-            }
-        }
-
-        private $releaseResources(urls: string[], method: Function, caller: Object): void {
-            for (let i: number = 0; i < urls.length; i++) {
-                const url: string = urls[i];
-                Resource.destroy(url, this.$onResourceCreated, this);
-            }
+            this.$handler.runWith([this.$id]);
         }
 
         release(): void {
-            this.$released = true;
-            if (this.$prepared === true) {
-                this.$checkList();
+            for (let i: number = 0; i < this.$urls.length; i++) {
+                const url: string = this.$urls[i];
+                Resource.destroy(url, this.$onResourceCreated, this);
             }
         }
     }

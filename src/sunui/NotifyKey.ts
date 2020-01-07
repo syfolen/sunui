@@ -102,5 +102,13 @@ module sunui {
          * 1. 若某个非弹出视图曾使用ViewContact与某个弹框建立过联系，则对象销毁时应当派发此事件
          */
         export const ON_CALLER_DESTROYED: string = "sunui.NotifyKey.ON_CALLER_DESTROYED";
+
+        /**
+         * 加载资源失败
+         * 说明：
+         * 1. 您必须在外部监听这个消息，用来处理Resource预加载资源失败的问题
+         * export
+         */
+        export const LOAD_ASSETS_FAILED: string = "sunui.NotifyKey.LOAD_ASSETS_FAILED";
     }
 }

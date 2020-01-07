@@ -68,34 +68,32 @@ module sunui {
             this.$applyShowProps(view, props, duration);
 
             // 调用IPopupView的$onOpen接口
-            if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
-                M.viewLayer.onViewCreate(view, args);
-                // 派发弹框创建完成事件
-                if (args === void 0) {
-                    this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, view);
-                }
-                else if (args instanceof Array) {
-                    this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, [view].concat(args));
-                }
-                else {
-                    this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, [view, args]);
-                }
+            M.viewLayer.onViewCreate(view, args);
+            // 派发弹框创建完成事件
+            if (args === void 0) {
+                this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, view);
+            }
+            else if (args instanceof Array) {
+                this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, [view].concat(args));
+            }
+            else {
+                this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, [view, args]);
             }
 
-            // 遮罩不通透逻辑处理
-            if (suncore.System.isModulePaused(suncore.ModuleEnum.CUSTOM) === false) {
-                const handler: suncom.IHandler = suncom.Handler.create(this, this.$onPopupFinish, [view]);
-                /**
-                 * TODO:
-                 * 这里按要求将duration改成固定200
-                 */
-                Tween.get(mask, suncore.ModuleEnum.CUSTOM).from({ alpha: 0 }, 200);
-                /**
-                 * TODO:
-                 * 由于duration的更改，故需要将Tween的回调改成由message调用
-                 */
-                suncore.System.addTrigger(suncore.ModuleEnum.CUSTOM, duration, handler);
-            }
+            /**
+             * 遮罩不通透逻辑处理
+             * TODO:
+             * 这里按要求将duration改成固定200
+             */
+            Tween.get(mask, info.props.mod).from({ alpha: 0 }, 200);
+
+            // 弹框弹出回调
+            const handler: suncom.IHandler = suncom.Handler.create(this, this.$onPopupFinish, [view]);
+            /**
+             * TODO:
+             * 由于duration的更改，故需要将Tween的回调改成由message调用
+             */
+            suncore.System.addTrigger(info.props.mod, duration, handler);
         }
 
         /**

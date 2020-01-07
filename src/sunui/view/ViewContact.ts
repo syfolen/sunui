@@ -91,12 +91,12 @@ module sunui {
         * 注册弹框被关闭时需要执行的回调
         * export
         */
-        onPopupClosed(method: Function, caller: any): ViewContact {
+        onPopupClosed(method: Function, caller: any, args?: any[]): ViewContact {
             if (this.$caller !== caller) {
                 throw Error(`caller与执行者不一致`);
             }
             if (this.$closedHandler === null) {
-                this.$closedHandler = suncom.Handler.create(caller, method);
+                this.$closedHandler = suncom.Handler.create(caller, method, args);
             }
             else {
                 throw Error(`重复监听弹出对象的关闭事件`);
@@ -108,12 +108,12 @@ module sunui {
         * 注册弹框被销毁时需要执行的回调
         * export
         */
-        onPopupRemoved(method: Function, caller: any): ViewContact {
+        onPopupRemoved(method: Function, caller: any, args?: any[]): ViewContact {
             if (this.$caller !== caller) {
                 throw Error(`caller与执行者不一致`);
             }
             if (this.$removedHandler === null) {
-                this.$removedHandler = suncom.Handler.create(caller, method);
+                this.$removedHandler = suncom.Handler.create(caller, method, args);
             }
             else {
                 throw Error(`重复监听弹出对象的移除事件`);
