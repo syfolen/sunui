@@ -1,11 +1,11 @@
 
 module sunui {
     /**
-     * 缓动信息接口
+     * 缓动动作接口
      */
-    export interface ITweenInfo {
+    export interface ITweenAction {
         /**
-         * 属性名称
+         * 属性名
          */
         prop: string;
 

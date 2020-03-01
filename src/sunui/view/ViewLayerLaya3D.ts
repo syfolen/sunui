@@ -1,96 +1,123 @@
 
 module sunui {
-
+    /**
+     * 视图层（Laya2.x）
+     */
     export class ViewLayerLaya3D extends ViewLayer {
 
-        addChild(view: sunui.IView): void {
-            const child: Laya.Node = view as any;
-            const parent: Laya.Node = M.sceneLayer.uiScene || Laya.stage;
-            parent.addChild(child);
-        }
-
-        removeChild(view: sunui.IView): void {
-            const child: Laya.Node = view as any;
-            const parent: Laya.Node = child.parent || null;
-            if (parent === null) {
-                throw Error(`无法移除显示对象，因为父节点不存在 ${child.name}`);
+        /**
+         * 添加视图到舞台
+         */
+        addChild(node: Laya.Node): void {
+            if (M.sceneLayer.uiScene === null) {
+                Laya.stage.addChild(node);
             }
-            parent.removeChild(child);
+            else {
+                M.sceneLayer.uiScene.addChild(node);
+            }
         }
 
-        createMask(view: sunui.IView): sunui.IView {
+        /**
+         * 将视图从舞台移除
+         */
+        removeChild(node: Laya.Node): void {
+            const parent: Laya.Node = node.parent || null;
+            if (parent === null) {
+                throw Error(`无法移除显示对象，因为父节点不存在 ${node.name}`);
+            }
+            parent.removeChild(node);
+        }
+
+        /**
+         * 创建遮罩
+         */
+        createMask(node: Laya.Node): Laya.Image {
             const mask: Laya.Image = new Laya.Image("common/mask.png");
             mask.left = mask.right = mask.top = mask.bottom = 0;
             mask.sizeGrid = "1,1,1,1";
             mask.alpha = 0.5;
             mask.mouseEnabled = true;
             mask.mouseThrough = false;
-            return mask as sunui.IView;
+
+            mask.on(Laya.Event.CLICK, this, this.$onMaskClick, [node]);
+
+            return mask;
         }
 
-        onViewCreate(view: sunui.IView, args: any): void {
-            const node: any = view;
-            const components: sunui.IPopupView[] = node.getComponents(Laya.Component) || [];
-            for (const component of components) {
+        /**
+         * 弹框背景点击回调
+         */
+        private $onMaskClick(node: Laya.Node): void {
+            const info: IViewStackInfo = M.viewLayer.getInfoByView(node);
+            if (info !== null && info.closed === false && info.cancelAllowed === true) {
+                new ViewFacade(node).close();
+            }
+        }
+
+        /**
+         * 销毁遮罩
+         */
+        destroyMask(mask: Laya.Image): void {
+            mask.off(Laya.Event.CLICK, this, this.$onMaskClick);
+            mask.destroy();
+        }
+
+        /**
+         * 执行视图创建成功的回调
+         */
+        onViewCreate(node: Laya.Node, args: any): void {
+            const components: IPopupView[] = (node as any).getComponents(Laya.Component) || [];
+            for (let i: number = 0; i < components.length; i++) {
+                const component: IPopupView = components[i];
                 if (component.$onCreate) {
-                    if (args instanceof Array) {
-                        component.$onCreate.apply(component, args);
-                    }
-                    else {
-                        component.$onCreate.call(component, args);
-                    }
+                    component.$onCreate.apply(component, args);
                 }
             }
         }
 
-        onViewOpen(view: sunui.IView): void {
-            const node: any = view;
-            const components: sunui.IPopupView[] = node.getComponents(Laya.Component) || [];
-            for (const component of components) {
+        /**
+         * 执行视图完成弹出的回调
+         */
+        onViewOpen(node: Laya.Node): void {
+            const components: IPopupView[] = (node as any).getComponents(Laya.Component) || [];
+            for (let i: number = 0; i < components.length; i++) {
+                const component: IPopupView = components[i];
                 if (component.$onOpen) {
                     component.$onOpen.call(component);
                 }
             }
         }
 
-        onViewClose(view: sunui.IView): void {
-            const node: any = view;
-            const components: sunui.IPopupView[] = node.getComponents(Laya.Component) || [];
-            for (const component of components) {
+        /**
+         * 执行视图关闭被触发时的回调
+         */
+        onViewClose(node: Laya.Node): void {
+            const components: IPopupView[] = (node as any).getComponents(Laya.Component) || [];
+            for (let i: number = 0; i < components.length; i++) {
+                const component: IPopupView = components[i];
                 if (component.$onClose) {
                     component.$onClose.call(component);
                 }
             }
         }
 
-        onViewRemove(view: sunui.IView): void {
-            const node: any = view;
-            const components: sunui.IPopupView[] = node.getComponents(Laya.Component) || [];
-            for (const component of components) {
+        /**
+         * 执行视图从舞台上被移除时的回调（尚未移除）
+         */
+        onViewRemove(node: Laya.Node): void {
+            const components: IPopupView[] = (node as any).getComponents(Laya.Component) || [];
+            for (let i: number = 0; i < components.length; i++) {
+                const component: IPopupView = components[i];
                 if (component.$onRemove) {
                     component.$onRemove.call(component);
                 }
             }
         }
 
-        destroyMask(view: sunui.IView): void {
-            const mask: Laya.Image = view as any;
-            mask.destroy();
-        }
-
-        createViewByClass(cls: string | (new () => IView)): sunui.IView {
-            if (typeof cls === "string") {
-                const prefab: Laya.Prefab = new Laya.Prefab();
-                prefab.json = Laya.Loader.getRes(cls);
-                return prefab.create();
-            }
-            else {
-                return new cls();
-            }
-        }
-
-        destroyView(view: sunui.IView): void {
-            const node = view as any;
+        /**
+         * 销毁视图对象
+         */
+        destroyView(node: Laya.Node): void {
             node.destroy();
         }
     }

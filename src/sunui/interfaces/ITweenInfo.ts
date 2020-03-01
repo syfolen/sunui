@@ -1,13 +1,18 @@
 
 module sunui {
     /**
-     * 缓动配置接口
+     * 缓动信息接口
      */
-    export interface ITweenConfig {
+    export interface ITweenInfo {
         /**
          * 缓动函数
          */
         ease: Function;
+
+        /**
+         * 动作列表
+         */
+        actions: ITweenAction[];
 
         /**
          * 缓动回调

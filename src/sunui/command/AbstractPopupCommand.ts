@@ -29,7 +29,7 @@ module sunui {
          * 应用展示缓动
          * @duration: 若此值为0，则没有缓动过程
          */
-        protected $applyShowProps(view: IView, props: IViewProps, duration: number): void {
+        protected $applyShowProps(view: Laya.Sprite, props: IViewProps, duration: number): void {
             // 应用坐标
             if (props.x !== void 0) { view.x = props.x; }
             if (props.y !== void 0) { view.y = props.y; }
@@ -39,7 +39,7 @@ module sunui {
             if (props.centerY !== void 0) { view.centerY = props.centerY; }
 
             // 没有缓动
-            if (duration == 0) {
+            if (duration === 0) {
                 if (props.left !== void 0) { view.left = props.left; }
                 if (props.right !== void 0) { view.right = props.right; }
 
@@ -74,7 +74,7 @@ module sunui {
          * 应用关闭缓动
          * @duration: 若此值为0，则没有缓动过程
          */
-        protected $applyCloseProps(view: IView, props: IViewProps, duration: number): void {
+        protected $applyCloseProps(view: Laya.Sprite, props: IViewProps, duration: number): void {
             // 只有在缓动时间大于0时才会执行缓动
             if (duration > 0) {
                 // 从左或右滑出

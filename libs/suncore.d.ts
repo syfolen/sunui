@@ -66,7 +66,7 @@ declare module suncore {
          * 1. 任务消息在执行时，会阻塞整个消息队列，直至任务完成
          * 2. 新的任务只会在下一帧被开始执行
          */
-        PRIORITY_TASK,
+        PRIORITY_TASK
     }
 
     /**
@@ -80,6 +80,11 @@ declare module suncore {
      * 尽量不要添加新的模块，因为模块越多，消息响应的调度算法就会越复杂
      */
     enum ModuleEnum {
+        /**
+         * 枚举开始
+         */
+        MIN = 0,
+
         /**
          * 系统模块
          * 此模块为常驻模块，该模块下的消息永远不会被清理
@@ -97,6 +102,11 @@ declare module suncore {
          * 此模块下的消息会在时间轴被销毁的同时被清理
          */
         TIMELINE,
+
+        /**
+         * 枚举结束
+         */
+        MAX
     }
 
     /**
@@ -182,7 +192,7 @@ declare module suncore {
         /**
          * 网络层
          */
-        NSL,
+        NSL
     }
 
     /**
@@ -263,12 +273,12 @@ declare module suncore {
         protected $done: boolean;
 
         /**
-         * 是否正在运行（内置变量，请勿操作）
+         * 是否正在运行（内置属性，请勿操作）
          */
         protected $running: boolean;
 
         /**
-         * 是否己销毁
+         * 是否己销毁（内置属性，请勿操作）
          */
         protected $destroyed: boolean;
 
@@ -308,6 +318,11 @@ declare module suncore {
          * 服务停止接口
          */
         stop(): void;
+
+        /**
+         * 帧循环事件
+         */
+        protected $frameLoop(): void;
 
         /**
          * 启动回调
@@ -363,7 +378,7 @@ declare module suncore {
         static readonly SHUTDOWN: string;
 
         /**
-         * 启用时间轴 { mod: ModuleEnum, pause: boolean = false }
+         * 启用时间轴 { mod: ModuleEnum, pause: boolean }
          * @mod: 时间轴模块
          * @pause: 若为true，时间轴开始后将处于暂停模式
          * 说明：
@@ -372,7 +387,7 @@ declare module suncore {
         static readonly START_TIMELINE: string;
 
         /**
-         * 暂停时间轴 { mod: ModuleEnum, stop: boolean = true }
+         * 暂停时间轴 { mod: ModuleEnum, stop: boolean }
          * @mod: 时间轴模块
          * @stop: 若为true，时间轴将被停止而非暂停
          * 说明：
@@ -422,9 +437,9 @@ declare module suncore {
 
         /**
          * @mod: 时间轴模块
-         * @stop: 若为true，时间轴将被停止而非暂停，默认为：true
+         * @stop: 若为true，时间轴将被停止而非暂停
          */
-        execute(mod:ModuleEnum, stop?:boolean): void;
+        execute(mod:ModuleEnum, stop:boolean): void;
     }
 
     /**
@@ -449,7 +464,7 @@ declare module suncore {
          * @mod: 时间轴模块
          * @pause: 时间轴在开启时是否处于暂停状态
          */
-        execute(mod:ModuleEnum, pause?:boolean): void;
+        execute(mod:ModuleEnum, pause:boolean): void;
     }
 
     /**

@@ -70,12 +70,7 @@ module sunui {
          * 加载场景
          */
         private $loadScene(info: ISceneInfo, data: any): void {
-            if (data === void 0) {
-                this.facade.sendNotification(NotifyKey.LOAD_SCENE, info);
-            }
-            else {
-                this.facade.sendNotification(NotifyKey.LOAD_SCENE, [info, data]);
-            }
+            this.facade.sendNotification(NotifyKey.LOAD_SCENE, [info, data]);
         }
 
         /**
@@ -120,7 +115,7 @@ module sunui {
          */
         enterScene(name: number, data?: any): boolean {
             // 未就绪时不允许跳转场景
-            if (this.$ready == false) {
+            if (this.$ready === false) {
                 return false;
             }
             this.$ready = false;
@@ -139,7 +134,7 @@ module sunui {
          */
         exitScene(): void {
             // 未就绪时不允许跳转场景
-            if (this.$ready == false) {
+            if (this.$ready === false) {
                 return;
             }
             this.$ready = false;
@@ -162,7 +157,7 @@ module sunui {
             // 获取当前场景的历史
             const info: ISceneHeapInfo = SceneHeap.pop();
             // 进入新场景
-            if (this.enterScene(name, data) == false) {
+            if (this.enterScene(name, data) === false) {
                 return;
             }
             // 进入新场景

@@ -19,7 +19,7 @@ module sunui {
          * export
          */
         static getInstance(): UIManager {
-            if (UIManager.$inst == null) {
+            if (UIManager.$inst === null) {
                 UIManager.$inst = new UIManager();
             }
             return UIManager.$inst;
@@ -32,6 +32,10 @@ module sunui {
             super();
             M.viewLayer = new ViewLayerLaya3D();
             M.sceneLayer = new SceneLayer();
+
+            // 启动缓动服务
+            new TweenService().run();
+
             this.facade.registerCommand(NotifyKey.SHOW_POPUP, ShowPopupCommand);
             this.facade.registerCommand(NotifyKey.CLOSE_POPUP, ClosePopupCommand);
         }
@@ -64,44 +68,14 @@ module sunui {
         }
 
         /**
-         * 是否存在指定类型的视图
-         * @viewClass:视图类型
+         * 移除视图
          */
-        hasView(viewClass?: new () => IView): boolean {
-            return M.viewLayer.hasView(viewClass);
-        }
-
-        /**
-         * 显示普通类型视图
-         */
-        showView(viewClass: new () => IView, args?: any, props: IViewProps = {}): void {
-            props.level = UILevel.POPUP;
-            M.viewLayer.showView(viewClass, args, props);
-        }
-
-        /**
-         * 关闭普通类型视图
-         */
-        closeView(view: IView): void {
-            M.viewLayer.closeView(view);
-        }
-
-        /**
-         * 移除普通类型视图
-         */
-        removeView(view: IView): void {
+        removeView(view: Laya.Sprite): void {
             M.viewLayer.removeStackByView(view);
         }
 
         /**
-         * 根据视图类型移除视图
-         */
-        removeViewByClass(viewClass: any): void {
-            M.viewLayer.removeStackByViewClass(viewClass);
-        }
-
-        /**
-         * 获取场景对象
+         * 获取2D场景对象
          * export
          */
         get uiScene(): Laya.Scene {
@@ -109,7 +83,7 @@ module sunui {
         }
 
         /**
-         * 获取场景对象
+         * 获取3D场景对象
          * export
          */
         get d3Scene(): Laya.Scene3D {

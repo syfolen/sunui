@@ -5,13 +5,13 @@ module sunui {
      */
     export class ClosePopupCommand extends AbstractPopupCommand {
 
-        execute(view: IView, duration: number, destroy: boolean): void {
+        execute(view: Laya.Sprite, duration: number, destroy: boolean): void {
             const info: IViewStackInfo = M.viewLayer.getInfoByView(view);
             if (info === null) {
                 console.error(`${view}[${view.name}]'s infomation is not exist.`);
                 return;
             }
-            if (info.closed == true) {
+            if (info.closed === true) {
                 return;
             }
             if (destroy !== void 0) {
@@ -39,7 +39,7 @@ module sunui {
         /**
          * 缓动结束
          */
-        private $onCloseFinish(view: IView): void {
+        private $onCloseFinish(view: Laya.Sprite): void {
             // IPopupView的$onRemove方法在ViewLayer中实现
             M.viewLayer.removeStackByView(view);
         }

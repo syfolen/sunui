@@ -6,18 +6,11 @@ module sunui {
      */
     export abstract class AbstractSceneIniClass extends suncore.AbstractTask {
 
-        /**
-         * 可为构造函数指定参数来实现场景间的数据传递
-         */
-        constructor() {
+        constructor(data?: any) {
             super();
             this.facade.registerObserver(NotifyKey.ENTER_SCENE, this.$onEnterScene, this, true);
         }
 
-        /**
-         * 初始化执行函数，场景资源建议在此方法中加载
-         * export
-         */
         run(): boolean {
             return true;
         }

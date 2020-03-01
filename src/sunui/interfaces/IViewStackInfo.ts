@@ -5,29 +5,14 @@ module sunui {
      */
     export interface IViewStackInfo {
         /**
-         * 视图对象
+         * 视图节点
          */
-        view: IView;
-
-        /**
-         * 视图对象类型
-         */
-        viewClass: any;
+        view: Laya.Node;
 
         /**
          * 遮罩对象
          */
-        mask: IView;
-
-        /**
-         * 缓动信息
-         */
-        props: IViewProps;
-
-        /**
-         * 视图层级
-         */
-        level: UILevel;
+        mask: Laya.Image;
 
         /**
          * 是否己关闭
