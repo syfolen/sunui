@@ -10,6 +10,11 @@ module sunui {
         static readonly RETRY_TIMES_MAX: number = 3;
 
         /**
+         * 哈希值
+         */
+        private $hashId: number = suncom.Common.createHashId();
+
+        /**
          * 资源对象
          */
         private $templet: Laya.Templet = null;
@@ -69,7 +74,7 @@ module sunui {
                     this.$retryTimerId = suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, 1000, this.$reload, this);
                 }
                 else {
-                    this.facade.sendNotification(NotifyKey.LOAD_ASSETS_FAILED, suncom.Handler.create(this, this.$onReloadConfirmed));
+                    this.facade.sendNotification(NotifyKey.LOAD_ASSETS_FAILED, suncom.Handler.create(this, this.$onReloadConfirmed, [this.$hashId]));
                 }
                 return;
             }
@@ -92,13 +97,15 @@ module sunui {
         /**
          * 询问得到回复
          */
-        private $onReloadConfirmed(yes: boolean): void {
-            if (yes === true) {
-                this.$retryTimes = 0;
-                this.$reload();
-            }
-            else {
-                this.facade.sendNotification(suncore.NotifyKey.SHUTDOWN);
+        private $onReloadConfirmed(hashId: number, yes: boolean): void {
+            if (this.$hashId === hashId) {
+                if (yes === true) {
+                    this.$retryTimes = 0;
+                    this.$reload();
+                }
+                else {
+                    this.facade.sendNotification(suncore.NotifyKey.SHUTDOWN);
+                }
             }
         }
 
@@ -122,6 +129,7 @@ module sunui {
          * 销毁加载器
          */
         destroy(): void {
+            this.$hashId = 0;
             this.$handler = null;
             this.$loading = false;
             // 销毁动画模版
@@ -135,11 +143,6 @@ module sunui {
             const loadList: string[] = Resource.getLoadList(this.$url);
             for (let i: number = 0; i < loadList.length; i++) {
                 const url: string = loadList[i];
-                // 若资源的引用次数绝对为零，则清理资源
-                if (Resource.getReferenceByUrl(url)) {
-                    Laya.loader.clearRes(url);
-                    Laya.loader.cancelLoadByUrl(url);
-                }
             }
             // 取消定时器
             this.$retryTimerId = suncore.System.removeTimer(this.$retryTimerId);

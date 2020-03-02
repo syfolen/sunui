@@ -83,13 +83,12 @@ module sunui {
         /**
          * 根据url创建对象
          * @method: 仅支持Skeleton和Texture的创建
-         * @flag: 目前仅用于代替aniMode的值
          * 说明：
          * 1. 调用此接口创建对象时，会产生一个计数，当计数为0时，资源会被彻底释放
          * 2. 见destroy方法
          * export
          */
-        export function create(url: string, method: (res: any, url: string) => void = null, caller: Object = null, flag: number = 0): any {
+        export function create(url: string, method: (res: any, url: string) => void = null, caller: Object = null): any {
             let templet: Templet = $templets[url] || null;
             if (templet === null) {
                 templet = $templets[url] = new Templet();
@@ -118,8 +117,8 @@ module sunui {
         export function destroy(url: string, method: (res: any, url: string) => void = null, caller: Object = null): void {
             let templet: Templet = $templets[url] || null;
             if (templet !== null) {
-                Resource.unlock(url);
                 templet.destroy(url, method, caller);
+                Resource.unlock(url);
                 if (templet.referenceCount === 0) {
                     delete $templets[url];
                 }
