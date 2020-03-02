@@ -67,11 +67,18 @@ module sunui {
         export const CLOSE_POPUP: string = "sunui.NotifyKey.CLOSE_POPUP";
 
         /**
+         * 应用弹出效果 { view: Laya.Component, props: IViewProps, option: PopupMethodEnum | ITween, popup: boolean }
+         * @popup: true为弹出，false为关闭
+         */
+        export const APPLY_POPUP_METHOD: string = "sunui.NotifyKey.APPLY_POPUP_METHOD";
+
+        /**
          * 弹框创建完成 { view: Laya.Sprite, args?: any[] }
          * 说明：
          * 1. 此事件会在IPopupView的$onCreate方法执行完毕之后被派发
          * 2. 传递给$onCreate方法的所有参数均会在此命令中被传递，同时弹框对象亦会被传递
-         * export
+         * 补充：
+         * 1. 接口己弃用，没有使用此接口的需求，另外事件的派发没有考虑在onCreate中直接关闭弹窗的情况
          */
         export const ON_POPUP_CREATED: string = "sunui.NotifyKey.ON_POPUP_CREATED";
 
@@ -79,7 +86,8 @@ module sunui {
          * 弹框己打开 { view: Laya.Sprite }
          * 说明：
          * 1. 此事件会在IPopupView的$onOpen方法执行完毕之后被派发
-         * export
+         * 补充：
+         * 1. 接口己弃用，没有使用此接口的需求，另外事件的派发没有考虑在onOpen中直接关闭弹窗的情况
          */
         export const ON_POPUP_OPENED: string = "sunui.NotifyKey.ON_POPUP_OPENED";
 

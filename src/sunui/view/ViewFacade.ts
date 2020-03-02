@@ -8,7 +8,7 @@ module sunui {
         /**
          * 弹出对象
          */
-        private $view: Laya.Node;
+        private $view: IView;
 
         /**
          * 弹出信息配置
@@ -26,7 +26,7 @@ module sunui {
          * @duration 缓动时间，默认为200毫秒
          * export
          */
-        constructor(view: Laya.Node, duration?: number) {
+        constructor(view: IView, duration?: number) {
             super();
             this.$view = view;
             // 若存在配置
@@ -44,30 +44,20 @@ module sunui {
 
         /**
          * 执行弹出逻辑
-         * @option: 若为ITween类型，则会使用传入的缓动代替默认的弹出缓动，默认为ZOOM_IN
-         * 说明：
-         * 1. 若使用ZOOM_OUT模式弹出，则默认会使用ZOOM_IN模式关闭
          * export
          */
-        popup(props: IViewProps = {}, option: PopupMethodEnum | ITween = PopupMethodEnum.ZOOM_IN): ViewFacade {
-            if (this.facade.hasCommand(NotifyKey.SHOW_POPUP) === true) {
-                this.facade.sendNotification(NotifyKey.SHOW_POPUP, [this.$view, this.$duration, props, option]);
-            }
+        popup(props: IViewProps = {}): ViewFacade {
+            this.facade.sendNotification(NotifyKey.SHOW_POPUP, [this.$view, this.$duration, props]);
             return this;
         }
 
         /**
          * 执行关闭逻辑
          * @destroy: 关闭后是否销毁节点，默认为true
-         * @option: 若为ITween类型，则会使用传入的缓动代替默认的弹出缓动，默认为ZOOM_OUT
-         * 说明：
-         * 1. 若使用ZOOM_OUT模式弹出，则默认会使用ZOOM_IN模式关闭
          * export
          */
-        close(destroy?: boolean, option: PopupMethodEnum | ITween = PopupMethodEnum.ZOOM_OUT): void {
-            if (this.facade.hasCommand(NotifyKey.CLOSE_POPUP) === true) {
-                this.facade.sendNotification(NotifyKey.CLOSE_POPUP, [this.$view, this.$duration, destroy, option]);
-            }
+        close(destroy?: boolean): void {
+            this.facade.sendNotification(NotifyKey.CLOSE_POPUP, [this.$view, this.$duration, destroy]);
         }
 
         /**

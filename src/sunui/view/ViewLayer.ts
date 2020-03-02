@@ -18,17 +18,17 @@ module sunui {
         /**
          * 添加视图到舞台
          */
-        abstract addChild(node: Laya.Node): void;
+        abstract addChild(view: IView): void;
 
         /**
          * 将视图从舞台移除
          */
-        abstract removeChild(node: Laya.Node): void;
+        abstract removeChild(view: IView): void;
 
         /**
          * 创建遮罩
          */
-        abstract createMask(node: Laya.Node): Laya.Image;
+        abstract createMask(view: IView, trans: boolean): Laya.Image;
 
         /**
          * 销毁遮罩
@@ -38,27 +38,27 @@ module sunui {
         /**
          * 执行视图创建成功的回调
          */
-        abstract onViewCreate(node: Laya.Node, args: any): void;
+        abstract onViewCreate(view: IView, args: any): void;
 
         /**
          * 执行视图完成弹出的回调
          */
-        abstract onViewOpen(node: Laya.Node): void;
+        abstract onViewOpen(view: IView): void;
 
         /**
          * 执行视图关闭被触发时的回调
          */
-        abstract onViewClose(node: Laya.Node): void;
+        abstract onViewClose(view: IView): void;
 
         /**
          * 执行视图从舞台上被移除时的回调（尚未移除）
          */
-        abstract onViewRemove(node: Laya.Node): void;
+        abstract onViewRemove(view: IView): void;
 
         /**
          * 销毁视图对象
          */
-        abstract destroyView(node: Laya.Node): void;
+        abstract destroyView(view: IView): void;
 
         /**
          * 场景被卸载时，应当移除所有视图
@@ -97,7 +97,7 @@ module sunui {
         /**
          * 获取视图信息
          */
-        getInfoByView(view: Laya.Node): IViewStackInfo {
+        getInfoByView(view: IView): IViewStackInfo {
             for (let i: number = 0; i < this.$stack.length; i++) {
                 const info: IViewStackInfo = this.$stack[i];
                 if (info.view === view) {
@@ -118,7 +118,7 @@ module sunui {
         /**
          * 移除视图信息
          */
-        removeStackByView(view: Laya.Node): void {
+        removeStackByView(view: IView): void {
             for (let i: number = 0; i < this.$stack.length; i++) {
                 const info: IViewStackInfo = this.$stack[i];
                 if (info.view === view) {

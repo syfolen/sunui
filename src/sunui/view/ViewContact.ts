@@ -30,7 +30,7 @@ module sunui {
          * @popup: 被监视的视图对象，必须为弹框对象
          * export
          */
-        constructor(caller: any, popup: Laya.Node) {
+        constructor(caller: any, popup: any) {
             super();
             this.$popup = popup;
             this.$caller = caller;

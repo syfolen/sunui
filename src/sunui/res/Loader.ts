@@ -39,10 +39,6 @@ module sunui {
          */
         private $retryTimerId: number = 0;
 
-        constructor() {
-            super(suncore.MsgQModEnum.KAL);
-        }
-
         /**
          * 加载资源
          * @flag: 目前仅用于代替aniMode的值

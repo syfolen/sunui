@@ -7,12 +7,17 @@ module sunui {
         /**
          * 视图节点
          */
-        view: Laya.Node;
+        view: IView;
 
         /**
          * 遮罩对象
          */
         mask: Laya.Image;
+
+        /**
+         * 缓动信息
+         */
+        props: IViewProps;
 
         /**
          * 是否己关闭

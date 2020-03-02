@@ -12,16 +12,26 @@ module sunui {
         mod?: suncore.ModuleEnum;
 
         /**
-         * 参数列表，此参数会通过IPopupView的$onOpen方法传入IPopupView，用于支持窗口之间的交互
+         * 坐标
          * export
          */
-        args?: any;
+        x?: number;
 
         /**
-         * 显示层级
+         * depends
+         */
+        y?: number;
+
+        /**
+         * 通透值
+         */
+        alpha?: number;
+
+        /**
+         * 缓动方法
          * export
          */
-        level?: UILevel;
+        ease?: Function;
 
         /**
          * 背景是否通透
@@ -30,13 +40,69 @@ module sunui {
         trans?: boolean;
 
         /**
+         * 显示层级
+         * export
+         */
+        level?: UILevel;
+
+        /**
          * 是否允许取消
          * export
          */
         cancelAllowed?: boolean;
 
         /**
-         * 弹框关闭时是否保留节点，默认为：false
+         * 弹框的左右自适应参数
+         * export
+         */
+        left?: number;
+
+        /**
+         * depends
+         */
+        right?: number;
+
+        /**
+         * 弹框的上下自适应参数
+         * export
+         */
+        top?: number;
+
+        /**
+         * depends
+         */
+        bottom?: number;
+
+        /**
+         * 弹框的居中自适应参数
+         * export
+         */
+        centerX?: number;
+
+        /**
+         * depends
+         */
+        centerY?: number;
+
+        /**
+         * 弹出的变形系数
+         * export
+         */
+        scaleX?: number;
+
+        /**
+         * depends
+         */
+        scaleY?: number;
+
+        /**
+         * 参数列表，此参数会通过IPopupView的$onOpen方法传入IPopupView，用于支持窗口之间的交互
+         * export
+         */
+        args?: any;
+
+        /**
+         * 弹框关闭时是否保留节点，默认为false
          * export
          */
         keepNode?: boolean;

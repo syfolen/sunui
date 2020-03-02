@@ -103,18 +103,12 @@ module sunui {
         /**
          * 释放资源组
          * @id: 资源组ID
-         * @node: 显示对象节点，若节点有效，则资源会延时到节点被销毁后再释放
          * @return: 始终返回0
          * export
          */
-        export function release(id: number, node: Laya.Node = null): number {
+        export function release(id: number): number {
             if (id > 0) {
-                if (node !== null) {
-                    new ViewContact(null, node).onPopupRemoved(release, null, [id]);
-                }
-                else {
-                    suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, suncom.Handler.create(null, releaseTempletGroup, [id]));
-                }
+                suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, suncom.Handler.create(null, releaseTempletGroup, [id]));
             }
             return 0;
         }

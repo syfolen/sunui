@@ -8,7 +8,8 @@ module sunui {
         /**
          * 添加视图到舞台
          */
-        addChild(node: Laya.Node): void {
+        addChild(view: IView): void {
+            const node: Laya.Node = view as any;
             if (M.sceneLayer.uiScene === null) {
                 Laya.stage.addChild(node);
             }
@@ -20,7 +21,8 @@ module sunui {
         /**
          * 将视图从舞台移除
          */
-        removeChild(node: Laya.Node): void {
+        removeChild(view: IView): void {
+            const node: Laya.Node = view as any;
             const parent: Laya.Node = node.parent || null;
             if (parent === null) {
                 throw Error(`无法移除显示对象，因为父节点不存在 ${node.name}`);
@@ -31,15 +33,15 @@ module sunui {
         /**
          * 创建遮罩
          */
-        createMask(node: Laya.Node): Laya.Image {
+        createMask(view: IView, trans: boolean): Laya.Image {
             const mask: Laya.Image = new Laya.Image("common/mask.png");
             mask.left = mask.right = mask.top = mask.bottom = 0;
             mask.sizeGrid = "1,1,1,1";
-            mask.alpha = 0.5;
+            mask.alpha = trans === true ? 0 : 0.5;
             mask.mouseEnabled = true;
             mask.mouseThrough = false;
 
-            mask.on(Laya.Event.CLICK, this, this.$onMaskClick, [node]);
+            mask.on(Laya.Event.CLICK, this, this.$onMaskClick, [view]);
 
             return mask;
         }
@@ -47,10 +49,10 @@ module sunui {
         /**
          * 弹框背景点击回调
          */
-        private $onMaskClick(node: Laya.Node): void {
-            const info: IViewStackInfo = M.viewLayer.getInfoByView(node);
+        private $onMaskClick(view: IView): void {
+            const info: IViewStackInfo = M.viewLayer.getInfoByView(view);
             if (info !== null && info.closed === false && info.cancelAllowed === true) {
-                new ViewFacade(node).close();
+                new ViewFacade(view).close();
             }
         }
 
@@ -65,8 +67,8 @@ module sunui {
         /**
          * 执行视图创建成功的回调
          */
-        onViewCreate(node: Laya.Node, args: any): void {
-            const components: IPopupView[] = (node as any).getComponents(Laya.Component) || [];
+        onViewCreate(view: IView, args: any): void {
+            const components: IPopupView[] = (view as any).getComponents(Laya.Component) || [];
             for (let i: number = 0; i < components.length; i++) {
                 const component: IPopupView = components[i];
                 if (component.$onCreate) {
@@ -78,8 +80,8 @@ module sunui {
         /**
          * 执行视图完成弹出的回调
          */
-        onViewOpen(node: Laya.Node): void {
-            const components: IPopupView[] = (node as any).getComponents(Laya.Component) || [];
+        onViewOpen(view: IView): void {
+            const components: IPopupView[] = (view as any).getComponents(Laya.Component) || [];
             for (let i: number = 0; i < components.length; i++) {
                 const component: IPopupView = components[i];
                 if (component.$onOpen) {
@@ -91,8 +93,8 @@ module sunui {
         /**
          * 执行视图关闭被触发时的回调
          */
-        onViewClose(node: Laya.Node): void {
-            const components: IPopupView[] = (node as any).getComponents(Laya.Component) || [];
+        onViewClose(view: IView): void {
+            const components: IPopupView[] = (view as any).getComponents(Laya.Component) || [];
             for (let i: number = 0; i < components.length; i++) {
                 const component: IPopupView = components[i];
                 if (component.$onClose) {
@@ -104,8 +106,8 @@ module sunui {
         /**
          * 执行视图从舞台上被移除时的回调（尚未移除）
          */
-        onViewRemove(node: Laya.Node): void {
-            const components: IPopupView[] = (node as any).getComponents(Laya.Component) || [];
+        onViewRemove(view: IView): void {
+            const components: IPopupView[] = (view as any).getComponents(Laya.Component) || [];
             for (let i: number = 0; i < components.length; i++) {
                 const component: IPopupView = components[i];
                 if (component.$onRemove) {
@@ -117,7 +119,8 @@ module sunui {
         /**
          * 销毁视图对象
          */
-        destroyView(node: Laya.Node): void {
+        destroyView(view: IView): void {
+            const node: Laya.Node = view as any;
             node.destroy();
         }
     }

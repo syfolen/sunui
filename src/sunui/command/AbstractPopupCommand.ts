@@ -1,12 +1,14 @@
 
 module sunui {
-
+    /**
+     * 弹出命令基类，主要实现弹框弹出与关闭时的缓动效果
+     */
     export abstract class AbstractPopupCommand extends puremvc.SimpleCommand {
 
         /**
          * 重组缓动信息
          */
-        protected $makeProps(props: IViewProps): IViewProps {
+        protected $makeProps(props: IViewProps): void {
             // 水平默认居中
             if (props.x === void 0 && props.left === void 0 && props.right === void 0) {
                 props.centerX = 0;
@@ -19,17 +21,13 @@ module sunui {
             if (M.sceneLayer.uiScene === null) {
                 props.mod = suncore.ModuleEnum.SYSTEM;
             }
-            else {
-                props.mod = suncore.ModuleEnum.CUSTOM;
-            }
-            return props;
         }
 
         /**
          * 应用展示缓动
          * @duration: 若此值为0，则没有缓动过程
          */
-        protected $applyShowProps(view: Laya.Sprite, props: IViewProps, duration: number): void {
+        protected $applyShowProps(view: IView, props: IViewProps, duration: number): void {
             // 应用坐标
             if (props.x !== void 0) { view.x = props.x; }
             if (props.y !== void 0) { view.y = props.y; }
