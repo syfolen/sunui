@@ -110,7 +110,7 @@ module sunui {
         wait(delay: number): ITween {
             const info: ITweenInfo = {
                 ease: null,
-                actions: null,
+                actions: [],
                 handler: null,
                 time: suncore.System.getModuleTimestamp(this.$mod),
                 duration: delay

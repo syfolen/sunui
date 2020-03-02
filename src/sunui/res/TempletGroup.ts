@@ -35,19 +35,23 @@ module sunui {
             }
         }
 
+        /**
+         * 资源加载成功回调
+         */
         private $onResourceCreated(res: any, url: string): void {
             if (res instanceof Laya.Skeleton) {
                 res.destroy();
             }
             this.$doneList.push(url);
-
-            // 预加载未完成
-            if (this.$doneList.length < this.$urls.length) {
-                return;
+            
+            if (this.$doneList.length === this.$urls.length) {
+                this.$handler.runWith([this.$id]);
             }
-            this.$handler.runWith([this.$id]);
         }
 
+        /**
+         * 释放所有资源
+         */
         release(): void {
             for (let i: number = 0; i < this.$urls.length; i++) {
                 const url: string = this.$urls[i];

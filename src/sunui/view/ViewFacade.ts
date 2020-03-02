@@ -26,7 +26,7 @@ module sunui {
          * @duration 缓动时间，默认为200毫秒
          * export
          */
-        constructor(view: IView, duration?: number) {
+        constructor(view: any, duration?: number) {
             super();
             this.$view = view;
             // 若存在配置

@@ -48,7 +48,7 @@ module sunui {
                 this.$loading = true;
                 this.$url = url;
                 this.$handler = handler;
-                Laya.loader.load(this.$getLoadList(url), Laya.Handler.create(this, this.$onLoad));
+                Laya.loader.load(Resource.getLoadList(url), Laya.Handler.create(this, this.$onLoad));
             }
         }
 
@@ -108,7 +108,7 @@ module sunui {
         private $reload(): void {
             // 不存在动画模版时，只需要重新加载资源即可
             if (this.$templet === null) {
-                Laya.loader.load(this.$getLoadList(this.$url), Laya.Handler.create(this, this.$onLoad));
+                Laya.loader.load(Resource.getLoadList(this.$url), Laya.Handler.create(this, this.$onLoad));
             }
             // 重新加载动画
             else {
@@ -132,33 +132,17 @@ module sunui {
                 this.$templet = null;
             }
             // 卸载当前正在使用的资源
-            const loadList: string[] = this.$getLoadList(this.$url);
+            const loadList: string[] = Resource.getLoadList(this.$url);
             for (let i: number = 0; i < loadList.length; i++) {
                 const url: string = loadList[i];
-                Laya.loader.clearRes(url);
+                // 若资源的引用次数绝对为零，则清理资源
+                if (Resource.getReferenceByUrl(url)) {
+                    Laya.loader.clearRes(url);
+                    Laya.loader.cancelLoadByUrl(url);
+                }
             }
-            // 取消当前正在进行的加载
-            Laya.loader.cancelLoadByUrls(this.$getLoadList(this.$url));
             // 取消定时器
             this.$retryTimerId = suncore.System.removeTimer(this.$retryTimerId);
-        }
-
-        /**
-         * 获取需要加载的资源列表
-         */
-        private $getLoadList(url: string): string[] {
-            const index: number = url.lastIndexOf(".");
-            const str: string = url.substr(0, index);
-            const ext: string = url.substr(index + 1);
-            if (ext === "sk") {
-                return [
-                    str + ".sk",
-                    str + ".png"
-                ];
-            }
-            else {
-                return [url];
-            }
         }
 
         /**

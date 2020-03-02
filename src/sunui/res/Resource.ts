@@ -1,7 +1,7 @@
 
 module sunui {
     /**
-     * 资源管理器
+     * 资源管理器（主要用于资源的动态创建和销毁）
      * export
      */
     export namespace Resource {
@@ -21,11 +21,63 @@ module sunui {
         const $templets: { [url: string]: Templet } = {};
 
         /**
+         * 资源索引集合
+         */
+        const $references: { [url: string]: number } = {};
+
+        /**
          * 生成组ID（唯一）
          */
         function createGroupId(): number {
             $seedId++;
             return $seedId;
+        }
+
+        /**
+         * 锁定资源
+         * 说明：
+         * 1. 每次请求锁定资源，则资源的引用次数会加一
+         * export
+         */
+        export function lock(url: string): void {
+            const array: string[] = Resource.getLoadList(url);
+            for (let i: number = 0; i < array.length; i++) {
+                const link: string = array[i];
+                const reference: number = $references[link] || 0;
+                $references[link] = reference + 1;
+            }
+        }
+
+        /**
+         * 解锁资源
+         * 说明：
+         * 1. 每次请求解释资源时，资源的引用次数会减一
+         * 2. 当资源引用次数为0时，资源会自动释放，当前的加载亦会取消
+         * export
+         */
+        export function unlock(url: string): void {
+            const array: string[] = Resource.getLoadList(url);
+            for (let i: number = 0; i < array.length; i++) {
+                const reference: number = $references[url] || 0;
+                if (reference === 0) {
+                    throw Error(`尝试解锁不存在的资源 url：${url}`);
+                }
+                if (reference === 1) {
+                    delete $references[url];
+                    Laya.loader.clearRes(url);
+                    Laya.loader.cancelLoadByUrl(url);
+                }
+                else {
+                    $references[url] = reference - 1;
+                }
+            }
+        }
+
+        /**
+         * 查询资源的引用次数
+         */
+        export function getReferenceByUrl(url: string): number {
+            return $references[url] || 0;
         }
 
         /**
@@ -42,6 +94,7 @@ module sunui {
             if (templet === null) {
                 templet = $templets[url] = new Templet();
             }
+            Resource.lock(url);
             templet.create(url, method, caller);
             if ((suncom.Global.debugMode & suncom.DebugMode.DEBUG) === suncom.DebugMode.DEBUG) {
                 console.log("================== resouce debug ==================");
@@ -65,6 +118,7 @@ module sunui {
         export function destroy(url: string, method: (res: any, url: string) => void = null, caller: Object = null): void {
             let templet: Templet = $templets[url] || null;
             if (templet !== null) {
+                Resource.unlock(url);
                 templet.destroy(url, method, caller);
                 if (templet.referenceCount === 0) {
                     delete $templets[url];
@@ -121,6 +175,24 @@ module sunui {
             if (group !== null) {
                 delete $groups[id];
                 group.release();
+            }
+        }
+
+        /**
+         * 获取需要加载的资源列表
+         */
+        export function getLoadList(url: string): string[] {
+            const index: number = url.lastIndexOf(".");
+            const str: string = url.substr(0, index);
+            const ext: string = url.substr(index + 1);
+            if (ext === "sk") {
+                return [
+                    str + ".sk",
+                    str + ".png"
+                ];
+            }
+            else {
+                return [url];
             }
         }
     }
