@@ -70,6 +70,21 @@ module sunui {
         }
 
         /**
+         * 以props属性的幅度进行缓动
+         * export
+         */
+        by(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
+            const keys: Array<string> = Object.keys(props);
+            const item: any = this.$props === null ? this.$item : this.$props;
+            for (let i: number = 0; i < keys.length; i++) {
+                const key: string = keys[i];
+                props[key] += item[key];
+            }
+            this.to(props, duration, ease, handler);
+            return this;
+        }
+
+        /**
          * 生成缓动信息
          */
         private $createTweenInfo(keys: Array<string>, from: any, to: any, duration: number, ease: Function, handler: suncom.IHandler): void {

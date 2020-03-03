@@ -25,6 +25,12 @@ module sunui {
         from(props: any, duration: number, ease?: Function, handler?: suncom.IHandler): ITween;
 
         /**
+         * 以props属性的幅度进行缓动
+         * export
+         */
+        by(props: any, duration: number, ease?: Function, handler?: suncom.IHandler): ITween;
+
+        /**
          * 等待指定时间
          * export
          */
