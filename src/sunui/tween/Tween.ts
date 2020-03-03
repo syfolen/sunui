@@ -78,7 +78,12 @@ module sunui {
             const item: any = this.$props === null ? this.$item : this.$props;
             for (let i: number = 0; i < keys.length; i++) {
                 const key: string = keys[i];
-                props[key] += item[key];
+                if (this.$props === null || this.$props[key] === void 0) {
+                    props[key] += this.$item[key];
+                }
+                else {
+                    props[key] += item[key];
+                }
             }
             this.to(props, duration, ease, handler);
             return this;
