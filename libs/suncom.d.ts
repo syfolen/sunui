@@ -298,6 +298,11 @@ declare module suncom {
         function getQualifiedClassName(obj: any): string;
 
         /**
+         * 返回某对象上的方法名
+         */
+        function getMethodName(method: Function, caller: Object): string;
+
+        /**
          * 将枚举转化成字符串
          */
         function convertEnumToString(value: number, oEnum: any): string;

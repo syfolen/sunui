@@ -5,11 +5,6 @@ module sunui {
      */
     export class Loader extends puremvc.Notifier {
         /**
-         * 最大重试次数
-         */
-        static readonly RETRY_TIMES_MAX: number = 3;
-
-        /**
          * 哈希值
          */
         private $hashId: number = suncom.Common.createHashId();
@@ -35,14 +30,20 @@ module sunui {
         private $loading: boolean = false;
 
         /**
-         * 重试次数
+         * 加载重试机
          */
-        private $retryTimes: number = 0;
+        private $retryer: Retryer = null;
 
-        /**
-         * 加载重试定时器
-         */
-        private $retryTimerId: number = 0;
+        constructor() {
+            super();
+            this.$retryer = new Retryer(
+                RetryMethodEnum.CONFIRM | suncore.ModuleEnum.SYSTEM,
+                suncom.Handler.create(this, this.$onRetryConfirmed, [this.$hashId]),
+                "资源加载失败，点击确定重新尝试！",
+                RetryOptionValueEnum.YES, "确定",
+                RetryOptionValueEnum.NO, "取消"
+            );
+        }
 
         /**
          * 加载资源
@@ -53,7 +54,21 @@ module sunui {
                 this.$loading = true;
                 this.$url = url;
                 this.$handler = handler;
-                Laya.loader.load(Resource.getLoadList(url), Laya.Handler.create(this, this.$onLoad));
+                this.$doLoad();
+            }
+        }
+
+        /**
+         * 执行加载行为
+         */
+        private $doLoad(): void {
+            // 不存在动画模版时，只需要重新加载资源即可
+            if (this.$templet === null) {
+                Laya.loader.load(Resource.getLoadList(this.$url), Laya.Handler.create(this, this.$onLoad));
+            }
+            // 重新加载动画
+            else {
+                this.$templet.loadAni(this.$url);
             }
         }
 
@@ -63,66 +78,34 @@ module sunui {
         private $onLoad(ok: boolean): void {
             // 若资源加载失败，则尝试重新加载（无次数限制）
             if (ok === false) {
-                if (this.$templet === null) {
-                    console.log(`资源加载失败：url:${this.$url}，1秒后重新尝试...`);
-                }
-                else {
-                    console.log(`动画初始化失败：url:${this.$url}，1秒后重新尝试...`);
-                }
-                this.$retryTimes++;
-                if (this.$retryTimes < Loader.RETRY_TIMES_MAX) {
-                    this.$retryTimerId = suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, 1000, this.$reload, this);
-                }
-                else {
-                    this.facade.sendNotification(NotifyKey.LOAD_ASSETS_FAILED, suncom.Handler.create(this, this.$onReloadConfirmed, [this.$hashId]));
-                }
-                return;
+                this.$retryer.run(1000, suncom.Handler.create(this, this.$doLoad), 2);
             }
-
-            if (this.getResExtByUrl(this.$url) === "sk") {
-                if (this.$templet === null) {
-                    this.$templet = new Laya.Templet();
-                    this.$templet.on(Laya.Event.ERROR, this, this.$onLoad, [false]);
-                    this.$templet.on(Laya.Event.COMPLETE, this, this.$onLoad, [true]);
-                    this.$templet.loadAni(this.$url);
-                    return;
-                }
+            else if (this.getResExtByUrl(this.$url) === "sk" && this.$templet === null) {
+                this.$templet = new Laya.Templet();
+                this.$templet.on(Laya.Event.ERROR, this, this.$onLoad, [false]);
+                this.$templet.on(Laya.Event.COMPLETE, this, this.$onLoad, [true]);
+                this.$templet.loadAni(this.$url);
             }
-            // 重置标记
-            this.$loading = false;
-            // 执行回调器
-            this.$handler.run();
+            else {
+                // 重置标记
+                this.$loading = false;
+                // 执行回调器
+                this.$handler.run();
+            }
         }
 
         /**
          * 询问得到回复
          */
-        private $onReloadConfirmed(hashId: number, yes: boolean): void {
+        private $onRetryConfirmed(hashId: number, option: sunui.RetryOptionValueEnum): void {
             if (this.$hashId === hashId) {
-                if (yes === true) {
-                    this.$retryTimes = 0;
-                    this.$reload();
+                if (option === sunui.RetryOptionValueEnum.YES) {
+                    this.$doLoad();
                 }
                 else {
                     this.facade.sendNotification(suncore.NotifyKey.SHUTDOWN);
                 }
             }
-        }
-
-        /**
-         * 重新尝试加载
-         */
-        private $reload(): void {
-            // 不存在动画模版时，只需要重新加载资源即可
-            if (this.$templet === null) {
-                Laya.loader.load(Resource.getLoadList(this.$url), Laya.Handler.create(this, this.$onLoad));
-            }
-            // 重新加载动画
-            else {
-                this.$templet.loadAni(this.$url);
-            }
-            // 重置定时器索引
-            this.$retryTimerId = 0;
         }
 
         /**
@@ -144,8 +127,6 @@ module sunui {
             for (let i: number = 0; i < loadList.length; i++) {
                 const url: string = loadList[i];
             }
-            // 取消定时器
-            this.$retryTimerId = suncore.System.removeTimer(this.$retryTimerId);
         }
 
         /**

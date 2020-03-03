@@ -132,5 +132,11 @@ module sunui {
          * export
          */
         export const LOAD_ASSETS_FAILED: string = "sunui.NotifyKey.LOAD_ASSETS_FAILED";
+
+        /**
+         * 重试确认请求 { mod: suncore.ModuleEnum, prompt: string, options: IRetryOption[], handler: suncom.IHandler }
+         * export
+         */
+        export const RETRY_CONFIRM: string = "sunui.NotifyKey.RETRY_CONFIRM";
     }
 }
