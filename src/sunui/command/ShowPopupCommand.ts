@@ -60,6 +60,9 @@ module sunui {
             M.viewLayer.addChild(mask);
             M.viewLayer.addChild(view);
 
+            // 第一次显示的时候，轴心点可能会不正确
+            view["pivot"](view.width * 0.5, view.height * 0.5);
+
             // 调用IPopupView的$onOpen接口
             M.viewLayer.onViewCreate(view, args);
             // 派发弹框创建完成事件

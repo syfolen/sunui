@@ -18,7 +18,7 @@ module sunui {
                 props.centerY = 0;
             }
             // 为弹框默认时间模块
-            if (M.sceneLayer.uiScene === null) {
+            if (suncore.System.isModuleStopped(suncore.ModuleEnum.CUSTOM) === true) {
                 props.mod = suncore.ModuleEnum.SYSTEM;
             }
         }

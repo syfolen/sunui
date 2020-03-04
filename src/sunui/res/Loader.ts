@@ -40,8 +40,8 @@ module sunui {
                 RetryMethodEnum.CONFIRM | suncore.ModuleEnum.SYSTEM,
                 suncom.Handler.create(this, this.$onRetryConfirmed, [this.$hashId]),
                 "资源加载失败，点击确定重新尝试！",
-                RetryOptionValueEnum.YES, "确定",
-                RetryOptionValueEnum.NO, "取消"
+                ConfirmOptionValueEnum.YES, "确定",
+                ConfirmOptionValueEnum.NO, "取消"
             );
         }
 
@@ -97,10 +97,11 @@ module sunui {
         /**
          * 询问得到回复
          */
-        private $onRetryConfirmed(hashId: number, option: sunui.RetryOptionValueEnum): void {
+        private $onRetryConfirmed(hashId: number, option: ConfirmOptionValueEnum): void {
             if (this.$hashId === hashId) {
-                if (option === sunui.RetryOptionValueEnum.YES) {
+                if (option === ConfirmOptionValueEnum.YES) {
                     this.$doLoad();
+                    this.$retryer.reset();
                 }
                 else {
                     this.facade.sendNotification(suncore.NotifyKey.SHUTDOWN);

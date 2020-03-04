@@ -28,7 +28,7 @@ module sunui {
         /**
          * 提示选项
          */
-        private $options: IRetryOption[] = [];
+        private $options: Array<ConfirmOptionValueEnum | string> = [];
 
         /**
          * 当前重试次数
@@ -52,44 +52,34 @@ module sunui {
 
         /**
          * @confirmHandler: 若重试超过最大次数，则会执行此回调
-         * @options: [RetryOptionValueEnum, string, ...]
+         * @options: [ConfirmOptionValueEnum, string, ...]
          * 说明：
          * 1. method允许值为 RetryMethodEnum 或 suncore.ModuleEnum 或同时输入这两种值
          * 2. 若未输入 RetryMethodEnum ，则默认值为 RetryMethodEnum.NONE
          * 3. 若未输入 suncore.ModuleEnum ，则默认值为 suncore.ModuleEnum.SYSTEM
          * export 
          */
-        constructor(method: RetryMethodEnum | suncore.ModuleEnum, confirmHandler: suncom.IHandler = null, prompt: string = null, ...options: Array<string | RetryOptionValueEnum>) {
+        constructor(modOrMethod: suncore.ModuleEnum | RetryMethodEnum, confirmHandler: suncom.IHandler = null, prompt: string = null, ...options: Array<ConfirmOptionValueEnum | string>) {
             super(suncore.MsgQModEnum.MMI);
 
-            if ((method & RetryMethodEnum.CONFIRM) === RetryMethodEnum.CONFIRM) {
+            if ((modOrMethod & RetryMethodEnum.CONFIRM) === RetryMethodEnum.CONFIRM) {
                 this.$method = RetryMethodEnum.CONFIRM;
             }
             else {
                 this.$method = RetryMethodEnum.NONE;
             }
 
-            method &= 0xF;
-            if (method === suncore.ModuleEnum.CUSTOM || method === suncore.ModuleEnum.TIMELINE) {
-                this.$mod = method;
+            const mode: suncore.ModuleEnum = modOrMethod &= 0xF;
+            if (modOrMethod === suncore.ModuleEnum.CUSTOM || modOrMethod === suncore.ModuleEnum.TIMELINE) {
+                this.$mod = modOrMethod;
             }
             else {
                 this.$mod = suncore.ModuleEnum.SYSTEM;
             }
 
             this.$prompt = prompt;
+            this.$options = options;
             this.$confirmHandler = confirmHandler;
-
-            for (let i: number = 0; i < options.length; i += 2) {
-                const text: string = options[i + 1] as string;
-                const value: RetryOptionValueEnum = options[i] as RetryOptionValueEnum;
-
-                const option: IRetryOption = {
-                    text: text,
-                    value: value
-                }
-                this.$options.push(option);
-            }
         }
 
         /**
@@ -110,7 +100,7 @@ module sunui {
                 }
             }
             else if (this.$method === RetryMethodEnum.NONE) {
-                this.$confirmHandler.runWith(RetryOptionValueEnum.YES);
+                this.$confirmHandler.runWith(ConfirmOptionValueEnum.YES);
             }
             else {
                 if (this.$prompting === false) {
@@ -127,7 +117,7 @@ module sunui {
         /**
          * 询问答复回调
          */
-        private $onConfirmRely(option: RetryOptionValueEnum): void {
+        private $onConfirmRely(option: ConfirmOptionValueEnum): void {
             if (this.$prompting === true) {
                 this.$prompting = false;
                 this.$confirmHandler.runWith(option);
@@ -150,6 +140,14 @@ module sunui {
         cancel(): void {
             this.$prompting = false;
             this.$retryTimerId = suncore.System.removeTimer(this.$retryTimerId);
+        }
+
+        /**
+         * 重置（仅会重置次数统计）
+         * export
+         */
+        reset(): void {
+            this.$currentRetries = 0;
         }
 
         /**

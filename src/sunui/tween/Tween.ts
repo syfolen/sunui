@@ -146,6 +146,12 @@ module sunui {
             const time: number = suncore.System.getModuleTimestamp(this.$mod);
             const info: ITweenInfo = this.$infos[0];
 
+            // 有时候节点可能被销毁了
+            if (this.$item instanceof Laya.Node && this.$item.destroyed === true) {
+                this.cancel();
+                return;
+            }
+
             let done: boolean = false;
             let duration: number = time - info.time;
 

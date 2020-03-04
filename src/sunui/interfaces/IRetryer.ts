@@ -22,6 +22,12 @@ module sunui {
         cancel(): void;
 
         /**
+         * 重置（仅会重置次数统计）
+         * export
+         */
+        reset(): void;
+
+        /**
          * 当前重试次数
          * export
          */
