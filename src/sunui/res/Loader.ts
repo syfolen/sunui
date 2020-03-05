@@ -10,14 +10,14 @@ module sunui {
         private $hashId: number = suncom.Common.createHashId();
 
         /**
-         * 资源对象
-         */
-        private $templet: Laya.Templet = null;
-
-        /**
          * 资源链接
          */
         private $url: string = null;
+
+        /**
+         * 资源对象
+         */
+        private $templet: Laya.Templet = null;
 
         /**
          * 加载成功回调
@@ -122,11 +122,6 @@ module sunui {
                 this.$templet.off(Laya.Event.COMPLETE, this, this.$onLoad);
                 this.$templet.destroy();
                 this.$templet = null;
-            }
-            // 卸载当前正在使用的资源
-            const loadList: string[] = Resource.getLoadList(this.$url);
-            for (let i: number = 0; i < loadList.length; i++) {
-                const url: string = loadList[i];
             }
         }
 

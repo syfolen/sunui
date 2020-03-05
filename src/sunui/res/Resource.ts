@@ -161,7 +161,8 @@ module sunui {
          */
         export function release(id: number): number {
             if (id > 0) {
-                suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, suncom.Handler.create(null, releaseTempletGroup, [id]));
+                const handler: suncom.IHandler = suncom.Handler.create(null, releaseTempletGroup, [id]);
+                suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
             }
             return 0;
         }

@@ -6,6 +6,12 @@ module sunui {
      */
     export enum ConfirmOptionValueEnum {
         /**
+         * 无
+         * export
+         */
+        NONE,
+
+        /**
          * 是
          * export
          */
