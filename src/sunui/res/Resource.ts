@@ -188,8 +188,8 @@ module sunui {
             const ext: string = url.substr(index + 1);
             if (ext === "sk") {
                 return [
-                    str + ".sk",
-                    str + ".png"
+                    str + ".png",
+                    str + ".sk"
                 ];
             }
             else {

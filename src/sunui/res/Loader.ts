@@ -30,6 +30,11 @@ module sunui {
         private $loading: boolean = false;
 
         /**
+         * 加载是否己完成
+         */
+        private $complete: boolean = false;
+
+        /**
          * 加载重试机
          */
         private $retryer: Retryer = null;
@@ -62,35 +67,30 @@ module sunui {
          * 执行加载行为
          */
         private $doLoad(): void {
-            // 不存在动画模版时，只需要重新加载资源即可
-            if (this.$templet === null) {
-                Laya.loader.load(Resource.getLoadList(this.$url), Laya.Handler.create(this, this.$onLoad));
-            }
-            // 重新加载动画
-            else {
-                this.$templet.loadAni(this.$url);
-            }
+            // 无论如何都直接根据URL加载资源
+            Laya.loader.load(Resource.getLoadList(this.$url), Laya.Handler.create(this, this.$onLoad));
         }
 
         /**
          * 结束加载
          */
         private $onLoad(ok: boolean): void {
-            // 若资源加载失败，则尝试重新加载（无次数限制）
-            if (ok === false) {
-                this.$retryer.run(1000, suncom.Handler.create(this, this.$doLoad), 2);
-            }
-            else if (this.getResExtByUrl(this.$url) === "sk" && this.$templet === null) {
-                this.$templet = new Laya.Templet();
-                this.$templet.on(Laya.Event.ERROR, this, this.$onLoad, [false]);
-                this.$templet.on(Laya.Event.COMPLETE, this, this.$onLoad, [true]);
-                this.$templet.loadAni(this.$url);
-            }
-            else {
-                // 重置标记
-                this.$loading = false;
-                // 执行回调器
-                this.$handler.run();
+            if (this.$hashId > 0) {
+                // 若资源加载失败，则尝试重新加载（无次数限制）
+                if (ok === false) {
+                    this.$retryer.run(1000, suncom.Handler.create(this, this.$doLoad), 2);
+                }
+                else if (this.getResExtByUrl(this.$url) === "sk" && this.$templet === null) {
+                    this.$templet = new Laya.Templet();
+                    this.$templet.on(Laya.Event.COMPLETE, this, this.$onLoad, [true]);
+                    this.$templet.loadAni(this.$url);
+                }
+                else {
+                    // 重置标记
+                    this.$loading = false;
+                    // 执行回调器
+                    this.$handler.run();
+                }
             }
         }
 
@@ -116,6 +116,7 @@ module sunui {
             this.$hashId = 0;
             this.$handler = null;
             this.$loading = false;
+            this.$retryer.cancel();
             // 销毁动画模版
             if (this.$templet !== null) {
                 this.$templet.off(Laya.Event.ERROR, this, this.$onLoad);

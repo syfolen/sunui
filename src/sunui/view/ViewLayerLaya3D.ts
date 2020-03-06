@@ -72,7 +72,12 @@ module sunui {
             for (let i: number = 0; i < components.length; i++) {
                 const component: IPopupView = components[i];
                 if (component.$onCreate) {
-                    component.$onCreate.apply(component, args);
+                    if (args instanceof Array === false) {
+                        component.$onCreate.call(component, args);
+                    }
+                    else {
+                        component.$onCreate.apply(component, args);
+                    }
                 }
             }
         }
