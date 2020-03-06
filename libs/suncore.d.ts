@@ -241,9 +241,18 @@ declare module suncore {
     /**
      * 任务接口
      * 说明：
-     * 1. Task支持
+     * 1. Task必定为MMI层对象，这是不可更改的
+     * 2. Task一旦开始则不允许取消，可直接设置done为true来强制结束
+     * 3. Task对象有自己的生命周期管理机制，故不建议在外部持有
      */
     interface ITask {
+        /**
+         * 是否己完成
+         * 说明：
+         * 1. 请勿重写此getter和setter函数，否则可能会出问题
+         */
+        done: boolean;
+
         /**
          * 是否正在运行
          */
@@ -267,9 +276,21 @@ declare module suncore {
     /**
      * 任务抽象类
      * 说明：
-     * 1. Task对象有自己的生命周期管理机制，故不建议在外部持有
+     * 1. Task必定为MMI层对象，这是不可更改的
+     * 2. Task一旦开始则不允许取消，可直接设置done为true来强制结束
+     * 3. Task对象有自己的生命周期管理机制，故不建议在外部持有
      */
     abstract class AbstractTask extends puremvc.Notifier implements ITask {
+        /**
+         * 任务是否己经完成（内置属性，请勿操作）
+         */
+        private $done: boolean;
+
+        /**
+         * 是否正在运行（内置属性，请勿操作）
+         */
+        private $running: boolean;
+
         /**
          * 是否正在运行
          */
@@ -304,6 +325,10 @@ declare module suncore {
      * 2. 服务被设计用来处理与表现层无关的有状态业务。
      */
     abstract class BaseService extends puremvc.Notifier implements IService {
+        /**
+         * 服务是否己启动（内置属性，请勿操作）
+         */
+        private $running: boolean;
 
         /**
          * 服务启动入口
@@ -316,7 +341,7 @@ declare module suncore {
         stop(): void;
 
         /**
-         * 帧循环事件
+         * 帧循环事件（请重写此方法来替代ENTER_FRAME事件）
          */
         protected $frameLoop(): void;
 
@@ -575,8 +600,9 @@ declare module suncore {
 
         /**
          * 添加任务
+         * @groupId: 不同编组并行执行
          */
-        function addTask(mod: ModuleEnum, task: ITask): void;
+        function addTask(mod: ModuleEnum, groupId: number, task: ITask): void;
 
         /**
          * 添加触发器

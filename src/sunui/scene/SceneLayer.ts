@@ -63,7 +63,7 @@ module sunui {
         private $beforeLoadScene(info: ISceneInfo, data: any): void {
             this.$sceneName = info.name;
             const task: suncore.ITask = data === void 0 ? new info.iniCls() : new info.iniCls(data);
-            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, task);
+            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, task);
         }
 
         /**
@@ -96,9 +96,9 @@ module sunui {
             this.facade.sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
 
             // 执行反初始化任务
-            info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new info.uniCls());
+            info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new info.uniCls());
             // 退出成功（此时场景并未销毁）
-            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new suncore.SimpleTask(
+            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new suncore.SimpleTask(
                 suncom.Handler.create(this, this.$onExitScene)
             ));
         }
