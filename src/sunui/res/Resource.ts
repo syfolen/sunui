@@ -58,17 +58,18 @@ module sunui {
         export function unlock(url: string): void {
             const array: string[] = Resource.getLoadList(url);
             for (let i: number = 0; i < array.length; i++) {
-                const reference: number = $references[url] || 0;
+                const link: string = array[i];
+                const reference: number = $references[link] || 0;
                 if (reference === 0) {
-                    throw Error(`尝试解锁不存在的资源 url：${url}`);
+                    throw Error(`尝试解锁不存在的资源 url：${link}`);
                 }
                 if (reference === 1) {
-                    delete $references[url];
-                    Laya.loader.clearRes(url);
-                    Laya.loader.cancelLoadByUrl(url);
+                    delete $references[link];
+                    Laya.loader.clearRes(link);
+                    Laya.loader.cancelLoadByUrl(link);
                 }
                 else {
-                    $references[url] = reference - 1;
+                    $references[link] = reference - 1;
                 }
             }
         }
