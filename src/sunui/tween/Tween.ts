@@ -127,11 +127,11 @@ module sunui {
          * 等待指定时间
          * export
          */
-        wait(delay: number): ITween {
+        wait(delay: number, handler: suncom.IHandler = null): ITween {
             const info: ITweenInfo = {
                 ease: null,
                 actions: [],
-                handler: null,
+                handler: handler,
                 time: suncore.System.getModuleTimestamp(this.$mod),
                 duration: delay
             }

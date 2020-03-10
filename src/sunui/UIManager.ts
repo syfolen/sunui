@@ -46,7 +46,9 @@ module sunui {
          * export
          */
         enterScene(name: number, data?: any): void {
+            suncore.Mutex.backup(this);
             M.sceneLayer.enterScene(name, data);
+            suncore.Mutex.restore();
         }
 
         /**
@@ -54,7 +56,9 @@ module sunui {
          * export
          */
         exitScene(): void {
+            suncore.Mutex.backup(this);
             M.sceneLayer.exitScene();
+            suncore.Mutex.restore();
         }
 
         /**
@@ -64,7 +68,9 @@ module sunui {
          * export
          */
         replaceScene(name: number, data?: any): void {
+            suncore.Mutex.backup(this);
             M.sceneLayer.replaceScene(name, data);
+            suncore.Mutex.restore();
         }
 
         /**

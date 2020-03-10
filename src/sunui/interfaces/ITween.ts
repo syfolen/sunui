@@ -34,7 +34,7 @@ module sunui {
          * 等待指定时间
          * export
          */
-        wait(delay: number): ITween;
+        wait(delay: number, handler?: suncom.IHandler): ITween;
 
         /**
          * 执行动作

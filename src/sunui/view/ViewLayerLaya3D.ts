@@ -10,7 +10,7 @@ module sunui {
          */
         addChild(view: IView): void {
             const node: Laya.Node = view as any;
-            if (M.sceneLayer.uiScene === null) {
+            if (M.sceneLayer.uiScene === null || view.zOrder >= sunui.UILevel.LOADING) {
                 Laya.stage.addChild(node);
             }
             else {
@@ -37,7 +37,7 @@ module sunui {
             const mask: Laya.Image = new Laya.Image("common/mask.png");
             mask.left = mask.right = mask.top = mask.bottom = 0;
             mask.sizeGrid = "1,1,1,1";
-            mask.alpha = trans === true ? 0 : 0.5;
+            mask.alpha = trans === true ? 0 : 1;
             mask.mouseEnabled = true;
             mask.mouseThrough = false;
 

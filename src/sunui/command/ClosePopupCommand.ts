@@ -11,11 +11,11 @@ module sunui {
                 console.error(`${view}[${view.name}]'s infomation is not exist.`);
                 return;
             }
+
+            if (destroy !== void 0) { info.keepNode = !destroy; }
+
             if (info.closed === true) {
                 return;
-            }
-            if (destroy !== void 0) {
-                info.keepNode = !destroy;
             }
             // 标记弹框己关闭
             info.closed = true;

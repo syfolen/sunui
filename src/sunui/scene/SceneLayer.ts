@@ -36,19 +36,6 @@ module sunui {
          * 说明：场景参数在进入下一个场景时会自动被保存，在返回场景时会被重新传入，在返回上一个场景时被丢弃
          */
         private $enterScene(name: number, data: any): void {
-            let str: any = null;
-            if (typeof data === "object") {
-                try {
-                    str = JSON.stringify(data);
-                }
-                catch (error) {
-                    str = data;
-                    suncom.Logger.warn(`参数无法转化为JSON`);
-                }
-            }
-            else {
-                str = data;
-            }
             // 获取场景配置信息
             const info: ISceneInfo = SceneManager.getConfigByName(name);
             // 初始化场景（场景初始化应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
@@ -62,6 +49,8 @@ module sunui {
          */
         private $beforeLoadScene(info: ISceneInfo, data: any): void {
             this.$sceneName = info.name;
+            this.facade.sendNotification(NotifyKey.BEFORE_LOAD_SCENE);
+
             const task: suncore.ITask = data === void 0 ? new info.iniCls() : new info.iniCls(data);
             suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, task);
         }
@@ -89,22 +78,31 @@ module sunui {
          */
         private $exitScene(): void {
             // 派发退出场景事件
-            const info: ISceneInfo = SceneManager.getConfigByName(this.$sceneName);
             this.facade.sendNotification(NotifyKey.EXIT_SCENE, this.$sceneName);
-
             // 暂停场景时间轴
             this.facade.sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
 
+            // 反初始化场景（反场景初始化应当被无限延后，因为需要等待Loading界面的展示）
+            const info: ISceneInfo = SceneManager.getConfigByName(this.$sceneName);
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeExitScene, [info]));
+        }
+
+        /**
+         * 退出场景之前
+         */
+        private $beforeExitScene(info: ISceneInfo): void {
             // 执行反初始化任务
             info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new info.uniCls());
             // 退出成功（此时场景并未销毁）
             suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new suncore.SimpleTask(
-                suncom.Handler.create(this, this.$onExitScene)
+                suncom.Handler.create(this, this.$onExitScene, [info])
             ));
         }
 
-        private $onExitScene(): void {
-            const info: ISceneInfo = SceneManager.getConfigByName(this.$sceneName);
+        /**
+         * 退出场景
+         */
+        private $onExitScene(info: ISceneInfo): void {
             this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, info);
             this.$sceneName = 0;
         }
@@ -157,11 +155,10 @@ module sunui {
             // 获取当前场景的历史
             const info: ISceneHeapInfo = SceneHeap.pop();
             // 进入新场景
-            if (this.enterScene(name, data) === false) {
-                return;
+            if (this.enterScene(name, data) === true) {
+                // 进入新场景
+                info !== null && SceneHeap.removeHistory(info.name);
             }
-            // 进入新场景
-            info !== null && SceneHeap.removeHistory(info.name);
         }
 
         /**

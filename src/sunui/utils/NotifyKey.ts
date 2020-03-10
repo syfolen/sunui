@@ -24,6 +24,12 @@ module sunui {
         export const UNLOAD_SCENE: string = "sunui.NotifyKey.UNLOAD_SCENE";
 
         /**
+         * 加载场景之前 { none }
+         * export
+         */
+        export const BEFORE_LOAD_SCENE: string = "sunui.NotifyKey.BEFORE_LOAD_SCENE";
+
+        /**
          * 注册场景信息 { infos: ISceneInfo[] }
          * 说明：
          * 1. 此命令由sunui实现，但需要在外部进行注册

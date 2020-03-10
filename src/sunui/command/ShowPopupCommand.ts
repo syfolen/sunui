@@ -94,7 +94,7 @@ module sunui {
          */
         private $onPopupFinish(view: Laya.Sprite): void {
             const info: IViewStackInfo = M.viewLayer.getInfoByView(view);
-            if (info !== null) {
+            if (info !== null && info.closed === false) {
                 info.displayed = true;
                 M.viewLayer.onViewOpen(view);
                 this.facade.sendNotification(NotifyKey.ON_POPUP_OPENED, view);

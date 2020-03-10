@@ -5,11 +5,6 @@ module sunui {
      */
     export class Loader extends puremvc.Notifier {
         /**
-         * 哈希值
-         */
-        private $hashId: number = suncom.Common.createHashId();
-
-        /**
          * 资源链接
          */
         private $url: string = null;
@@ -30,9 +25,9 @@ module sunui {
         private $loading: boolean = false;
 
         /**
-         * 加载是否己完成
+         * 是否己销毁
          */
-        private $complete: boolean = false;
+        private $destroyed: boolean = false;
 
         /**
          * 加载重试机
@@ -43,7 +38,7 @@ module sunui {
             super();
             this.$retryer = new Retryer(
                 RetryMethodEnum.CONFIRM | suncore.ModuleEnum.SYSTEM,
-                suncom.Handler.create(this, this.$onRetryConfirmed, [this.$hashId]),
+                suncom.Handler.create(this, this.$onRetryConfirmed),
                 "资源加载失败，点击确定重新尝试！",
                 ConfirmOptionValueEnum.YES, "确定",
                 ConfirmOptionValueEnum.NO, "取消"
@@ -75,7 +70,7 @@ module sunui {
          * 结束加载
          */
         private $onLoad(ok: boolean): void {
-            if (this.$hashId > 0) {
+            if (this.$destroyed === false) {
                 // 若资源加载失败，则尝试重新加载（无次数限制）
                 if (ok === false) {
                     this.$retryer.run(1000, suncom.Handler.create(this, this.$doLoad), 2);
@@ -97,8 +92,8 @@ module sunui {
         /**
          * 询问得到回复
          */
-        private $onRetryConfirmed(hashId: number, option: ConfirmOptionValueEnum): void {
-            if (this.$hashId === hashId) {
+        private $onRetryConfirmed(option: ConfirmOptionValueEnum): void {
+            if (this.$destroyed === false) {
                 if (option === ConfirmOptionValueEnum.YES) {
                     this.$doLoad();
                     this.$retryer.reset();
@@ -113,16 +108,18 @@ module sunui {
          * 销毁加载器
          */
         destroy(): void {
-            this.$hashId = 0;
-            this.$handler = null;
-            this.$loading = false;
-            this.$retryer.cancel();
-            // 销毁动画模版
-            if (this.$templet !== null) {
-                this.$templet.off(Laya.Event.ERROR, this, this.$onLoad);
-                this.$templet.off(Laya.Event.COMPLETE, this, this.$onLoad);
-                this.$templet.destroy();
-                this.$templet = null;
+            if (this.$destroyed === false) {
+                this.$destroyed = true;
+                this.$handler = null;
+                this.$loading = false;
+                this.$retryer.cancel();
+                // 销毁动画模版
+                if (this.$templet !== null) {
+                    this.$templet.off(Laya.Event.ERROR, this, this.$onLoad);
+                    this.$templet.off(Laya.Event.COMPLETE, this, this.$onLoad);
+                    this.$templet.destroy();
+                    this.$templet = null;
+                }
             }
         }
 
