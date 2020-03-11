@@ -66,7 +66,6 @@ var suncore;
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this.$done = false;
             _this.$running = false;
-            _this.$canceled = false;
             return _this;
         }
         AbstractTask.prototype.cancel = function () {
@@ -78,8 +77,7 @@ var suncore;
             set: function (yes) {
                 if (this.$done !== yes) {
                     this.$done = yes;
-                    if (yes === true && this.$canceled === false) {
-                        this.$canceled = true;
+                    if (yes === true) {
                         this.cancel();
                     }
                 }
@@ -224,11 +222,15 @@ var suncore;
         MessageManager.prototype.clearMessages = function (mod) {
             this.$queues[mod].clearMessages();
         };
+        MessageManager.prototype.cancelTaskByGroupId = function (mod, groupId) {
+            this.$queues[mod].cancelTaskByGroupId(mod, groupId);
+        };
         return MessageManager;
     }());
     suncore.MessageManager = MessageManager;
     var MessageQueue = (function () {
         function MessageQueue(mod) {
+            this.$tasks = [];
             this.$queues = [];
             this.$messages0 = [];
             this.$mod = mod;
@@ -243,16 +245,29 @@ var suncore;
             var dealCount = 0;
             var remainCount = 0;
             for (var priority = MessagePriorityEnum.MIN; priority < MessagePriorityEnum.MAX; priority++) {
-                var queue = this.$queues[priority];
-                if (priority === MessagePriorityEnum.PRIORITY_LAZY) {
+                var queue = void 0;
+                if (priority === MessagePriorityEnum.PRIORITY_TASK) {
+                    queue = this.$tasks;
+                }
+                else {
+                    queue = this.$queues[priority];
+                }
+                if (queue.length === 0 || priority === MessagePriorityEnum.PRIORITY_LAZY) {
                     continue;
                 }
                 if (priority === MessagePriorityEnum.PRIORITY_TASK) {
-                    if (queue.length > 0) {
-                        if (this.$dealTaskMessage(queue[0]) === true) {
-                            queue.shift();
+                    for (var id = this.$tasks.length - 1; id > -1; id--) {
+                        var tasks = this.$tasks[id];
+                        if (tasks.length > 0 && this.$dealTaskMessage(tasks[0]) === true) {
+                            tasks.shift();
+                            dealCount++;
                         }
-                        dealCount++;
+                        if (tasks.length > 1) {
+                            remainCount += tasks.length - 1;
+                        }
+                        else if (tasks.length === 0) {
+                            this.$tasks.splice(id, 1);
+                        }
                     }
                 }
                 else if (priority === MessagePriorityEnum.PRIORITY_TRIGGER) {
@@ -264,7 +279,7 @@ var suncore;
                         }
                     }
                 }
-                else if (queue.length > 0) {
+                else {
                     var okCount = 0;
                     var totalCount = this.$getDealCountByPriority(priority);
                     for (; queue.length > 0 && (totalCount === 0 || okCount < totalCount); okCount++) {
@@ -322,7 +337,10 @@ var suncore;
         MessageQueue.prototype.classifyMessages0 = function () {
             while (this.$messages0.length) {
                 var message = this.$messages0.shift();
-                if (message.priority === MessagePriorityEnum.PRIORITY_TRIGGER) {
+                if (message.priority === MessagePriorityEnum.PRIORITY_TASK) {
+                    this.$addTaskMessage(message);
+                }
+                else if (message.priority === MessagePriorityEnum.PRIORITY_TRIGGER) {
                     this.$addTriggerMessage(message);
                 }
                 else {
@@ -361,20 +379,53 @@ var suncore;
                 queue.splice(index, 0, message);
             }
         };
+        MessageQueue.prototype.$addTaskMessage = function (message) {
+            var index = -1;
+            for (var i = 0; i < this.$tasks.length; i++) {
+                var tasks = this.$tasks[i];
+                if (tasks.length > 0 && tasks[0].groupId === message.groupId) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index === -1) {
+                this.$tasks.unshift([message]);
+            }
+            else {
+                this.$tasks[index].push(message);
+            }
+        };
         MessageQueue.prototype.clearMessages = function () {
             while (this.$messages0.length > 0) {
-                this.$cancelMessage(this.$messages0.pop());
+                this.$cancelMessage(this.$messages0.shift());
+            }
+            for (var i = 0; i < this.$tasks.length; i++) {
+                var tasks = this.$tasks[i];
+                while (tasks.length > 0) {
+                    this.$cancelMessage(tasks.shift());
+                }
             }
             for (var priority = MessagePriorityEnum.MIN; priority < MessagePriorityEnum.MAX; priority++) {
                 var queue = this.$queues[priority];
                 while (queue.length > 0) {
-                    this.$cancelMessage(queue.pop());
+                    this.$cancelMessage(queue.shift());
                 }
             }
         };
         MessageQueue.prototype.$cancelMessage = function (message) {
             if (message.priority === MessagePriorityEnum.PRIORITY_TASK) {
-                message.task.cancel();
+                message.task.done = true;
+            }
+        };
+        MessageQueue.prototype.cancelTaskByGroupId = function (mod, groupId) {
+            for (var id = 0; id < this.$tasks.length; id++) {
+                var tasks = this.$tasks[id];
+                if (tasks[0].groupId === groupId) {
+                    while (tasks.length > 0) {
+                        tasks.shift().task.done = true;
+                    }
+                    break;
+                }
             }
         };
         return MessageQueue;
@@ -1149,11 +1200,12 @@ var suncore;
             }
         }
         System.getModuleTimestamp = getModuleTimestamp;
-        function addTask(mod, task) {
+        function addTask(mod, groupId, task) {
             if (System.isModuleStopped(mod) === false) {
                 var message = {
                     mod: mod,
                     task: task,
+                    groupId: groupId,
                     priority: MessagePriorityEnum.PRIORITY_TASK
                 };
                 M.messageManager.putMessage(message);
@@ -1163,6 +1215,10 @@ var suncore;
             }
         }
         System.addTask = addTask;
+        function cancelTaskByGroupId(mod, groupId) {
+            M.messageManager.cancelTaskByGroupId(mod, groupId);
+        }
+        System.cancelTaskByGroupId = cancelTaskByGroupId;
         function addTrigger(mod, delay, handler) {
             if (System.isModuleStopped(mod) === false) {
                 var message = {

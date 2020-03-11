@@ -5,6 +5,45 @@
  * https://github.com/syfolen/sunui
  */
 declare module sunui {
+    /**
+     * 确认框结果类型
+     */
+    enum ConfirmOptionValueEnum {
+        /**
+         * 无
+         */
+        NONE,
+
+        /**
+         * 是
+         */
+        YES,
+
+        /**
+         * 否
+         */
+        NO,
+
+        /**
+         * 取消
+         */
+        CANCEL
+    }
+
+    /**
+     * 重试类型枚举
+     */
+    enum RetryMethodEnum {
+        /**
+         * 直接重试（默认）
+         */
+        NONE = 0x10,
+
+        /**
+         * 确认框，包含是和否选项
+         */
+        CONFIRM = 0x20
+    }
 
     enum UILevel {
         /**
@@ -70,6 +109,9 @@ declare module sunui {
 
         /**
          * 加载界面
+         * 说明：
+         * 1. 层级低于加载界面的在场景中显示
+         * 2. 层级等于或高于加载界面的在舞台中显示
          */
         LOADING,
 
@@ -116,6 +158,34 @@ declare module sunui {
     }
 
     /**
+     * Retryer接口
+     */
+    interface IRetryer {
+        /**
+         * 当前重试次数
+         */
+        readonly currentRetries: number;
+
+        /**
+         * 执行接口
+         * @delay: 重试延时
+         * @maxRetries: 最大重试次数，默认为：2
+         * @return: 返回true表示允许重试
+         */
+        run(delay: number, handler: suncom.IHandler, maxRetries?: number): void;
+
+        /**
+         * 取消重试
+         */
+        cancel(): void;
+
+        /**
+         * 重置（仅会重置次数统计）
+         */
+        reset(): void;
+    }
+
+    /**
      * 场景信息
      */
     interface ISceneInfo {
@@ -141,19 +211,40 @@ declare module sunui {
     interface ITween {
 
         /**
-         * 清除缓动
+         * 取消缓动
          */
-        clear(): void;
+        cancel(): ITween;
 
+        /**
+         * 从当前属性缓动至props属性
+         */
         to(props: any, duration: number, ease?: Function, handler?: suncom.IHandler): ITween;
 
+        /**
+         * 从props属性缓动至当前属性
+         */
         from(props: any, duration: number, ease?: Function, handler?: suncom.IHandler): ITween;
+
+        /**
+         * 以props属性的幅度进行缓动
+         */
+        by(props: any, duration: number, ease?: Function, handler?: suncom.IHandler): ITween;
+
+        /**
+         * 等待指定时间
+         */
+        wait(delay: number, handler?: suncom.IHandler): ITween;
     }
 
     /**
      * 弹出缓动信息接口，接口数据展示了执行弹出时支持的所有属性
      */
     interface IViewProps {
+        /**
+         * 弹框的时间模块
+         */
+        mod?: suncore.ModuleEnum;
+
         /**
          * 坐标
          */
@@ -167,9 +258,9 @@ declare module sunui {
         ease?: Function;
 
         /**
-         * 背景通透值
+         * 背景是否通透
          */
-        trans?: number;
+        trans?: boolean;
 
         /**
          * 显示层级
@@ -226,11 +317,6 @@ declare module sunui {
     abstract class AbstractSceneIniClass extends suncore.AbstractTask {
 
         /**
-         * 初始化执行函数，场景资源建议在此方法中加载
-         */
-        run(): boolean;
-
-        /**
          * 进入场景回调，场景元素建议在此方法中初始化
          */
         protected $onEnterScene(): void;
@@ -244,21 +330,82 @@ declare module sunui {
         /**
          * @infos: 场景信息配置列表
          */
-        execute(infos:Array<ISceneInfo>): void;
+        execute(infos: Array<ISceneInfo>): void;
     }
 
-    class Tween implements ITween {
+    /**
+     * 重试机制
+     */
+    class Retryer extends puremvc.Notifier implements IRetryer {
 
         /**
-         * @mod: 缓动挂靠的模块，默认为CUSTOM
+         * @confirmHandler: 若重试超过最大次数，则会执行此回调
+         * @options: [ConfirmOptionValueEnum, string, ...]
+         * 说明：
+         * 1. method允许值为 RetryMethodEnum 或 suncore.ModuleEnum 或同时输入这两种值
+         * 2. 若未输入 RetryMethodEnum ，则默认值为 RetryMethodEnum.NONE
+         * 3. 若未输入 suncore.ModuleEnum ，则默认值为 suncore.ModuleEnum.SYSTEM
          */
-        static get(item:any, mod?:suncore.ModuleEnum): ITween;
+        constructor(modOrMethod: suncore.ModuleEnum | RetryMethodEnum, confirmHandler?: suncom.IHandler, prompt?: string, ...options: Array<ConfirmOptionValueEnum | string>);
 
-        clear(): void;
+        /**
+         * 执行接口
+         * @delay: 重试延时
+         * @maxRetries: 最大重试次数，默认为：2
+         * @return: 返回true表示允许重试
+         */
+        run(delay: number, handler: suncom.IHandler, maxRetries?: number): void;
 
-        to(props:any, duration:number, ease?:Function, handler?:suncom.IHandler): ITween;
+        /**
+         * 取消重试
+         */
+        cancel(): void;
 
-        from(props:any, duration:number, ease?:Function, handler?:suncom.IHandler): ITween;
+        /**
+         * 重置（仅会重置次数统计）
+         */
+        reset(): void;
+
+        /**
+         * 当前重试次数
+         */
+        readonly currentRetries: number;
+    }
+
+    /**
+     * 缓动类
+     */
+    class Tween extends puremvc.Notifier implements ITween {
+
+        /**
+         * 取消缓动
+         */
+        cancel(): ITween;
+
+        /**
+         * 从当前属性缓动至props属性
+         */
+        to(props: any, duration: number, ease?: Function, handler?: suncom.IHandler): ITween;
+
+        /**
+         * 从props属性缓动至当前属性
+         */
+        from(props: any, duration: number, ease?: Function, handler?: suncom.IHandler): ITween;
+
+        /**
+         * 以props属性的幅度进行缓动
+         */
+        by(props: any, duration: number, ease?: Function, handler?: suncom.IHandler): ITween;
+
+        /**
+         * 等待指定时间
+         */
+        wait(delay: number, handler?: suncom.IHandler): ITween;
+
+        /**
+         * @mod: 执行缓动的模块，默认为：CUSTOM
+         */
+        static get(item: any, mod?: suncore.ModuleEnum): ITween;
     }
 
     class UIManager extends puremvc.Notifier {
@@ -269,7 +416,7 @@ declare module sunui {
          * 进入新场景，并将当前场景压入历史
          * @data: 参数对象，保存在此对象中的数据的生命周期与场景历史的生命周期一致，当场景存在于当前或存在于历史时，数据就不会被销毁
          */
-        enterScene(name:number, data?:any): void;
+        enterScene(name: number, data?: any): void;
 
         /**
          * 退出当前场景，并返回历史
@@ -281,15 +428,15 @@ declare module sunui {
          * @data: 参数说明请参考enterScene方法的注释
          * 说明：被替换的场景不会进入历史
          */
-        replaceScene(name:number, data?:any): void;
+        replaceScene(name: number, data?: any): void;
 
         /**
-         * 获取场景对象
+         * 获取2D场景对象
          */
         readonly uiScene: Laya.Scene;
 
         /**
-         * 获取场景对象
+         * 获取3D场景对象
          */
         readonly d3Scene: Laya.Scene3D;
 
@@ -306,21 +453,24 @@ declare module sunui {
 
         /**
          * @caller: 脚本回调对象，允许为非弹框对象
-         * @popup: 被监视的视图对象，只能为弹框对象
+         * @popup: 被监视的视图对象，必须为弹框对象
          */
-        constructor(caller:any, popup:any);
+        constructor(caller: any, popup: any);
 
         /**
-         * 注册弹框被关闭时需要执行的回调
+         * 注册弹框被关闭时需要执行的回调（详见ON_POPUP_CLOSED）
          */
-        onPopupClosed(method:Function, caller:any, args?:any[]): ViewContact;
+        onPopupClosed(method: Function, caller: any, args?: any[]): ViewContact;
 
         /**
-         * 注册弹框被销毁时需要执行的回调
+         * 注册弹框被销毁时需要执行的回调（详见ON_POPUP_REMOVED）
          */
-        onPopupRemoved(method:Function, caller:any, args?:any[]): ViewContact;
+        onPopupRemoved(method: Function, caller: any, args?: any[]): ViewContact;
     }
 
+    /**
+     * 弹框外观类，实现通用的弹窗功能
+     */
     class ViewFacade extends puremvc.Notifier {
         /**
          * 设置是否允许取消，默认为false
@@ -332,18 +482,18 @@ declare module sunui {
          * @view 弹出对象
          * @duration 缓动时间，默认为200毫秒
          */
-        constructor(view:any, duration?:number);
+        constructor(view: any, duration?: number);
 
         /**
          * 执行弹出逻辑
          */
-        popup(props?:IViewProps): ViewFacade;
+        popup(props?: IViewProps): ViewFacade;
 
         /**
          * 执行关闭逻辑
          * @destroy: 关闭后是否销毁节点，默认为true
          */
-        close(destroy?:boolean): void;
+        close(destroy?: boolean): void;
     }
 
     /**
@@ -351,91 +501,115 @@ declare module sunui {
      */
     namespace NotifyKey {
         /**
-         * 加载场景，此命令由外部注册并实现
+         * 加载场景 { info: ISceneInfo, data: any }
          * 说明：
-         * 1. 当场景加载完成时，外部应当派发ENTER_SCENE通知sunui以执行进入场景的逻辑
+         * 1. 此命令由外部注册并实现
+         * 2. 当场景加载完成时，外部应当派发ENTER_SCENE以通知sunui继续逻辑
          */
         const LOAD_SCENE: string;
 
         /**
-         * 卸载场景，此命令由外部注册并实现
+         * 卸载场景 { info: ISceneInfo }
          * 说明：
-         * 1. 不同于LOAD_SCENE命令，当场景卸载完成时，外部无需派发EXIT_SCENE命令
+         * 1. 此命令由外部注册并实现
+         * 2. 不同于LOAD_SCENE命令，当场景卸载完成时，EXIT_SCENE命令不需要由外部派发
          */
         const UNLOAD_SCENE: string;
 
         /**
-         * 注册场景信息，此命令由sunui实现，但需要在外部进行注册
+         * 加载场景之前 { none }
+         */
+        const BEFORE_LOAD_SCENE: string;
+
+        /**
+         * 注册场景信息 { infos: ISceneInfo[] }
+         * 说明：
+         * 1. 此命令由sunui实现，但需要在外部进行注册
          */
         const REGISTER_SCENES: string;
 
         /**
-         * 进入场景命令，由外部在实现LOAD_SCENE命令时于场景加载完成时派发
+         * 进入场景命令 { uiScene: Laya.Scene, d3Scene: Laya.Scene3D }
          * 说明：
-         * 1. 此命令必然在iniCls被执行之后被派发
+         * 1. 此命令由外部在实现LOAD_SCENE命令时于场景加载完成时派发
+         * 2. 此命令必然在iniCls被执行之后被派发
          */
         const ENTER_SCENE: string;
 
         /**
-         * 退出场景命令，由sunui在执行退出场景逻辑时派发
+         * 退出场景命令 { sceneName: SceneNameEnum }
          * 说明：
-         * 1. 此命令必然在uniCls被执行之前被派发
-         * 2. 场景退出与销毁并不相同，场景销毁的逻辑会执行在uniCls被执行之后
+         * 1. 此命令由sunui在执行退出场景逻辑时派发
+         * 2. 此命令必然在uniCls被执行之前被派发
+         * 3. 场景退出与销毁并不相同，场景销毁的逻辑会执行在uniCls被执行之后
+         * 4. SceneNameEnum 为由外部定义的枚举值
          */
         const EXIT_SCENE: string;
 
         /**
-         * 弹框创建完成
-         * 说明：
-         * 1. 此事件会在IPopupView的$onCreate方法执行完毕之后被派发
-         * 2. 传递给$onCreate方法的所有参数均会在此命令中被传递，同时弹框对象亦会被传递
-         */
-        const ON_POPUP_CREATED: string;
-
-        /**
-         * 弹框己打开
-         * 说明：
-         * 1. 此事件会在IPopupView的$onOpen方法执行完毕之后被派发
-         */
-        const ON_POPUP_OPENED: string;
-
-        /**
-         * 弹框己关闭
+         * 弹框己关闭 { view: Laya.Sprite }
          * 说明：
          * 1. 此事件会在IPopupView的$onClose方法执行完毕之后被派发
          */
         const ON_POPUP_CLOSED: string;
 
         /**
-         * 弹框销毁之前
+         * 弹框移除之前 { view: Laya.Sprite }
          * 说明：
          * 1. 此事件会在IPopupView的$onRemove方法执行之前被派发
          */
-        const BEFORE_POPUP_REMOVED: string;
+        const BEFORE_POPUP_REMOVE: string;
 
         /**
-         * 弹框己移除
+         * 弹框己移除 { view: Laya.Sprite }
          * 说明：
          * 1. 此事件会在IPopupView的$onRemove方法执行完毕之后被派发
-         * 2. 为了避免不同对象之间的销毁逻辑相互形成干扰，此命令被派发时，意味着弹框对象己被销毁
+         * 2. 为了避免不同对象之间的销毁逻辑形成相互干扰，此命令被派发时，意味着弹框对象己被销毁
          */
         const ON_POPUP_REMOVED: string;
+
+        /**
+         * 对象被销毁事件 { caller: any }
+         * 说明：
+         * 1. 此事件主要被设计用来避免与非弹框对象存在联系的弹框在对象被销毁时可能意外残留的问题
+         * 2. 若某个非视图对象曾使用ViewContact与某个弹框建立过联系，则对象销毁时应当派发此事件
+         */
+        const ON_CALLER_DESTROYED: string;
+
+        /**
+         * 重试确认请求 { mod: suncore.ModuleEnum, prompt: string, options: IRetryOption[], handler: suncom.IHandler }
+         */
+        const RETRY_CONFIRM: string;
     }
 
     /**
-     * 资源管理器
+     * 资源管理器（主要用于资源的动态创建和销毁）
      */
     namespace Resource {
 
         /**
+         * 锁定资源
+         * 说明：
+         * 1. 每次请求锁定资源，则资源的引用次数会加一
+         */
+        function lock(url: string): void;
+
+        /**
+         * 解锁资源
+         * 说明：
+         * 1. 每次请求解释资源时，资源的引用次数会减一
+         * 2. 当资源引用次数为0时，资源会自动释放，当前的加载亦会取消
+         */
+        function unlock(url: string): void;
+
+        /**
          * 根据url创建对象
          * @method: 仅支持Skeleton和Texture的创建
-         * @flag: 目前仅用于代替aniMode的值
          * 说明：
          * 1. 调用此接口创建对象时，会产生一个计数，当计数为0时，资源会被彻底释放
          * 2. 见destroy方法
          */
-        function create(url: string, method?: (res: any, url: string) => void, caller?: Object, flag?: number): any;
+        function create(url: string, method?: (res: any, url: string) => void, caller?: Object): any;
 
         /**
          * 销毁对象
@@ -456,10 +630,9 @@ declare module sunui {
         /**
          * 释放资源组
          * @id: 资源组ID
-         * @node: 显示对象节点，若节点有效，则资源会延时到节点被销毁后再释放
          * @return: 始终返回0
          */
-        function release(id: number, node?: Laya.Node): number;
+        function release(id: number): number;
     }
 
     /**

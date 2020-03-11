@@ -16,12 +16,6 @@ var suncom;
         EnvMode[EnvMode["DEBUG"] = 1] = "DEBUG";
         EnvMode[EnvMode["WEB"] = 2] = "WEB";
     })(EnvMode = suncom.EnvMode || (suncom.EnvMode = {}));
-    var EventInfo = (function () {
-        function EventInfo() {
-        }
-        return EventInfo;
-    }());
-    suncom.EventInfo = EventInfo;
     var EventSystem = (function () {
         function EventSystem() {
             this.$events = {};
@@ -95,12 +89,13 @@ var suncom;
                     index = i;
                 }
             }
-            var event = new EventInfo();
-            event.type = type;
-            event.method = method;
-            event.caller = caller;
-            event.priority = priority;
-            event.receiveOnce = receiveOnce;
+            var event = {
+                type: type,
+                method: method,
+                caller: caller,
+                priority: priority,
+                receiveOnce: receiveOnce
+            };
             if (index < 0) {
                 list.push(event);
             }

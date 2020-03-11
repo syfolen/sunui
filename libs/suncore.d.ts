@@ -594,11 +594,6 @@ declare module suncore {
         function getDelta(): number;
 
         /**
-         * 获取当前帧序号（所有模块共享）
-         */
-        function getFrameIndex(): number;
-
-        /**
          * 获取指定模块的时间戳
          */
         function getModuleTimestamp(mod: ModuleEnum): number;
