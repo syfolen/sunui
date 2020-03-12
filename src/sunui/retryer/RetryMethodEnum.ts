@@ -6,15 +6,21 @@ module sunui {
      */
     export enum RetryMethodEnum {
         /**
-         * 直接重试（默认）
+         * 自动重试（默认）
          * export
          */
-        NONE = 0x10,
+        AUTO = 0x10,
 
         /**
-         * 确认框，包含是和否选项
+         * 请求确认，包含是和否选项
          * export
          */
-        CONFIRM = 0x20
+        CONFIRM = 0x20,
+
+        /**
+         * 终止重试
+         * export
+         */
+        TERMINATE = 0x40
     }
 }

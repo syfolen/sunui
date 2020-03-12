@@ -74,6 +74,15 @@ module sunui {
         }
 
         /**
+         * 删除历史
+         * @deleteCount: 需要删除的历史场景个数
+         * export
+         */
+        deleteHistories(deleteCount: number): void {
+            M.sceneLayer.deleteHistories(deleteCount);
+        }
+
+        /**
          * 移除视图
          */
         removeView(view: Laya.Sprite): void {

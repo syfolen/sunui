@@ -162,6 +162,13 @@ module sunui {
         }
 
         /**
+         * 删除历史
+         */
+        deleteHistories(deleteCount: number): void {
+            SceneHeap.deleteHistories(deleteCount);
+        }
+
+        /**
          * 获取ui场景对象
          */
         get uiScene(): any {

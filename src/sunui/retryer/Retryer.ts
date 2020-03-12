@@ -55,7 +55,7 @@ module sunui {
          * @options: [ConfirmOptionValueEnum, string, ...]
          * 说明：
          * 1. method允许值为 RetryMethodEnum 或 suncore.ModuleEnum 或同时输入这两种值
-         * 2. 若未输入 RetryMethodEnum ，则默认值为 RetryMethodEnum.NONE
+         * 2. 若未输入 RetryMethodEnum ，则默认值为 RetryMethodEnum.AUTO
          * 3. 若未输入 suncore.ModuleEnum ，则默认值为 suncore.ModuleEnum.SYSTEM
          * export 
          */
@@ -65,8 +65,11 @@ module sunui {
             if ((modOrMethod & RetryMethodEnum.CONFIRM) === RetryMethodEnum.CONFIRM) {
                 this.$method = RetryMethodEnum.CONFIRM;
             }
+            else if ((modOrMethod & RetryMethodEnum.TERMINATE) === RetryMethodEnum.TERMINATE) {
+                this.$method = RetryMethodEnum.TERMINATE;
+            }
             else {
-                this.$method = RetryMethodEnum.NONE;
+                this.$method = RetryMethodEnum.AUTO;
             }
 
             const mode: suncore.ModuleEnum = modOrMethod &= 0xF;
@@ -90,7 +93,7 @@ module sunui {
          * export
          */
         run(delay: number, handler: suncom.IHandler, maxRetries: number = 2): void {
-            if (this.$currentRetries < maxRetries) {
+            if (this.$method === RetryMethodEnum.AUTO || this.$currentRetries < maxRetries) {
                 if (this.$retryTimerId === 0) {
                     this.$retryHandler = handler;
                     this.$retryTimerId = suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, delay, this.$onRetryTimer, this, 1);
@@ -99,14 +102,17 @@ module sunui {
                     console.warn(`己忽略的重试请求 method:${suncom.Common.getMethodName(handler.method, handler.caller)}, caller:${suncom.Common.getQualifiedClassName(handler.caller)}`);
                 }
             }
-            else if (this.$method === RetryMethodEnum.NONE) {
-                this.$confirmHandler.runWith(ConfirmOptionValueEnum.YES);
-            }
             else {
                 if (this.$prompting === false) {
                     this.$prompting = true;
-                    const handler: suncom.IHandler = suncom.Handler.create(this, this.$onConfirmRely);
-                    this.facade.sendNotification(NotifyKey.RETRY_CONFIRM, [this.$mod, this.$prompt, this.$options, handler]);
+                    if (this.$method === RetryMethodEnum.TERMINATE) {
+                        const handler: suncom.IHandler = suncom.Handler.create(this, this.$onConfirmRely, [ConfirmOptionValueEnum.NO]);
+                        suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
+                    }
+                    else {
+                        const handler: suncom.IHandler = suncom.Handler.create(this, this.$onConfirmRely);
+                        this.facade.sendNotification(NotifyKey.RETRY_CONFIRM, [this.$mod, this.$prompt, this.$options, handler]);
+                    }
                 }
                 else {
                     console.warn(`己忽略的重试的询问请求 prompt:${this.$prompt}`);
@@ -120,7 +126,9 @@ module sunui {
         private $onConfirmRely(option: ConfirmOptionValueEnum): void {
             if (this.$prompting === true) {
                 this.$prompting = false;
-                this.$confirmHandler.runWith(option);
+                if (this.$confirmHandler !== null) {
+                    this.$confirmHandler.runWith(option);
+                }
             }
         }
 

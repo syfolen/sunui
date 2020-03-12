@@ -71,5 +71,15 @@ module sunui {
             }
             return null;
         }
+
+        /**
+         * 删除历史
+         */
+        export function deleteHistories(deleteCount: number): void {
+            while ($infos.length > 1 && deleteCount > 0) {
+                $infos.pop();
+                deleteCount--;
+            }
+        }
     }
 }
