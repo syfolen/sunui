@@ -87,6 +87,12 @@ module sunui {
         LOADING,
 
         /**
+         * 跑马灯提示
+         * export
+         */
+        LAMP_TIPS,
+
+        /**
          * 轻提示
          * export
          */
