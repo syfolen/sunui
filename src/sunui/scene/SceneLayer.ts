@@ -186,7 +186,7 @@ module sunui {
          * 获取场景名字
          */
         get sceneName(): number {
-            return this.$sceneName;
+            return this.$ready === false ? 0 : this.$sceneName;
         }
     }
 }
