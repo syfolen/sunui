@@ -97,13 +97,13 @@ module sunui {
             Resource.lock(url);
             templet.create(url, method, caller);
             if ((suncom.Global.debugMode & suncom.DebugMode.DEBUG) === suncom.DebugMode.DEBUG) {
-                console.log("================== resouce debug ==================");
+                suncom.Logger.log("================== resouce debug ==================");
                 const keys: string[] = Object.keys($templets);
                 for (const key of keys) {
                     const templet: Templet = $templets[key];
-                    console.log(`url:${key}, references:${templet.referenceCount}`);
+                    suncom.Logger.log(`url:${key}, references:${templet.referenceCount}`);
                 }
-                console.log("================== resouce debug ==================");
+                suncom.Logger.log("================== resouce debug ==================");
             }
         }
 
@@ -125,13 +125,13 @@ module sunui {
                 }
             }
             if ((suncom.Global.debugMode & suncom.DebugMode.DEBUG) === suncom.DebugMode.DEBUG) {
-                console.log("================== resouce debug ==================");
+                suncom.Logger.log("================== resouce debug ==================");
                 const keys: string[] = Object.keys($templets);
                 for (const key of keys) {
                     const templet: Templet = $templets[key];
-                    console.log(`url:${key}, references:${templet.referenceCount}`);
+                    suncom.Logger.log(`url:${key}, references:${templet.referenceCount}`);
                 }
-                console.log("================== resouce debug ==================");
+                suncom.Logger.log("================== resouce debug ==================");
             }
         }
 

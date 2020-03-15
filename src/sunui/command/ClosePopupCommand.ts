@@ -8,7 +8,7 @@ module sunui {
         execute(view: Laya.Sprite, duration: number, destroy: boolean): void {
             const info: IViewStackInfo = M.viewLayer.getInfoByView(view);
             if (info === null) {
-                console.error(`${view}[${view.name}]'s infomation is not exist.`);
+                suncom.Logger.error(`${view}[${view.name}]'s infomation is not exist.`);
                 return;
             }
 
