@@ -51,8 +51,11 @@ module sunui {
             this.$sceneName = info.name;
             this.facade.sendNotification(NotifyKey.BEFORE_LOAD_SCENE);
 
-            const task: suncore.ITask = data === void 0 ? new info.iniCls() : new info.iniCls(data);
-            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, task);
+            const iniCls: any = info.iniCls || null;
+            if (iniCls !== null) {
+                const task: suncore.ITask = data === void 0 ? new iniCls() : new iniCls(data);
+                suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, task);
+            }
         }
 
         /**
