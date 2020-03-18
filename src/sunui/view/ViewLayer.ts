@@ -65,8 +65,11 @@ module sunui {
          */
         private $onUnloadScene(): void {
             const array: Array<IViewStackInfo> = this.$stack.concat();
-            while (array.length > 0) {
-                this.removeStackInfo(array.pop());
+            for (let i: number = array.length - 1; i > -1; i--) {
+                const info: IViewStackInfo = array[i];
+                if (info.props.mod !== suncore.ModuleEnum.SYSTEM) {
+                    this.removeStackInfo(info);
+                }
             }
         }
 
