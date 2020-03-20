@@ -62,6 +62,7 @@ module sunui {
          * 加载场景
          */
         private $loadScene(info: ISceneInfo, data: any): void {
+            this.facade.sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
             this.facade.sendNotification(NotifyKey.LOAD_SCENE, [info, data]);
         }
 

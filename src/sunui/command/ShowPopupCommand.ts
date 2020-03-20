@@ -30,7 +30,6 @@ module sunui {
             const keepNode: boolean = props.keepNode;
 
             delete props.args;
-            delete props.trans;
             delete props.level;
             delete props.keepNode;
 

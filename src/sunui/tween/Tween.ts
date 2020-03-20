@@ -111,6 +111,10 @@ module sunui {
                 actions.push(action);
                 // 更新最终属性，用来支持连续缓动的实现
                 this.$props[key] = to[key];
+                // 第一次执行from缓动时会有点问题
+                if (this.$infos.length === 0) {
+                    this.$item[action.prop] = action.from;
+                }
             }
 
             const info: ITweenInfo = {
