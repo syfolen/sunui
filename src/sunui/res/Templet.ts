@@ -7,7 +7,7 @@ module sunui {
         /**
          * 资源加载器
          */
-        private $loader: Loader = new Loader();
+        private $loader: Loader = null;
 
         /**
          * 引用计数器
@@ -29,11 +29,16 @@ module sunui {
             if (method !== null) {
                 this.$handlers.push(suncom.Handler.create(caller, method));
             }
+            // 创建加载器
+            if (this.$loader === null) {
+                this.$loader = new Loader();
+                this.$loader.addEventListener(EventKey.LOADED, this.$doCreate, this);
+            }
             /**
              * 说明：
              * 1. 此处无论资源是否己得到缓存，都应当重新加载，因为如果不重新加载而直接回调，则回调的发生有可能在外部类的构造函数执行结束之前，这种情况就会引发一些错误
              */
-            this.$loader.loading === false && this.$loader.load(url, suncom.Handler.create(this, this.$doCreate));
+            this.$loader.loading === false && this.$loader.load(url);
         }
 
         private $doCreate(): void {
@@ -66,7 +71,9 @@ module sunui {
                 throw Error(`资源计数不应当小于0 url:${url}, references:${this.$referenceCount}`);
             }
             if (this.$referenceCount === 0) {
+                this.$loader.removeEventListener(EventKey.LOADED, this.$doCreate, this);
                 this.$loader.destroy();
+                this.$loader = null;
             }
         }
 

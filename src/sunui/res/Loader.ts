@@ -3,21 +3,16 @@ module sunui {
     /**
      * 资源加载器（预加载专用）
      */
-    export class Loader extends puremvc.Notifier {
+    export class Loader extends suncom.EventSystem {
         /**
          * 资源链接
          */
         private $url: string = null;
 
         /**
-         * 资源对象
+         * 加载器
          */
-        private $templet: Laya.Templet = null;
-
-        /**
-         * 加载成功回调
-         */
-        private $handler: suncom.IHandler = null;
+        private $loader: UrlLoader = null;
 
         /**
          * 是否正在加载
@@ -47,13 +42,11 @@ module sunui {
 
         /**
          * 加载资源
-         * @flag: 目前仅用于代替aniMode的值
          */
-        load(url: string, handler: suncom.IHandler): void {
+        load(url: string): void {
             if (this.$loading === false) {
                 this.$loading = true;
                 this.$url = url;
-                this.$handler = handler;
                 this.$doLoad();
             }
         }
@@ -62,8 +55,20 @@ module sunui {
          * 执行加载行为
          */
         private $doLoad(): void {
-            // 无论如何都直接根据URL加载资源
-            Laya.loader.load(Resource.getLoadList(this.$url), Laya.Handler.create(this, this.$onLoad));
+            if (this.$loader !== null) {
+                this.$loader.destroy();
+            }
+
+            const handler: suncom.IHandler = suncom.Handler.create(this, this.$onLoad);
+            if (Resource.isRes3dUrl(this.$url) === true) {
+                this.$loader = new Res3dLoader(this.$url, handler);
+            }
+            else if (suncom.Common.getFileExtension(this.$url) === "sk") {
+                this.$loader = new SkeletonLoader(this.$url, handler);
+            }
+            else {
+                this.$loader = new UrlLoader(this.$url, handler);
+            }
         }
 
         /**
@@ -75,16 +80,11 @@ module sunui {
                 if (ok === false) {
                     this.$retryer.run(1000, suncom.Handler.create(this, this.$doLoad), 2);
                 }
-                else if (this.getResExtByUrl(this.$url) === "sk" && this.$templet === null) {
-                    this.$templet = new Laya.Templet();
-                    this.$templet.on(Laya.Event.COMPLETE, this, this.$onLoad, [true]);
-                    this.$templet.loadAni(this.$url);
-                }
                 else {
                     // 重置标记
                     this.$loading = false;
-                    // 执行回调器
-                    this.$handler.run();
+                    // 派发己加载事件
+                    this.dispatchEvent(EventKey.LOADED);
                 }
             }
         }
@@ -99,7 +99,7 @@ module sunui {
                     this.$retryer.reset();
                 }
                 else {
-                    this.facade.sendNotification(suncore.NotifyKey.SHUTDOWN);
+                    puremvc.Facade.getInstance().sendNotification(suncore.NotifyKey.SHUTDOWN);
                 }
             }
         }
@@ -110,41 +110,16 @@ module sunui {
         destroy(): void {
             if (this.$destroyed === false) {
                 this.$destroyed = true;
-                this.$handler = null;
                 this.$loading = false;
                 this.$retryer.cancel();
-                // 销毁动画模版
-                if (this.$templet !== null) {
-                    this.$templet.off(Laya.Event.ERROR, this, this.$onLoad);
-                    this.$templet.off(Laya.Event.COMPLETE, this, this.$onLoad);
-                    this.$templet.destroy();
-                    this.$templet = null;
-                }
             }
-        }
-
-        /**
-         * 根据URL获取资源后缀名
-         */
-        getResExtByUrl(url: string): string {
-            return url.substr(url.lastIndexOf(".") + 1);
         }
 
         /**
          * 创建对象
          */
-        create(): Laya.Texture | Laya.Skeleton {
-            let res: any = null;
-            if (this.$templet === null) {
-                res = Laya.loader.getRes(this.$url) || null;
-            }
-            else {
-                res = this.$templet.buildArmature(2) || null;
-            }
-            if (res === null) {
-                throw Error(`资源预加载出错 url:${this.$url}`);
-            }
-            return res;
+        create(): any {
+            return this.$loader.create();
         }
 
         /**

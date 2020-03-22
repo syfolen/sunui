@@ -26,8 +26,14 @@ module sunui {
 
         constructor(id: number, urls: string[], handler: suncom.IHandler) {
             this.$id = id;
-            this.$urls = urls;
+            this.$urls = this.$removeDuplicateResources(urls);
             this.$handler = handler;
+
+            // 龙骨无需加载png资源
+            this.$removeUnnecessaryResources(this.$urls, "sk", "png", "龙骨预加载无需指定PNG资源");
+            // 图集无需加载png资源
+            this.$removeUnnecessaryResources(this.$urls, "atlas", "png", "图集预加载无需指定PNG资源");
+
             // 预加载资源
             for (let i: number = 0; i < this.$urls.length; i++) {
                 const url: string = this.$urls[i];
@@ -43,7 +49,7 @@ module sunui {
                 res.destroy();
             }
             this.$doneList.push(url);
-            
+
             if (this.$doneList.length === this.$urls.length) {
                 this.$handler.runWith([this.$id]);
             }
@@ -56,6 +62,50 @@ module sunui {
             for (let i: number = 0; i < this.$urls.length; i++) {
                 const url: string = this.$urls[i];
                 Resource.destroy(url, this.$onResourceCreated, this);
+            }
+        }
+
+        /**
+         * 移除重复的资源
+         */
+        private $removeDuplicateResources(urls: string[]): string[] {
+            const array: string[] = [];
+            for (let i: number = 0; i < urls.length; i++) {
+                const url: string = urls[i];
+                if (array.indexOf(url) === -1) {
+                    array.push(url);
+                }
+                else {
+                    suncom.Logger.warn(`重复的预加载资源文件 ${url}`);
+                }
+            }
+            return array;
+        }
+
+        /**
+         * 根据扩展名移除无需指定的资源文件
+         */
+        private $removeUnnecessaryResources(urls: string[], match: string, remove: string, msg: string): void {
+            const array: string[] = [];
+
+            for (let i: number = 0; i < urls.length; i++) {
+                const url: string = urls[i];
+                if (suncom.Common.getFileExtension(url) === match) {
+                    array.push(url);
+                }
+            }
+
+            for (let i: number = 0; i < array.length; i++) {
+                const url: string = array[i];
+                const png: string = url.substring(0, url.length - match.length) + remove;
+                do {
+                    const index: number = urls.indexOf(png);
+                    if (index === -1) {
+                        break;
+                    }
+                    urls.splice(index, 1);
+                    suncom.Logger.warn(`${msg} ${url}`);
+                } while (true);
             }
         }
     }

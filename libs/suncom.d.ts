@@ -409,6 +409,11 @@ declare module suncom {
         function formatDate(str: string, time: string | number | Date): string;
 
         /**
+         * 获取文件的扩展名
+         */
+        function getFileExtension(path: string): string;
+
+        /**
          * 从数组中查找数据
          * @array: 数据源
          * @method: 查询规则，返回true表示与规则匹配

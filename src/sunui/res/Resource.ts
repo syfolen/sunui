@@ -36,54 +36,94 @@ module sunui {
         /**
          * 锁定资源
          * 说明：
-         * 1. 每次请求锁定资源，则资源的引用次数会加一
+         * 1. 每次请求锁定资源，则资源的引用次数会-1
+         * 2. 若为3d资源，则应当同时锁定资源包的配置文件
          * export
          */
         export function lock(url: string): void {
-            const array: string[] = Resource.getLoadList(url);
-            for (let i: number = 0; i < array.length; i++) {
-                const link: string = array[i];
-                const reference: number = $references[link] || 0;
-                $references[link] = reference + 1;
+            const reference: number = $references[url] || 0;
+            $references[url] = reference + 1;
+            if (Resource.isRes3dUrl(url) === true && suncom.Common.getFileExtension(url) !== "json") {
+                Resource.lock(Resource.getRes3dJsonUrl(url));
             }
         }
 
         /**
          * 解锁资源
          * 说明：
-         * 1. 每次请求解释资源时，资源的引用次数会减一
-         * 2. 当资源引用次数为0时，资源会自动释放，当前的加载亦会取消
+         * 1. 每次请求解锁资源时，资源的引用次数会+1
+         * 2. 若为3d资源，则应当同时解锁资源包的配置文件
+         * 3. 当2d资源的引用次数为0时，资源会自动释放，当前的加载亦会取消
+         * 4. 3d资源只有在资源包的配置文件的引用次数为0时才会释放
          * export
          */
         export function unlock(url: string): void {
-            const array: string[] = Resource.getLoadList(url);
-            for (let i: number = 0; i < array.length; i++) {
-                const link: string = array[i];
-                const reference: number = $references[link] || 0;
-                if (reference === 0) {
-                    throw Error(`尝试解锁不存在的资源 url：${link}`);
-                }
-                if (reference === 1) {
-                    delete $references[link];
-                    Laya.loader.clearRes(link);
-                    Laya.loader.cancelLoadByUrl(link);
+            const reference: number = $references[url] || 0;
+            if (reference === 0) {
+                throw Error(`尝试解锁不存在的资源 url：${url}`);
+            }
+            else if (reference === 1) {
+                delete $references[url];
+                if (Resource.isRes3dUrl(url) === false) {
+                    $clearRes2d(url);
                 }
                 else {
-                    $references[link] = reference - 1;
+                    $clearRes3d(url);
                 }
+            }
+            else {
+                $references[url] = reference - 1;
+            }
+            // 若为3d资源，且不为json文件，则需要解锁配置文件
+            if (Resource.isRes3dUrl(url) === true && suncom.Common.getFileExtension(url) !== "json") {
+                Resource.unlock(Resource.getRes3dJsonUrl(url));
             }
         }
 
         /**
-         * 查询资源的引用次数
+         * 释放2d资源
          */
-        export function getReferenceByUrl(url: string): number {
-            return $references[url] || 0;
+        function $clearRes2d(url: string): void {
+            const urls: string[] = Resource.getLoadList(url);
+            for (let i: number = 0; i < urls.length; i++) {
+                const url: string = urls[i];
+                Laya.loader.clearRes(url);
+                Laya.loader.cancelLoadByUrl(url);
+            }
+        }
+
+        /**
+         * 释放3d资源
+         */
+        function $clearRes3d(url: string): void {
+            if (Resource.getRes3dJsonUrl(url) === url) {
+                const json: IRes3dJsonFile = Laya.loader.getRes(url);
+                const root: string = $getRes3dPackRoot(json.pack);
+                for (let i: number = 0; i < json.files.length; i++) {
+                    const path: string = root + json.files[i];
+                    const item: any = Laya.loader.getRes(path);
+                    item.dispose && item.dispose();
+                    item.destroy && item.destroy();
+                    Laya.loader.clearRes(path);
+                    Laya.loader.cancelLoadByUrl(path);
+                }
+                for (let i: number = 0; i < json.resources.length; i++) {
+                    const path: string = root + json.resources[i];
+                    const item: any = Laya.loader.getRes(path);
+                    item.dispose && item.dispose();
+                    item.destroy && item.destroy();
+                    Laya.loader.clearRes(path);
+                    Laya.loader.cancelLoadByUrl(path);
+                }
+                Laya.loader.clearRes(url);
+            }
+            else {
+                Laya.loader.cancelLoadByUrl(url);
+            }
         }
 
         /**
          * 根据url创建对象
-         * @method: 仅支持Skeleton和Texture的创建
          * 说明：
          * 1. 调用此接口创建对象时，会产生一个计数，当计数为0时，资源会被彻底释放
          * 2. 见destroy方法
@@ -118,8 +158,8 @@ module sunui {
         export function destroy(url: string, method: (res: any, url: string) => void = null, caller: Object = null): void {
             let templet: Templet = $templets[url] || null;
             if (templet !== null) {
-                templet.destroy(url, method, caller);
                 Resource.unlock(url);
+                templet.destroy(url, method, caller);
                 if (templet.referenceCount === 0) {
                     delete $templets[url];
                 }
@@ -162,7 +202,7 @@ module sunui {
          */
         export function release(id: number): number {
             if (id > 0) {
-                const handler: suncom.IHandler = suncom.Handler.create(null, releaseTempletGroup, [id]);
+                const handler: suncom.IHandler = suncom.Handler.create(null, $releaseTempletGroup, [id]);
                 suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
             }
             return 0;
@@ -171,30 +211,67 @@ module sunui {
         /**
          * 资源组释放执行函数，此方法由release方法异步调用执行，以避免create回调中的释放请求不生效的问题
          */
-        function releaseTempletGroup(id: number): void {
+        function $releaseTempletGroup(id: number): void {
             const group: TempletGroup = $groups[id] || null;
-            if (group !== null) {
-                delete $groups[id];
-                group.release();
+            if (group === null) {
+                return;
             }
+            delete $groups[id];
+            group.release();
         }
 
         /**
          * 获取需要加载的资源列表
          */
         export function getLoadList(url: string): string[] {
-            const index: number = url.lastIndexOf(".");
-            const str: string = url.substr(0, index);
-            const ext: string = url.substr(index + 1);
+            const ext: string = suncom.Common.getFileExtension(url);
             if (ext === "sk") {
-                return [
-                    str + ".png",
-                    str + ".sk"
-                ];
+                return [url, url.substr(0, url.length - ext.length) + "png"];
             }
             else {
                 return [url];
             }
+        }
+
+        /**
+         * 获取3d资源包名
+         */
+        function $getRes3dPackName(url: string): string {
+            const prefix: string = "res3d/LayaScene_";
+            const suffix: string = "/Conventional/";
+
+            if (url.indexOf(prefix) !== 0) {
+                throw Error(`解析3D资源包名失败 url:${url}`);
+            }
+            url = url.substr(prefix.length);
+
+            const index: number = url.indexOf(suffix);
+            if (index === -1) {
+                throw Error(`解析3D资源包名失败 url:${url}`);
+            }
+            return url.substr(0, index);
+        }
+
+        /**
+         * 获取3D资源的配置文件地址
+         */
+        export function getRes3dJsonUrl(url: string): string {
+            const pack: string = $getRes3dPackName(url);
+            return `${$getRes3dPackRoot(pack)}${pack}.json`;
+        }
+
+        /**
+         * 获取3d资源包的根目录
+         */
+        function $getRes3dPackRoot(pack: string): string {
+            return `res3d/LayaScene_${pack}/Conventional/`;
+        }
+
+        /**
+         * 判断是否为3D资源
+         */
+        export function isRes3dUrl(url: string): boolean {
+            return url.indexOf("res3d") === 0;
         }
     }
 }
