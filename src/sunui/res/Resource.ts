@@ -84,11 +84,10 @@ module sunui {
          * 释放2d资源
          */
         function $clearRes2d(url: string): void {
-            const urls: string[] = Resource.getLoadList(url);
+            const urls: string[] = Resource.getUnloadList(url);
             for (let i: number = 0; i < urls.length; i++) {
-                const url: string = urls[i];
-                Laya.loader.clearRes(url);
-                Laya.loader.cancelLoadByUrl(url);
+                const path: string = urls[i];
+                $clearRes(path);
             }
         }
 
@@ -98,28 +97,33 @@ module sunui {
         function $clearRes3d(url: string): void {
             if (Resource.getRes3dJsonUrl(url) === url) {
                 const json: IRes3dJsonFile = Laya.loader.getRes(url);
-                const root: string = $getRes3dPackRoot(json.pack);
+                const root: string = Resource.getRes3dPackRoot(json.pack);
                 for (let i: number = 0; i < json.files.length; i++) {
                     const path: string = root + json.files[i];
-                    const item: any = Laya.loader.getRes(path);
-                    item.dispose && item.dispose();
-                    item.destroy && item.destroy();
-                    Laya.loader.clearRes(path);
-                    Laya.loader.cancelLoadByUrl(path);
+                    $clearRes(path);
                 }
                 for (let i: number = 0; i < json.resources.length; i++) {
                     const path: string = root + json.resources[i];
-                    const item: any = Laya.loader.getRes(path);
-                    item.dispose && item.dispose();
-                    item.destroy && item.destroy();
-                    Laya.loader.clearRes(path);
-                    Laya.loader.cancelLoadByUrl(path);
+                    $clearRes(path);
                 }
                 Laya.loader.clearRes(url);
             }
             else {
                 Laya.loader.cancelLoadByUrl(url);
             }
+        }
+
+        /**
+         * 根据URL释放资源对象
+         */
+        function $clearRes(url: string): void {
+            const item: any = Laya.loader.getRes(url) || null;
+            if (item !== null) {
+                item.dispose && item.dispose();
+                item.destroy && item.destroy();
+            }
+            Laya.loader.clearRes(url);
+            Laya.loader.cancelLoadByUrl(url);
         }
 
         /**
@@ -226,6 +230,22 @@ module sunui {
         export function getLoadList(url: string): string[] {
             const ext: string = suncom.Common.getFileExtension(url);
             if (ext === "sk") {
+                return [url.substr(0, url.length - ext.length) + "png", url];
+            }
+            else {
+                return [url];
+            }
+        }
+
+        /**
+         * 获取需要卸载的资源列表
+         */
+        export function getUnloadList(url: string): string[] {
+            const ext: string = suncom.Common.getFileExtension(url);
+            if (ext === "sk") {
+                return [url, url.substr(0, url.length - ext.length) + "png"];
+            }
+            else if (ext === "atlas") {
                 return [url, url.substr(0, url.length - ext.length) + "png"];
             }
             else {
@@ -257,13 +277,14 @@ module sunui {
          */
         export function getRes3dJsonUrl(url: string): string {
             const pack: string = $getRes3dPackName(url);
-            return `${$getRes3dPackRoot(pack)}${pack}.json`;
+            return `${Resource.getRes3dPackRoot(pack)}${pack}.json`;
         }
 
         /**
          * 获取3d资源包的根目录
+         * export
          */
-        function $getRes3dPackRoot(pack: string): string {
+        export function getRes3dPackRoot(pack: string): string {
             return `res3d/LayaScene_${pack}/Conventional/`;
         }
 

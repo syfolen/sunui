@@ -12,7 +12,7 @@ module sunui {
         /**
          * 开始加载
          */
-        protected $doLoad(): void {
+        load(): void {
             Laya.loader.load(Resource.getLoadList(this.$url), Laya.Handler.create(this, this.$onUrlLoad));
         }
 

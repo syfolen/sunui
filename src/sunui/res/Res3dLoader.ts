@@ -8,7 +8,7 @@ module sunui {
         /**
          * 开始加载
          */
-        protected $doLoad(): void {
+        load(): void {
             const url: string = Resource.getRes3dJsonUrl(this.$url);
             Laya.loader.load([url], Laya.Handler.create(this, this.$onUrlLoad));
         }

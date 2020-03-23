@@ -47,28 +47,30 @@ module sunui {
             if (this.$loading === false) {
                 this.$loading = true;
                 this.$url = url;
-                this.$doLoad();
+                this.$doLoad(false);
             }
         }
 
         /**
          * 执行加载行为
          */
-        private $doLoad(): void {
-            if (this.$loader !== null) {
+        private $doLoad(destroyLoader: boolean): void {
+            if (destroyLoader === true) {
                 this.$loader.destroy();
             }
-
-            const handler: suncom.IHandler = suncom.Handler.create(this, this.$onLoad);
-            if (Resource.isRes3dUrl(this.$url) === true) {
-                this.$loader = new Res3dLoader(this.$url, handler);
+            else if (this.$loader === null) {
+                const handler: suncom.IHandler = suncom.Handler.create(this, this.$onLoad);
+                if (Resource.isRes3dUrl(this.$url) === true) {
+                    this.$loader = new Res3dLoader(this.$url, handler);
+                }
+                else if (suncom.Common.getFileExtension(this.$url) === "sk") {
+                    this.$loader = new SkeletonLoader(this.$url, handler);
+                }
+                else {
+                    this.$loader = new UrlLoader(this.$url, handler);
+                }
             }
-            else if (suncom.Common.getFileExtension(this.$url) === "sk") {
-                this.$loader = new SkeletonLoader(this.$url, handler);
-            }
-            else {
-                this.$loader = new UrlLoader(this.$url, handler);
-            }
+            this.$loader.load();
         }
 
         /**
@@ -78,7 +80,7 @@ module sunui {
             if (this.$destroyed === false) {
                 // 若资源加载失败，则尝试重新加载（无次数限制）
                 if (ok === false) {
-                    this.$retryer.run(1000, suncom.Handler.create(this, this.$doLoad), 2);
+                    this.$retryer.run(1000, suncom.Handler.create(this, this.$doLoad, [true]), 2);
                 }
                 else {
                     // 重置标记
@@ -95,7 +97,7 @@ module sunui {
         private $onRetryConfirmed(option: ConfirmOptionValueEnum): void {
             if (this.$destroyed === false) {
                 if (option === ConfirmOptionValueEnum.YES) {
-                    this.$doLoad();
+                    this.$doLoad(true);
                     this.$retryer.reset();
                 }
                 else {
@@ -111,6 +113,7 @@ module sunui {
             if (this.$destroyed === false) {
                 this.$destroyed = true;
                 this.$loading = false;
+                this.$loader.destroy();
                 this.$retryer.cancel();
             }
         }
