@@ -17,12 +17,12 @@ module sunui {
         /**
          * ui场景对象
          */
-        private $uiScene: Laya.Scene = null;
+        private $scene2d: Laya.Scene = null;
 
         /**
          * 当前场景对象
          */
-        private $d3Scene: Laya.Scene3D = null;
+        private $scene3d: Laya.Scene3D = null;
 
         constructor() {
             super();
@@ -49,13 +49,10 @@ module sunui {
          */
         private $beforeLoadScene(info: ISceneInfo, data: any): void {
             this.$sceneName = info.name;
+            // 此事件主要用于展示LoadingView
             this.facade.sendNotification(NotifyKey.BEFORE_LOAD_SCENE);
-
-            const iniCls: any = info.iniCls || null;
-            if (iniCls !== null) {
-                const task: suncore.ITask = data === void 0 ? new iniCls() : new iniCls(data);
-                suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, task);
-            }
+            // 执行初始化任务
+            info.iniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new info.iniCls(info, data));
         }
 
         /**
@@ -63,16 +60,18 @@ module sunui {
          */
         private $loadScene(info: ISceneInfo, data: any): void {
             this.facade.sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
+
+            info.scene3d = info.scene3d || null;
             this.facade.sendNotification(NotifyKey.LOAD_SCENE, [info, data]);
         }
 
         /**
          * 成功进入场景
          */
-        private $onEnterScene(uiScene: Laya.Scene, d3Scene: Laya.Scene3D): void {
+        private $onEnterScene(scene2d: Laya.Scene, scene3d: Laya.Scene3D): void {
             this.$ready = true;
-            this.$uiScene = uiScene;
-            this.$d3Scene = d3Scene;
+            this.$scene2d = scene2d || null;
+            this.$scene3d = scene3d || null;
             this.facade.sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, false]);
         }
 
@@ -96,7 +95,7 @@ module sunui {
          */
         private $beforeExitScene(info: ISceneInfo): void {
             // 执行反初始化任务
-            info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new info.uniCls());
+            info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new info.uniCls(info));
             // 退出成功（此时场景并未销毁）
             suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new suncore.SimpleTask(
                 suncom.Handler.create(this, this.$onExitScene, [info])
@@ -107,7 +106,8 @@ module sunui {
          * 退出场景
          */
         private $onExitScene(info: ISceneInfo): void {
-            this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, info);
+            this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, [info, this.$scene2d, this.$scene3d]);
+            this.facade.sendNotification(NotifyKey.DESTROY_SCENE, [info, this.$scene2d, this.$scene3d]);
             this.$sceneName = 0;
         }
 
@@ -175,15 +175,15 @@ module sunui {
         /**
          * 获取ui场景对象
          */
-        get uiScene(): any {
-            return this.$uiScene;
+        get scene2d(): any {
+            return this.$scene2d;
         }
 
         /**
          * 获取3d场景对象
          */
-        get d3Scene(): any {
-            return this.$d3Scene;
+        get scene3d(): any {
+            return this.$scene3d;
         }
 
         /**

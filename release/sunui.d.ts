@@ -449,12 +449,12 @@ declare module sunui {
         /**
          * 获取2D场景对象
          */
-        readonly uiScene: Laya.Scene;
+        readonly scene2d: Laya.Scene;
 
         /**
          * 获取3D场景对象
          */
-        readonly d3Scene: Laya.Scene3D;
+        readonly scene3d: Laya.Scene3D;
 
         /**
          * 获取场景名字
@@ -545,7 +545,7 @@ declare module sunui {
         const REGISTER_SCENES: string;
 
         /**
-         * 进入场景命令 { uiScene: Laya.Scene, d3Scene: Laya.Scene3D }
+         * 进入场景命令 { scene2d: Laya.Scene, scene3d: Laya.Scene3D }
          * 说明：
          * 1. 此命令由外部在实现LOAD_SCENE命令时于场景加载完成时派发
          * 2. 此命令必然在iniCls被执行之后被派发
@@ -654,5 +654,5 @@ declare module sunui {
     /**
      * 在对象或子对象中查找
      */
-    function find(path:string, parent:Laya.Node): any;
+    function find(path: string, parent: Laya.Node): any;
 }

@@ -10,11 +10,11 @@ module sunui {
          */
         addChild(view: IView): void {
             const node: Laya.Node = view as any;
-            if (M.sceneLayer.uiScene === null || view.zOrder >= sunui.UILevel.LOADING) {
+            if (M.sceneLayer.scene2d === null || view.zOrder >= sunui.UILevel.LOADING) {
                 Laya.stage.addChild(node);
             }
             else {
-                M.sceneLayer.uiScene.addChild(node);
+                M.sceneLayer.scene2d.addChild(node);
             }
         }
 

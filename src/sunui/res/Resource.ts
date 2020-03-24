@@ -97,7 +97,7 @@ module sunui {
         function $clearRes3d(url: string): void {
             if (Resource.getRes3dJsonUrl(url) === url) {
                 const json: IRes3dJsonFile = Laya.loader.getRes(url);
-                const root: string = Resource.getRes3dPackRoot(json.pack);
+                const root: string = $getRes3dPackRoot(json.pack);
                 for (let i: number = 0; i < json.files.length; i++) {
                     const path: string = root + json.files[i];
                     $clearRes(path);
@@ -177,6 +177,26 @@ module sunui {
                 }
                 suncom.Logger.log("================== resouce debug ==================");
             }
+        }
+
+        /**
+         * 创建3d对象
+         * 说明：
+         * 1. 同create方法
+         * export
+         */
+        export function createRes3d(name: string | IRes3dName, method: (node: any, url: string) => void, caller: Object): void {
+            Resource.create(Resource.getRes3dUrlByName(name), method, caller);
+        }
+
+        /**
+         * 销毁3d对象
+         * 说明：
+         * 1. 同destroy方法
+         * export
+         */
+        export function destroyRes3d(name: string | IRes3dName, method: (node: any, url: string) => void, caller: Object): void {
+            Resource.destroy(Resource.getRes3dUrlByName(name), method, caller);
         }
 
         /**
@@ -277,15 +297,32 @@ module sunui {
          */
         export function getRes3dJsonUrl(url: string): string {
             const pack: string = $getRes3dPackName(url);
-            return `${Resource.getRes3dPackRoot(pack)}${pack}.json`;
+            return `${$getRes3dPackRoot(pack)}${pack}.json`;
         }
 
         /**
          * 获取3d资源包的根目录
+         */
+        function $getRes3dPackRoot(pack: string): string {
+            return `res3d/LayaScene_${pack}/Conventional/`;
+        }
+
+        /**
+         * 获取3D资源地址
+         * @name: 如xxx.ls
+         * @pack: 如LayaScene_xxxx中的xxxx，允许为空
+         * 说明：
+         * 1. 所有3d资源都必须放在res3d目录下
+         * 2. 完整的3D资源目录必须为 res3d/LayaScene_xxxx/Conventional/ 否则将不能正确解析
          * export
          */
-        export function getRes3dPackRoot(pack: string): string {
-            return `res3d/LayaScene_${pack}/Conventional/`;
+        export function getRes3dUrlByName(name: string | IRes3dName): string {
+            if (typeof name === "object") {
+                return $getRes3dPackRoot(name.pack) + name.name;
+            }
+            else {
+                return $getRes3dPackRoot(suncom.Common.getFileName(name)) + name;
+            }
         }
 
         /**

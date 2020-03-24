@@ -12,15 +12,27 @@ module sunui {
         name: number;
 
         /**
+         * 2D场景文件
+         * export
+         */
+        scene2d: string;
+
+        /**
+         * 3D场景文件
+         * export
+         */
+        scene3d?: string;
+
+        /**
          * 初始化类
          * export
          */
-        iniCls?: new (data?: any) => suncore.ITask;
+        iniCls?: new (info: ISceneInfo, data?: any) => sunui.AbstractSceneIniClass;
 
         /**
          * 反初始化类
          * export
          */
-        uniCls?: new () => suncore.ITask;
+        uniCls?: new (info: ISceneInfo) => sunui.AbstractSceneIniClass;
     }
 }

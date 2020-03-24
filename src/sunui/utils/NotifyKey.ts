@@ -6,7 +6,7 @@ module sunui {
      */
     export namespace NotifyKey {
         /**
-         * 加载场景 { info: ISceneInfo, data: any }
+         * 加载场景 { name: number, data: any }
          * 说明：
          * 1. 此命令由外部注册并实现
          * 2. 当场景加载完成时，外部应当派发ENTER_SCENE以通知sunui继续逻辑
@@ -24,6 +24,15 @@ module sunui {
         export const UNLOAD_SCENE: string = "sunui.NotifyKey.UNLOAD_SCENE";
 
         /**
+         * 销毁场景 { info: ISceneInfo }
+         * 说明：
+         * 1. 外部应监听此事件来销毁场景资源
+         * 2. 同UNLOAD_SCENE
+         * depends
+         */
+        export const DESTROY_SCENE: string = "sunui.NotifyKey.DESTROY_SCENE";
+
+        /**
          * 加载场景之前 { none }
          * export
          */
@@ -38,7 +47,7 @@ module sunui {
         export const REGISTER_SCENES: string = "sunui.NotifyKey.REGISTER_SCENES";
 
         /**
-         * 进入场景命令 { uiScene: Laya.Scene, d3Scene: Laya.Scene3D }
+         * 进入场景命令 { scene2d: Laya.Scene, scene3d: Laya.Scene3D }
          * 说明：
          * 1. 此命令由外部在实现LOAD_SCENE命令时于场景加载完成时派发
          * 2. 此命令必然在iniCls被执行之后被派发

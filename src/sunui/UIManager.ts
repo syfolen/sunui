@@ -93,16 +93,16 @@ module sunui {
          * 获取2D场景对象
          * export
          */
-        get uiScene(): Laya.Scene {
-            return M.sceneLayer.uiScene;
+        get scene2d(): Laya.Scene {
+            return M.sceneLayer.scene2d;
         }
 
         /**
          * 获取3D场景对象
          * export
          */
-        get d3Scene(): Laya.Scene3D {
-            return M.sceneLayer.d3Scene;
+        get scene3d(): Laya.Scene3D {
+            return M.sceneLayer.scene3d;
         }
 
         /**

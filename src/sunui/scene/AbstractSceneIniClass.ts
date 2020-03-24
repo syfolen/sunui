@@ -5,9 +5,25 @@ module sunui {
      * export
      */
     export abstract class AbstractSceneIniClass extends suncore.AbstractTask {
+        /**
+         * 场景配置信息
+         * export
+         */
+        protected $info: ISceneInfo = null;
 
-        constructor(data?: any) {
+        /**
+         * 场景跳转参数
+         * export
+         */
+        protected $data: any;
+
+        /**
+         * export
+         */
+        constructor(info: ISceneInfo, data?: any) {
             super();
+            this.$info = info;
+            this.$data = data;
             this.facade.registerObserver(NotifyKey.ENTER_SCENE, this.$onEnterScene, this, true);
         }
 
