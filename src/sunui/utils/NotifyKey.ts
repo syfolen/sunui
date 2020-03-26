@@ -145,5 +145,35 @@ module sunui {
          * export
          */
         export const RETRY_CONFIRM: string = "sunui.NotifyKey.RETRY_CONFIRM";
+
+        /**
+         * 缓存资源安全加载器 { url: string, loader: AssetSafetyLoader }
+         */
+        export const CACHE_ASSET_SAFETY_LOADER: string = "sunui.NotifyKey.CACHE_ASSET_SAFETY_LOADER";
+
+        /**
+         * 移除资源安全加载器 { url: string, loader: AssetSafetyLoader }
+         */
+        export const REMOVE_ASSET_SAFETY_LOADER: string = "sunui.NotifyKey.REMOVE_ASSET_SAFETY_LOADER";
+
+        /**
+         * 资源加载失败 { none }
+         */
+        export const ON_ASSET_SAFETY_LOADER_FAILED: string = "sunui.NotifyKey.ON_ASSET_SAFETY_LOADER_FAILED";
+
+        /**
+         * 资源加载重试 { none }
+         */
+        export const ASSET_SAFETY_LOADER_RETRY: string = "sunui.NotifyKey.ASSET_SAFETY_LOADER_RETRY";
+
+        /**
+         * UrlSafetyLoader对象创建通知 { loader: UrlSafetyLoader }
+         */
+        export const ON_URL_SAFETY_LOADER_CREATED: string = "sunui.NotifyKey.ON_URL_SAFETY_LOADER_CREATED";
+
+        /**
+         * UrlSafetyLoader加载完成通知 { loader: UrlSafetyLoader }
+         */
+        export const ON_URL_SAFETY_LOADER_COMPLETE: string = "sunui.NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE";
     }
 }

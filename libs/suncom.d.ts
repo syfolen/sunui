@@ -459,7 +459,7 @@ declare module suncom {
         /**
          * 存储数据
          */
-        function put(name: number, data: any): void;
+        function put(name: number, data: any): any;
 
         /**
          * 是否存在

@@ -96,7 +96,7 @@ module sunui {
             if (this.$method === RetryMethodEnum.AUTO || this.$currentRetries < maxRetries) {
                 if (this.$retryTimerId === 0) {
                     this.$retryHandler = handler;
-                    this.$retryTimerId = suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, delay, this.$onRetryTimer, this, 1);
+                    this.$retryTimerId = suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, delay, this.$onRetryTimer, this);
                 }
                 else {
                     suncom.Logger.warn(`己忽略的重试请求 method:${suncom.Common.getMethodName(handler.method, handler.caller)}, caller:${suncom.Common.getQualifiedClassName(handler.caller)}`);
@@ -106,11 +106,11 @@ module sunui {
                 if (this.$prompting === false) {
                     this.$prompting = true;
                     if (this.$method === RetryMethodEnum.TERMINATE) {
-                        const handler: suncom.IHandler = suncom.Handler.create(this, this.$onConfirmRely, [ConfirmOptionValueEnum.NO]);
+                        const handler: suncom.IHandler = suncom.Handler.create(this, this.$onConfirmReplied, [ConfirmOptionValueEnum.NO]);
                         suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
                     }
                     else {
-                        const handler: suncom.IHandler = suncom.Handler.create(this, this.$onConfirmRely);
+                        const handler: suncom.IHandler = suncom.Handler.create(this, this.$onConfirmReplied);
                         this.facade.sendNotification(NotifyKey.RETRY_CONFIRM, [this.$mod, this.$prompt, this.$options, handler]);
                     }
                 }
@@ -121,9 +121,9 @@ module sunui {
         }
 
         /**
-         * 询问答复回调
+         * 询问得到答复
          */
-        private $onConfirmRely(option: ConfirmOptionValueEnum): void {
+        private $onConfirmReplied(option: ConfirmOptionValueEnum): void {
             if (this.$prompting === true) {
                 this.$prompting = false;
                 if (this.$confirmHandler !== null) {

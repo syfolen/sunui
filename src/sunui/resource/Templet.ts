@@ -3,7 +3,7 @@ module sunui {
     /**
      * 资源模版组
      */
-    export class TempletGroup {
+    export class Templet {
         /**
          * 模版组ID
          */
@@ -45,11 +45,10 @@ module sunui {
          * 资源加载成功回调
          */
         private $onResourceCreated(res: any, url: string): void {
-            if (res instanceof Laya.Skeleton) {
+            if (res instanceof Laya.Skeleton || res instanceof Laya.Scene3D || res instanceof Laya.Sprite3D) {
                 res.destroy();
             }
             this.$doneList.push(url);
-
             if (this.$doneList.length === this.$urls.length) {
                 this.$handler.runWith([this.$id]);
             }
@@ -69,43 +68,48 @@ module sunui {
          * 移除重复的资源
          */
         private $removeDuplicateResources(urls: string[]): string[] {
-            const array: string[] = [];
-            for (let i: number = 0; i < urls.length; i++) {
-                const url: string = urls[i];
-                if (array.indexOf(url) === -1) {
-                    array.push(url);
+            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
+                const array: string[] = [];
+                for (let i: number = 0; i < urls.length; i++) {
+                    const url: string = urls[i];
+                    if (array.indexOf(url) === -1) {
+                        array.push(url);
+                    }
+                    else {
+                        suncom.Logger.error(`重复的预加载资源文件 ${url}`);
+                    }
                 }
-                else {
-                    suncom.Logger.warn(`重复的预加载资源文件 ${url}`);
-                }
+                return array;
             }
-            return array;
+            return urls;
         }
 
         /**
          * 根据扩展名移除无需指定的资源文件
          */
         private $removeUnnecessaryResources(urls: string[], match: string, remove: string, msg: string): void {
-            const array: string[] = [];
+            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
+                const array: string[] = [];
 
-            for (let i: number = 0; i < urls.length; i++) {
-                const url: string = urls[i];
-                if (suncom.Common.getFileExtension(url) === match) {
-                    array.push(url);
-                }
-            }
-
-            for (let i: number = 0; i < array.length; i++) {
-                const url: string = array[i];
-                const png: string = url.substring(0, url.length - match.length) + remove;
-                do {
-                    const index: number = urls.indexOf(png);
-                    if (index === -1) {
-                        break;
+                for (let i: number = 0; i < urls.length; i++) {
+                    const url: string = urls[i];
+                    if (suncom.Common.getFileExtension(url) === match) {
+                        array.push(url);
                     }
-                    urls.splice(index, 1);
-                    suncom.Logger.warn(`${msg} ${url}`);
-                } while (true);
+                }
+
+                for (let i: number = 0; i < array.length; i++) {
+                    const url: string = array[i];
+                    const png: string = url.substring(0, url.length - match.length) + remove;
+                    do {
+                        const index: number = urls.indexOf(png);
+                        if (index === -1) {
+                            break;
+                        }
+                        urls.splice(index, 1);
+                        suncom.Logger.warn(`${msg} ${url}`);
+                    } while (true);
+                }
             }
         }
     }

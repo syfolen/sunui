@@ -34,7 +34,9 @@ module sunui {
             M.sceneLayer = new SceneLayer();
 
             // 启动缓动服务
-            new TweenService().run();
+            suncom.DBService.put(-1, new TweenService()).run();
+            // 启动资源加载管理服务
+            suncom.DBService.put(-1, new ResourceService()).run();
 
             this.facade.registerCommand(NotifyKey.SHOW_POPUP, ShowPopupCommand);
             this.facade.registerCommand(NotifyKey.CLOSE_POPUP, ClosePopupCommand);

@@ -60,7 +60,6 @@ module sunui {
          */
         private $loadScene(info: ISceneInfo, data: any): void {
             this.facade.sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
-
             info.scene3d = info.scene3d || null;
             this.facade.sendNotification(NotifyKey.LOAD_SCENE, [info, data]);
         }
