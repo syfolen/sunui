@@ -94,13 +94,16 @@ module sunui {
 
         /**
          * 根据url创建对象
+         * @data: 默认为：void 0
          * 说明：
          * 1. 调用此接口创建对象时，会产生一个计数，当计数为0时，资源会被彻底释放
          * 2. 见destroy方法
+         * 参数data允许为以下几种类型：
+         * 1. aniMode：目前仅支持动画模式，0不支持换装，1、2支持换装，默认值与真正实现加载的Loader有关
          * export
          */
-        export function create(url: string, method: (res: any, url: string) => void = null, caller: Object = null): any {
-            new AssetSafetyLoader(url, suncom.Handler.create(caller, method));
+        export function create(url: string, method: (res: any, url: string) => void = null, caller: Object = null, data?: any): any {
+            new AssetSafetyLoader(url, suncom.Handler.create(caller, method), data);
         }
 
         /**

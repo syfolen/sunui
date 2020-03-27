@@ -38,9 +38,9 @@ module sunui {
         private $enterScene(name: number, data: any): void {
             // 获取场景配置信息
             const info: ISceneInfo = SceneManager.getConfigByName(name);
-            // 初始化场景（场景初始化应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
+            // 初始化场景（应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeLoadScene, [info, data]));
-            // 加载当前场景（场景加载应当被无限延后，因为初始化方法中可能会增加一些加载资源的任务）
+            // 加载当前场景（应当被无限延后，因为初始化方法中可能会增加一些加载资源的任务）
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$loadScene, [info, data]));
         }
 
@@ -51,7 +51,6 @@ module sunui {
             this.$sceneName = info.name;
             // 此事件主要用于展示LoadingView
             this.facade.sendNotification(NotifyKey.BEFORE_LOAD_SCENE);
-            // 执行初始化任务
             info.iniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new info.iniCls(info, data));
         }
 
@@ -84,29 +83,33 @@ module sunui {
             // 暂停场景时间轴
             this.facade.sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
 
-            // 反初始化场景（反场景初始化应当被无限延后，因为需要等待Loading界面的展示）
+            // 离开当前场景（应当被无限延后，因为需要等待Loading界面的展示）
             const info: ISceneInfo = SceneManager.getConfigByName(this.$sceneName);
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeExitScene, [info]));
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$onLeaveScene, [info]));
         }
 
         /**
-         * 退出场景之前
+         * 离开当前场景
          */
-        private $beforeExitScene(info: ISceneInfo): void {
-            // 执行反初始化任务
+        private $onLeaveScene(info: ISceneInfo): void {
+            // 添加反初始化任务
             info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new info.uniCls(info));
-            // 退出成功（此时场景并未销毁）
+            // 派发离开场景通知
+            this.facade.sendNotification(NotifyKey.LEAVE_SCENE);
+            // 卸载场景
+            this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, [info, this.$scene2d, this.$scene3d]);
+            // 销毁场景资源
+            this.facade.sendNotification(NotifyKey.DESTROY_SCENE, [info]);
+            // 置空当前场景名字
             suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new suncore.SimpleTask(
-                suncom.Handler.create(this, this.$onExitScene, [info])
+                suncom.Handler.create(this, this.$onExitScene)
             ));
         }
 
         /**
          * 退出场景
          */
-        private $onExitScene(info: ISceneInfo): void {
-            this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, [info, this.$scene2d, this.$scene3d]);
-            this.facade.sendNotification(NotifyKey.DESTROY_SCENE, [info, this.$scene2d, this.$scene3d]);
+        private $onExitScene(): void {
             this.$sceneName = 0;
         }
 

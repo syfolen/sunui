@@ -12,6 +12,11 @@ module sunui {
         private $url: string = null;
 
         /**
+         * 可选参数
+         */
+        private $data: any = void 0;
+
+        /**
          * 资源加载回调
          */
         private $complete: suncom.IHandler = null;
@@ -31,9 +36,10 @@ module sunui {
          */
         private $destroyed: boolean = false;
 
-        constructor(url: string, complete: suncom.IHandler) {
+        constructor(url: string, complete: suncom.IHandler, data?: any) {
             super();
             this.$url = url;
+            this.$data = data;
             this.$complete = complete;
             this.facade.sendNotification(NotifyKey.CACHE_ASSET_SAFETY_LOADER, [url, this]);
             this.$doLoad();
@@ -60,7 +66,7 @@ module sunui {
                 this.$loader = new Res3dLoader(this.$url, handler);
             }
             else if (suncom.Common.getFileExtension(this.$url) === "sk") {
-                this.$loader = new SkeletonLoader(this.$url, handler);
+                this.$loader = new SkeletonLoader(this.$url, handler, this.$data);
             }
             else {
                 this.$loader = new UrlLoader(this.$url, handler);

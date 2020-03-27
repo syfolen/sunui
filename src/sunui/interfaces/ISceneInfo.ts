@@ -27,12 +27,12 @@ module sunui {
          * 初始化类
          * export
          */
-        iniCls?: new (info: ISceneInfo, data?: any) => sunui.AbstractSceneIniClass;
+        iniCls?: new (info: ISceneInfo, data?: any) => sunui.SceneIniClass;
 
         /**
          * 反初始化类
          * export
          */
-        uniCls?: new (info: ISceneInfo) => sunui.AbstractSceneIniClass;
+        uniCls?: new (info: ISceneInfo) => sunui.SceneUniClass;
     }
 }

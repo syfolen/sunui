@@ -24,10 +24,11 @@ module sunui {
         export const UNLOAD_SCENE: string = "sunui.NotifyKey.UNLOAD_SCENE";
 
         /**
-         * 销毁场景 { info: ISceneInfo }
+         * 销毁场景资源 { info: ISceneInfo }
          * 说明：
          * 1. 外部应监听此事件来销毁场景资源
          * 2. 同UNLOAD_SCENE
+         * 3. 此通知后于UNLOAD_SCENE派发
          * depends
          */
         export const DESTROY_SCENE: string = "sunui.NotifyKey.DESTROY_SCENE";
@@ -65,6 +66,13 @@ module sunui {
          * depends
          */
         export const EXIT_SCENE: string = "sunui.NotifyKey.EXIT_SCENE";
+
+        /**
+         * 离开场景命令 { none }
+         * 说明：
+         * 1. 此命令后于EXIT_SCENE派发
+         */
+        export const LEAVE_SCENE: string = "sunui.NotifyKey.LEAVE_SCENE";
 
         /**
          * 添加缓动对象 { tween: ITween }

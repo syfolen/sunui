@@ -1,10 +1,10 @@
 
 module sunui {
     /**
-     * 场景初始化抽象入口类
+     * 场景初始化入口类
      * export
      */
-    export abstract class AbstractSceneIniClass extends suncore.AbstractTask {
+    export abstract class SceneIniClass extends suncore.AbstractTask {
         /**
          * 场景配置信息
          * export
@@ -27,12 +27,10 @@ module sunui {
             this.facade.registerObserver(NotifyKey.ENTER_SCENE, this.$onEnterScene, this, true);
         }
 
-        run(): boolean {
-            return true;
-        }
-
         /**
-         * 进入场景回调，场景元素建议在此方法中初始化
+         * 进入场景回调，场景数据建议在此方法中初始化
+         * 说明：
+         * 1. 此方法会后于run执行
          * export
          */
         protected $onEnterScene(): void {
