@@ -26,8 +26,21 @@ module sunui {
          */
         protected $onAssetsLoaded(ok: boolean): void {
             if (ok === true) {
-                const skeleton: Laya.Skeleton = new Laya.Skeleton(null, this.$aniMode);
-                skeleton.load(this.$url, Laya.Handler.create(this, this.$onSkeletonCreated));
+                let templet: Laya.Templet = M.cacheMap[this.$url] || null;
+                if (templet === null) {
+                    templet = M.cacheMap[this.$url] = new Laya.Templet();
+                    templet.on(Laya.Event.COMPLETE, this, this.$onTempletCreated);
+                    templet.loadAni(this.$url);
+                }
+                else if (templet.isParserComplete === false) {
+                    templet.on(Laya.Event.COMPLETE, this, this.$onTempletCreated);
+                }
+                else {
+                    const handler: suncom.IHandler = suncom.Handler.create(this, this.$onTempletCreated);
+                    suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
+                }
+                // 加锁防止Laya.Event.COMPLETE事件不被回调
+                Resource.lock(this.$url);
             }
             else {
                 this.$onComplete(false);
@@ -37,13 +50,12 @@ module sunui {
         /**
          * 龙骨创建完成
          */
-        private $onSkeletonCreated(skeleton: Laya.Skeleton): void {
-            if (this.destroyed === true) {
-                skeleton.destroy();
+        private $onTempletCreated(): void {
+            if (this.destroyed === false) {
+                const templet: Laya.Templet = M.cacheMap[this.$url];
+                this.$onComplete(true, templet.buildArmature(this.$aniMode));
             }
-            else {
-                this.$onComplete(true, skeleton);
-            }
+            Resource.lock(this.$url);
         }
     }
 }

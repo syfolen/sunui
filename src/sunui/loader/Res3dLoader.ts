@@ -24,7 +24,13 @@ module sunui {
          */
         private $onUrlLoaded(ok: boolean, url: string): void {
             if (ok === true) {
-                this.$loadAssets([this.$url]);
+                const res: any = M.cacheMap[this.$url] || null;
+                if (res === null) {
+                    this.$loadAssets([this.$url]);
+                }
+                else {
+                    this.$onAssetsLoaded(true);
+                }
             }
             else {
                 this.$onComplete(false);
@@ -39,7 +45,11 @@ module sunui {
                 this.$onComplete(ok);
             }
             else {
-                this.$onComplete(ok, ok === false ? null : Laya.Sprite3D.instantiate(Laya.loader.getRes(this.$url)));
+                let res: any = M.cacheMap[this.$url] || null;
+                if (res === null) {
+                    res = M.cacheMap[this.$url] = Laya.loader.getRes(this.$url);
+                }
+                this.$onComplete(ok, ok === false ? null : Laya.Sprite3D.instantiate(res));
             }
         }
     }

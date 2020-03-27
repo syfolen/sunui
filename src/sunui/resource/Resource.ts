@@ -94,7 +94,7 @@ module sunui {
 
         /**
          * 根据url创建对象
-         * @data: 默认为：void 0
+         * @data: 可缺省参数，默认为：void 0
          * 说明：
          * 1. 调用此接口创建对象时，会产生一个计数，当计数为0时，资源会被彻底释放
          * 2. 见destroy方法
@@ -102,7 +102,7 @@ module sunui {
          * 1. aniMode：目前仅支持动画模式，0不支持换装，1、2支持换装，默认值与真正实现加载的Loader有关
          * export
          */
-        export function create(url: string, method: (res: any, url: string) => void = null, caller: Object = null, data?: any): any {
+        export function create(url: string, method: (res: any, url: string) => void = null, caller: Object = null, data?: any): void {
             new AssetSafetyLoader(url, suncom.Handler.create(caller, method), data);
         }
 
@@ -120,11 +120,12 @@ module sunui {
 
         /**
          * 创建3d对象
+         * @data: 可缺省参数，默认为：void 0
          * 说明：
          * 1. 同create方法
          * export
          */
-        export function createRes3d(name: string | IRes3dName, method: (node: any, url: string) => void, caller: Object): void {
+        export function createRes3d(name: string | IRes3dName, method: (node: any, url: string) => void, caller: Object, data?: any): any {
             Resource.create(Resource.getRes3dUrlByName(name), method, caller);
         }
 

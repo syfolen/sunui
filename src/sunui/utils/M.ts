@@ -15,6 +15,11 @@ module sunui {
         export let sceneLayer: SceneLayer;
 
         /**
+         * 全局资源缓存
+         */
+        export const cacheMap: { [url: string]: any } = {};
+
+        /**
          * 模版集合
          */
         export const templets: { [url: string]: Templet } = {};
@@ -23,15 +28,5 @@ module sunui {
          * 资源引用计数集合
          */
         export const references: { [url: string]: number } = {};
-
-        /**
-         * 缓动Service
-         */
-        export let tweenService: TweenService = null;
-
-        /**
-         * 资源加载管理Service
-         */
-        export let resourceService: ResourceService = null;
     }
 }
