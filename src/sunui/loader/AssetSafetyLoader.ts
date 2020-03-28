@@ -41,7 +41,6 @@ module sunui {
             this.$url = url;
             this.$data = data;
             this.$complete = complete;
-            this.facade.sendNotification(NotifyKey.CACHE_ASSET_SAFETY_LOADER, [url, this]);
             this.$doLoad();
         }
 

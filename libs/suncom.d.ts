@@ -419,6 +419,11 @@ declare module suncom {
         function getFileExtension(path: string): string;
 
         /**
+         * 替换扩展名，并返回新的路径
+         */
+        export function replacePathExtension(path: string, newExt: string): string;
+
+        /**
          * 从数组中查找数据
          * @array: 数据源
          * @method: 查询规则，返回true表示与规则匹配

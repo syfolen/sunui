@@ -6,23 +6,26 @@ module sunui {
     export class ResourceService extends suncore.BaseService {
         /**
          * 允许同时加载的最大个数
+         * export
          */
         static readonly MAX_LOAD_COUNT: number = 5;
 
         /**
-         * AssetSafetyLoader集合
-         */
-        private $loaders: { [url: string]: AssetSafetyLoader[] } = {};
-
-        /**
-         * 待执行的加载器
+         * 待执行的UrlSafetyLoader
          */
         private $undoList: UrlSafetyLoader[] = [];
 
         /**
-         * 正在执行的加载器
+         * 正在执行的UrlSafetyLoader
          */
         private $loadingList: UrlSafetyLoader[] = [];
+
+        /**
+         * AssetSafetyLoader加载器缓存
+         * 说明：
+         * 1. 缓存加载器作为解锁资源的依据
+         */
+        private $cacheLoaders: { [url: string]: AssetSafetyLoader[] } = {};
 
         /**
          * 己询问资源是否重新加载
@@ -91,9 +94,9 @@ module sunui {
          * 缓存AssetSafetyLoader
          */
         private $onCacheAssetSafetyLoader(url: string, loader: AssetSafetyLoader): void {
-            let loaders: AssetSafetyLoader[] = this.$loaders[url] || null;
+            let loaders: AssetSafetyLoader[] = this.$cacheLoaders[url] || null;
             if (loaders === null) {
-                loaders = this.$loaders[url] = [];
+                loaders = this.$cacheLoaders[url] = [];
             }
             loaders.push(loader);
             Resource.lock(url);
@@ -103,7 +106,7 @@ module sunui {
          * 移除AssetSafetyLoader
          */
         private $onRemoveAssetSafetyLoader(url: string, loader: AssetSafetyLoader, method: Function, caller: Object): void {
-            const loaders: AssetSafetyLoader[] = this.$loaders[url] || null;
+            const loaders: AssetSafetyLoader[] = this.$cacheLoaders[url] || null;
             if (loaders === null) {
                 return;
             }
@@ -125,7 +128,7 @@ module sunui {
             if (index > -1) {
                 loaders.splice(index, 1);
                 if (loaders.length === 0) {
-                    delete this.$loaders[url];
+                    delete this.$cacheLoaders[url];
                 }
                 Resource.unlock(url);
             }

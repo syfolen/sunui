@@ -11,6 +11,12 @@ module sunui {
         let $seedId: number = 0;
 
         /**
+         * 3D资源目录
+         * export
+         */
+        export let res3dRoot: string = null;
+
+        /**
          * 生成模版ID（唯一）
          */
         function createTempletId(): number {
@@ -26,26 +32,23 @@ module sunui {
          * export
          */
         export function lock(url: string): void {
+            // 禁止单独锁定3d资源配置文件
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 if (Resource.isRes3dUrl(url) === true && Resource.getRes3dJsonUrl(url) === url) {
-                    suncom.Logger.error(`禁止单独锁定3d资源配置文件：${url}`);
+                    return;
                 }
             }
             const ext: string = suncom.Common.getFileExtension(url);
             const str: string = url.substr(0, url.length - ext.length);
 
-            const urls: string[] = [];
+            const urls: string[] = [url];
             // 图集和龙骨需要同时锁定PNG图片
             if (ext === "sk" || ext === "atlas") {
-                urls.push(url);
                 urls.push(str + "png");
             }
             // 3d资源需要同时锁定json配置文件
             else if (Resource.isRes3dUrl(url) === true) {
                 urls.push(str + "json");
-            }
-            else {
-                urls.push(url);
             }
 
             for (let i: number = 0; i < urls.length; i++) {
@@ -63,26 +66,23 @@ module sunui {
          * export
          */
         export function unlock(url: string): void {
+            // 禁止单独解锁3D资源配置文件
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 if (Resource.isRes3dUrl(url) === true && Resource.getRes3dJsonUrl(url) === url) {
-                    suncom.Logger.error(`禁止单独解锁3D资源配置文件：${url}`);
+                    return;
                 }
             }
             const ext: string = suncom.Common.getFileExtension(url);
             const str: string = url.substr(0, url.length - ext.length);
 
-            const urls: string[] = [];
+            const urls: string[] = [url];
             // 图集和龙骨需要同时解锁PNG图片
             if (ext === "sk" || ext === "atlas") {
                 urls.push(str + "png");
-                urls.push(url);
             }
             // 3d资源只需要解锁json配置文件
             else if (Resource.isRes3dUrl(url) === true) {
                 urls.push(str + "json");
-            }
-            else {
-                urls.push(url);
             }
 
             for (let i: number = 0; i < urls.length; i++) {
@@ -101,29 +101,8 @@ module sunui {
          * export
          */
         export function create(url: string, method: (res: any, url: string) => void = null, caller: Object = null, data?: any): void {
-            new AssetSafetyLoader(url, suncom.Handler.create(caller, method), data);
-        }
-
-        /**
-         * 立即创建对象
-         * 说明：
-         * 1. 通过此方法创建对象并不会产生引用计数，且只需要在外部销毁即可
-         * export
-         */
-        export function createSync(url: string, data?: any): any {
-            let res: any = M.cacheMap[url] || null;
-            if (suncom.Common.getFileExtension(url) === "sk") {
-                return res.buildArmature(data);
-            }
-            else if (Resource.isRes3dUrl(url) === true) {
-                if (res === null) {
-                    res = M.cacheMap[url] = Laya.loader.getRes(url);
-                }
-                return Laya.Sprite3D.instantiate(res);
-            }
-            else {
-                return Laya.loader.getRes(url);
-            }
+            const loader: AssetSafetyLoader = new AssetSafetyLoader(url, suncom.Handler.create(caller, method), data);
+            puremvc.Facade.getInstance().sendNotification(NotifyKey.CACHE_ASSET_SAFETY_LOADER, [url, loader]);
         }
 
         /**
@@ -146,16 +125,6 @@ module sunui {
          */
         export function createRes3d(name: string | IRes3dName, method: (node: any, url: string) => void, caller: Object): any {
             Resource.create(Resource.getRes3dUrlByName(name), method, caller);
-        }
-
-        /**
-         * 立即创建3d对象
-         * 说明：
-         * 1. 同createSync
-         * export
-         */
-        export function createRes3dSync(name: string | IRes3dName): any {
-            return Resource.createSync(Resource.getRes3dUrlByName(name));
         }
 
         /**
@@ -214,30 +183,60 @@ module sunui {
         }
 
         /**
-         * 获取需要加载的资源列表
+         * 立即创建对象
+         * 说明：
+         * 1. 通过此方法创建对象并不会产生引用计数，且只需要在外部销毁即可
+         * export
          */
-        export function getLoadList(url: string): string[] {
-            const ext: string = suncom.Common.getFileExtension(url);
-            if (ext === "sk") {
-                return [url.substr(0, url.length - ext.length) + "png", url];
+        export function createSync(url: string, data?: any): any {
+            let res: any = M.cacheMap[url] || null;
+            if (suncom.Common.getFileExtension(url) === "sk") {
+                return res.buildArmature(data);
+            }
+            else if (Resource.isRes3dUrl(url) === true) {
+                if (res === null) {
+                    res = M.cacheMap[url] = Laya.loader.getRes(url);
+                }
+                return Laya.Sprite3D.instantiate(res);
             }
             else {
-                return [url];
+                return Laya.loader.getRes(url);
             }
         }
 
         /**
-         * 获取3d资源包的根目录
+         * 立即创建3d对象
+         * 说明：
+         * 1. 同createSync
+         * export
+         */
+        export function createRes3dSync(name: string | IRes3dName): any {
+            return Resource.createSync(Resource.getRes3dUrlByName(name));
+        }
+
+        /**
+         * 根据Url清理资源
+         * export
+         */
+        export function clearResByUrl(url: string): void {
+            UrlLocker.clearResByUrl(url);
+        }
+
+        /**
+         * 获取3D资源目录下的资源包路径
          */
         export function getRes3dPackRoot(pack: string): string {
-            return `res3d/LayaScene_${pack}/Conventional/`;
+            if (Resource.res3dRoot === null) {
+                throw Error(`请先指定3D资源目录：sunui.Resource.res3dRoot=`);
+            }
+            return `${Resource.res3dRoot}/LayaScene_${pack}/Conventional/`;
         }
 
         /**
          * 获取3d资源包名
          */
         function $getRes3dPackName(url: string): string {
-            const prefix: string = "res3d/LayaScene_";
+            const prefix: string = `${Resource.res3dRoot}/LayaScene_`;
             const suffix: string = "/Conventional/";
 
             if (url.indexOf(prefix) !== 0) {
@@ -256,7 +255,7 @@ module sunui {
          * 判断是否为3D资源
          */
         export function isRes3dUrl(url: string): boolean {
-            return url.indexOf("res3d") === 0;
+            return url.indexOf(Resource.res3dRoot) === 0;
         }
 
         /**
@@ -264,8 +263,7 @@ module sunui {
          * export
          */
         export function getRes3dJsonUrl(url: string): string {
-            const pack: string = $getRes3dPackName(url);
-            return `${Resource.getRes3dPackRoot(pack)}${pack}.json`;
+            return suncom.Common.replacePathExtension(url, "json");
         }
 
         /**
@@ -273,8 +271,8 @@ module sunui {
          * @name: 如xxx.ls
          * @pack: 如LayaScene_xxxx中的xxxx，允许为空
          * 说明：
-         * 1. 所有3d资源都必须放在res3d目录下
-         * 2. 完整的3D资源目录必须为 res3d/LayaScene_xxxx/Conventional/ 否则将不能正确解析
+         * 1. 所有3d资源都必须放在${Resource.res3dRoot}目录下
+         * 2. 完整的3D资源目录必须为 ${Resource.res3dRoot}/LayaScene_${pack}/Conventional/ 否则将不能正确解析
          * export
          */
         export function getRes3dUrlByName(name: string | IRes3dName): string {
@@ -284,14 +282,6 @@ module sunui {
             else {
                 return Resource.getRes3dPackRoot(suncom.Common.getFileName(name)) + name;
             }
-        }
-
-        /**
-         * 根据Url清理资源
-         * export
-         */
-        export function clearResByUrl(url: string): void {
-            UrlLocker.clearResByUrl(url);
         }
     }
 }

@@ -39,13 +39,23 @@ module sunui {
          * 根据Url清理资源
          */
         export function clearResByUrl(url: string): void {
-            const item: any = Laya.loader.getRes(url) || null;
+            // 销毁自定义缓存
+            let item: any = M.cacheMap[url] || null;
             if (item !== null) {
                 item.dispose && item.dispose();
                 item.destroy && item.destroy();
+                delete M.cacheMap[url];
             }
-            Laya.loader.clearRes(url);
-            Laya.loader.cancelLoadByUrl(url);
+            // 销毁系统缓存
+            const res: any = Laya.loader.getRes(url) || null;
+            if (res === null) {
+                Laya.loader.cancelLoadByUrl(url);
+            }
+            else {
+                res.dispose && res.dispose();
+                res.destroy && res.destroy();
+                Laya.loader.clearRes(url);
+            }
         }
 
         /**
@@ -58,13 +68,6 @@ module sunui {
                 for (let i: number = 0; i < urls.length; i++) {
                     UrlLocker.clearResByUrl(urls[i]);
                 }
-            }
-            // 若存在全局缓存，则销毁
-            const res: any = M.cacheMap[url] || null;
-            if (res !== null) {
-                delete M.cacheMap[url];
-                res.dispose && res.dispose();
-                res.destroy && res.destroy();
             }
             UrlLocker.clearResByUrl(url);
         }

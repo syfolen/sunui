@@ -18,7 +18,7 @@ module sunui {
          * 预加载龙骨资源
          */
         protected $doLoad(): void {
-            this.$loadAssets(Resource.getLoadList(this.$url));
+            this.$loadAssets([this.$url, suncom.Common.replacePathExtension(this.$url, "png")]);
         }
 
         /**
