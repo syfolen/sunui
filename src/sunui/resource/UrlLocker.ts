@@ -59,6 +59,13 @@ module sunui {
                     UrlLocker.clearResByUrl(urls[i]);
                 }
             }
+            // 若存在全局缓存，则销毁
+            const res: any = M.cacheMap[url] || null;
+            if (res !== null) {
+                delete M.cacheMap[url];
+                res.dispose && res.dispose();
+                res.destroy && res.destroy();
+            }
             UrlLocker.clearResByUrl(url);
         }
 

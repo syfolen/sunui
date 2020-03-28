@@ -55,7 +55,7 @@ module sunui {
                 const templet: Laya.Templet = M.cacheMap[this.$url];
                 this.$onComplete(true, templet.buildArmature(this.$aniMode));
             }
-            Resource.lock(this.$url);
+            Resource.unlock(this.$url);
         }
     }
 }

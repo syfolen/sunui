@@ -26,10 +26,9 @@ module sunui {
          * export
          */
         export function lock(url: string): void {
-            // 禁止锁定3d资源配置文件
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 if (Resource.isRes3dUrl(url) === true && Resource.getRes3dJsonUrl(url) === url) {
-                    suncom.Logger.error(`禁止锁定3D资源配置文件：${url}`);
+                    suncom.Logger.error(`禁止单独锁定3d资源配置文件：${url}`);
                 }
             }
             const ext: string = suncom.Common.getFileExtension(url);
@@ -64,10 +63,9 @@ module sunui {
          * export
          */
         export function unlock(url: string): void {
-            // 禁止锁定3d资源配置文件
             if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
                 if (Resource.isRes3dUrl(url) === true && Resource.getRes3dJsonUrl(url) === url) {
-                    suncom.Logger.error(`禁止锁定3D资源配置文件：${url}`);
+                    suncom.Logger.error(`禁止单独解锁3D资源配置文件：${url}`);
                 }
             }
             const ext: string = suncom.Common.getFileExtension(url);
@@ -107,6 +105,28 @@ module sunui {
         }
 
         /**
+         * 立即创建对象
+         * 说明：
+         * 1. 通过此方法创建对象并不会产生引用计数，且只需要在外部销毁即可
+         * export
+         */
+        export function createSync(url: string, data?: any): any {
+            let res: any = M.cacheMap[url] || null;
+            if (suncom.Common.getFileExtension(url) === "sk") {
+                return res.buildArmature(data);
+            }
+            else if (Resource.isRes3dUrl(url) === true) {
+                if (res === null) {
+                    res = M.cacheMap[url] = Laya.loader.getRes(url);
+                }
+                return Laya.Sprite3D.instantiate(res);
+            }
+            else {
+                return Laya.loader.getRes(url);
+            }
+        }
+
+        /**
          * 销毁对象
          * 说明：
          * 1. 见create方法
@@ -120,13 +140,22 @@ module sunui {
 
         /**
          * 创建3d对象
-         * @data: 可缺省参数，默认为：void 0
          * 说明：
          * 1. 同create方法
          * export
          */
-        export function createRes3d(name: string | IRes3dName, method: (node: any, url: string) => void, caller: Object, data?: any): any {
+        export function createRes3d(name: string | IRes3dName, method: (node: any, url: string) => void, caller: Object): any {
             Resource.create(Resource.getRes3dUrlByName(name), method, caller);
+        }
+
+        /**
+         * 立即创建3d对象
+         * 说明：
+         * 1. 同createSync
+         * export
+         */
+        export function createRes3dSync(name: string | IRes3dName): any {
+            return Resource.createSync(Resource.getRes3dUrlByName(name));
         }
 
         /**
@@ -232,6 +261,7 @@ module sunui {
 
         /**
          * 获取3D资源的配置文件地址
+         * export
          */
         export function getRes3dJsonUrl(url: string): string {
             const pack: string = $getRes3dPackName(url);

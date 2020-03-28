@@ -86,7 +86,6 @@ module sunui {
             else {
                 this.$retryer.run(1000, suncom.Handler.create(this, this.$doLoad), 2);
             }
-            this.$loader.destroy();
             this.$loader = null;
         }
 
