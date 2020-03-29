@@ -19,11 +19,6 @@ module sunui {
         private $complete: suncom.IHandler = null;
 
         /**
-         * 加载进度
-         */
-        private $progress: number = 0;
-
-        /**
          * 是否正在加载
          */
         private $loading: boolean = false;
@@ -55,10 +50,10 @@ module sunui {
                 this.$loading = true;
                 UrlLocker.lock(this.$url);
                 if (Resource.isRes3dUrl(this.$url) === false || Resource.getRes3dJsonUrl(this.$url) === this.$url) {
-                    Laya.loader.load(this.$url, Laya.Handler.create(this, this.$onComplete), Laya.Handler.create(this, this.$onProgress));
+                    Laya.loader.load(this.$url, Laya.Handler.create(this, this.$onComplete));
                 }
                 else {
-                    Laya.loader.create(this.$url, Laya.Handler.create(this, this.$onComplete), Laya.Handler.create(this, this.$onProgress));
+                    Laya.loader.create(this.$url, Laya.Handler.create(this, this.$onComplete));
                 }
             }
         }
@@ -74,22 +69,6 @@ module sunui {
             this.facade.sendNotification(NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE, this);
             UrlLocker.unlock(this.$url);
             this.$loading = false;
-        }
-
-        /**
-         * 加载进度回调
-         */
-        protected $onProgress(value: number): void {
-            if (this.$destroyed === false) {
-                this.$progress = value;
-            }
-        }
-
-        /**
-         * 获取加载进度
-         */
-        get progress(): number {
-            return this.$progress;
         }
 
         /**

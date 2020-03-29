@@ -15,11 +15,9 @@ module sunui {
         private $complete: suncom.IHandler = null;
 
         /**
-         * 己完成的加载器数量
-         * 说明：
-         * 1. 此属性将在资源URL解析完成后生效
+         * 是否己销毁
          */
-        private $doneCount: number = -1;
+        private $destroyed: boolean = false;
 
         /**
          * 加载网址
@@ -32,9 +30,9 @@ module sunui {
         protected $loaders: UrlSafetyLoader[] = [];
 
         /**
-         * 是否己销毁
+         * 己完成的加载器数量
          */
-        private $destroyed: boolean = false;
+        protected $doneCount: number = 0;
 
         constructor(url: string, complete: suncom.IHandler) {
             this.$url = url;
@@ -110,34 +108,6 @@ module sunui {
             }
             this.destroy();
             this.$loading = false;
-        }
-
-        /**
-         * 计算加载进度
-         */
-        private $calculateProgressValue(): number {
-            if (this.$doneCount === -1) {
-                return 0;
-            }
-            else if (this.$doneCount === this.$loaders.length) {
-                return 1;
-            }
-            else {
-                let total: number = 0;
-                let value: number = 0;
-                for (let i: number = 0; i < this.$loaders.length; i++) {
-                    total++;
-                    value += this.$loaders[i].progress;
-                }
-                return total === 0 ? 0 : value / total;
-            }
-        }
-
-        /**
-         * 获取加载进度
-         */
-        get progress(): number {
-            return this.$calculateProgressValue();
         }
 
         /**
