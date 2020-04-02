@@ -33,10 +33,16 @@ module sunui {
 		 */
 		private $currentSize: number = 0;
 
+		/**
+		 * 优先级（0-5），为0时下载最快
+		 */
+		private $priority: number = 0;
+
 		constructor(url: string, handler: suncom.IHandler) {
 			super();
 			this.$url = url;
 			this.$handler = handler;
+			this.$priority = suncom.Common.random(0, 6);
 			// 资源己存在
 			if (Laya.loader.getRes(url) !== void 0) {
 				this.$totalSize = -1;
@@ -113,7 +119,7 @@ module sunui {
 		 * 每帧更新己下载的大小
 		 */
 		private $onEnterFrame(): void {
-			this.$currentSize += this.$getDowloadSpeed();
+			this.$currentSize += this.$getDowloadSpeed() * (10 - this.$priority) / 10;
 			if (this.$totalSize > 0 && this.$currentSize > this.$totalSize) {
 				if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
 					suncom.Logger.log(`[100%] ${this.$url}:{${this.$currentSize}:${this.$totalSize}}`);
