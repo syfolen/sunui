@@ -25,6 +25,14 @@ module sunui {
         }
 
         /**
+         * 设置资源的加载速度
+         * export
+         */
+        export function setDownloadSpeed(speed: ResourceDownloadSpeedEnum): void {
+            M.downloadSpeed = speed;
+        }
+
+        /**
          * 锁定资源
          * 说明：
          * 1. 每次请求锁定资源，则资源的引用次数会-1
@@ -282,6 +290,23 @@ module sunui {
             else {
                 return Resource.getRes3dPackRoot(suncom.Common.getFileName(name)) + name;
             }
+        }
+
+        /**
+         * 根据JSON配置获取所有3D资源列表
+         */
+        export function getAssetUrlsByRes3dJson(json: IRes3dJsonFile): string[] {
+            const urls: string[] = [];
+            const root: string = Resource.getRes3dPackRoot(json.pack);
+
+            for (let i: number = 0; i < json.files.length; i++) {
+                urls.push(root + json.files[i]);
+            }
+            for (let i: number = 0; i < json.resources.length; i++) {
+                urls.push(root + json.resources[i]);
+            }
+
+            return urls;
         }
     }
 }

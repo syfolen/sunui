@@ -14,6 +14,11 @@ module sunui {
         private $url: string = null;
 
         /**
+         * 下载限制器
+         */
+        private $limiter: UrlDownloadLimiter = null;
+
+        /**
          * 加载回调
          */
         private $complete: suncom.IHandler = null;
@@ -55,20 +60,36 @@ module sunui {
                 else {
                     Laya.loader.create(this.$url, Laya.Handler.create(this, this.$onComplete));
                 }
+                if (M.downloadSpeed !== ResourceDownloadSpeedEnum.NONE) {
+                    this.$limiter = new UrlDownloadLimiter(this.$url, suncom.Handler.create(this, this.$onDownloaded));
+                }
             }
         }
 
         /**
          * 加载结束回调
          */
-        protected $onComplete(data: any): void {
-            if (this.$destroyed === false) {
-                this.$destroyed = true;
-                this.$complete.runWith([data === null ? false : true, this.$url]);
+        private $onComplete(data: any): void {
+            if (this.$limiter === null) {
+                if (this.$destroyed === false) {
+                    this.$destroyed = true;
+                    this.$complete.runWith([data === null ? false : true, this.$url]);
+                }
+                this.facade.sendNotification(NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE, this);
+                UrlLocker.unlock(this.$url);
+                this.$loading = false;
             }
-            this.facade.sendNotification(NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE, this);
-            UrlLocker.unlock(this.$url);
-            this.$loading = false;
+            else {
+                this.$limiter.updateDownloadSize(data);
+            }
+        }
+
+        /**
+         * 加载结束
+         */
+        private $onDownloaded(data: any): void {
+            this.$limiter = null;
+            this.$onComplete(data);
         }
 
         /**

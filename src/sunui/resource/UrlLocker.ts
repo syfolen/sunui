@@ -64,29 +64,12 @@ module sunui {
         function $clearRes(url: string): void {
             // 清理3d资源json配置文件
             if (Resource.isRes3dUrl(url) === true && Resource.getRes3dJsonUrl(url) === url) {
-                const urls: string[] = $getAssetUrlsByRes3dJson(Laya.loader.getRes(url));
+                const urls: string[] = Resource.getAssetUrlsByRes3dJson(Laya.loader.getRes(url));
                 for (let i: number = 0; i < urls.length; i++) {
                     UrlLocker.clearResByUrl(urls[i]);
                 }
             }
             UrlLocker.clearResByUrl(url);
-        }
-
-        /**
-         * 根据JSON配置获取所有3D资源列表
-         */
-        function $getAssetUrlsByRes3dJson(json: IRes3dJsonFile): string[] {
-            const urls: string[] = [];
-            const root: string = Resource.getRes3dPackRoot(json.pack);
-
-            for (let i: number = 0; i < json.files.length; i++) {
-                urls.push(root + json.files[i]);
-            }
-            for (let i: number = 0; i < json.resources.length; i++) {
-                urls.push(root + json.resources[i]);
-            }
-
-            return urls;
         }
     }
 }
