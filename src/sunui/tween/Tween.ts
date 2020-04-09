@@ -54,7 +54,7 @@ module sunui {
         to(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
             const keys: Array<string> = Object.keys(props);
             const item: any = this.$props === null ? this.$item : this.$props;
-            this.$createTweenInfo(keys, item, props, duration, ease, props.update, handler);
+            this.$createTweenInfo(keys, item, props, duration, ease, props.update || null, handler);
             return this;
         }
 
@@ -65,7 +65,7 @@ module sunui {
         from(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
             const keys: Array<string> = Object.keys(props);
             const item: any = this.$props === null ? this.$item : this.$props;
-            this.$createTweenInfo(keys, props, item, duration, ease, props.update, handler);
+            this.$createTweenInfo(keys, props, item, duration, ease, props.update || null, handler);
             return this;
         }
 
