@@ -308,5 +308,67 @@ module sunui {
 
             return urls;
         }
+
+        /**
+         * 确认资源加载列表
+         * export
+         */
+        export function checkLoadList(urls: string[]): string[] {
+            // 龙骨无需加载png资源
+            Resource.removeUnnecessaryResources(urls, "sk", "png", "龙骨预加载无需指定PNG资源");
+            // 图集无需加载png资源
+            Resource.removeUnnecessaryResources(urls, "atlas", "png", "图集预加载无需指定PNG资源");
+            // 移除重复项
+            return Resource.removeDuplicateResources(urls);
+        }
+
+        /**
+         * 移除重复的资源
+         */
+        export function removeDuplicateResources(urls: string[]): string[] {
+            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
+                const array: string[] = [];
+                for (let i: number = 0; i < urls.length; i++) {
+                    const url: string = urls[i];
+                    if (array.indexOf(url) === -1) {
+                        array.push(url);
+                    }
+                    else {
+                        suncom.Logger.error(`重复的预加载资源文件 ${url}`);
+                    }
+                }
+                return array;
+            }
+            return urls;
+        }
+
+        /**
+         * 根据扩展名移除无需指定的资源文件
+         */
+        export function removeUnnecessaryResources(urls: string[], match: string, remove: string, msg: string): void {
+            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
+                const array: string[] = [];
+
+                for (let i: number = 0; i < urls.length; i++) {
+                    const url: string = urls[i];
+                    if (suncom.Common.getFileExtension(url) === match) {
+                        array.push(url);
+                    }
+                }
+
+                for (let i: number = 0; i < array.length; i++) {
+                    const url: string = array[i];
+                    const png: string = url.substring(0, url.length - match.length) + remove;
+                    do {
+                        const index: number = urls.indexOf(png);
+                        if (index === -1) {
+                            break;
+                        }
+                        urls.splice(index, 1);
+                        suncom.Logger.warn(`${msg} ${url}`);
+                    } while (true);
+                }
+            }
+        }
     }
 }
