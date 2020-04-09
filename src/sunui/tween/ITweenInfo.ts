@@ -15,6 +15,11 @@ module sunui {
         actions: ITweenAction[];
 
         /**
+         * 更新回调
+         */
+        update: suncom.IHandler;
+
+        /**
          * 缓动回调
          */
         handler: suncom.IHandler;

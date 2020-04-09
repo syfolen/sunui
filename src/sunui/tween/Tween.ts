@@ -54,7 +54,7 @@ module sunui {
         to(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
             const keys: Array<string> = Object.keys(props);
             const item: any = this.$props === null ? this.$item : this.$props;
-            this.$createTweenInfo(keys, item, props, duration, ease, handler);
+            this.$createTweenInfo(keys, item, props, duration, ease, props.update, handler);
             return this;
         }
 
@@ -65,7 +65,7 @@ module sunui {
         from(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
             const keys: Array<string> = Object.keys(props);
             const item: any = this.$props === null ? this.$item : this.$props;
-            this.$createTweenInfo(keys, props, item, duration, ease, handler);
+            this.$createTweenInfo(keys, props, item, duration, ease, props.update, handler);
             return this;
         }
 
@@ -92,7 +92,7 @@ module sunui {
         /**
          * 生成缓动信息
          */
-        private $createTweenInfo(keys: Array<string>, from: any, to: any, duration: number, ease: Function, handler: suncom.IHandler): void {
+        private $createTweenInfo(keys: Array<string>, from: any, to: any, duration: number, ease: Function, update: suncom.IHandler, handler: suncom.IHandler): void {
             // 最终属性
             this.$props = this.$props || {};
 
@@ -100,6 +100,9 @@ module sunui {
             const actions: Array<ITweenAction> = [];
             for (let i: number = 0; i < keys.length; i++) {
                 const key: string = keys[i];
+                if (key === "update") {
+                    continue;
+                }
                 const action: ITweenAction = {
                     prop: key,
                     from: from[key],
@@ -120,6 +123,7 @@ module sunui {
             const info: ITweenInfo = {
                 ease: ease,
                 actions: actions,
+                update: update,
                 handler: handler,
                 time: suncore.System.getModuleTimestamp(this.$mod),
                 duration: duration
@@ -135,6 +139,7 @@ module sunui {
             const info: ITweenInfo = {
                 ease: null,
                 actions: [],
+                update: null,
                 handler: handler,
                 time: suncore.System.getModuleTimestamp(this.$mod),
                 duration: delay
@@ -173,6 +178,9 @@ module sunui {
                 else {
                     this.$item[action.prop] = func(duration, action.from, action.to - action.from, info.duration);
                 }
+            }
+            if (info.update !== null) {
+                info.update.run();
             }
 
             // 缓动未完成
