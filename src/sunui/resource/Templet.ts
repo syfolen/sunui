@@ -44,7 +44,10 @@ module sunui {
                 res.destroy();
             }
             this.$doneList.push(url);
-            if (this.$doneList.length === this.$urls.length) {
+            if (this.$doneList.length < this.$urls.length) {
+                return;
+            }
+            if (M.templets[this.$id]) {
                 this.$handler.runWith([this.$id]);
             }
         }

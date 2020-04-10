@@ -15,6 +15,8 @@ module sunui {
             if (props.mod === void 0) { props.mod = suncore.ModuleEnum.CUSTOM; }
             // 提供默认的缓动方法
             if (props.ease === void 0) { props.ease = Laya.Ease.backOut; }
+            // 默认阻断鼠标点击
+            if (props.block === void 0) { props.block = true; }
             // 默认背景不通透
             if (props.trans === void 0) { props.trans = false; }
             // 默认不保存节点
@@ -24,6 +26,8 @@ module sunui {
             const args: any = props.args;
             // 背景通透值
             const trans: boolean = props.trans;
+            // 是否阻断鼠标点击
+            const block: boolean = props.block;
             // 显示层级
             const level: UILevel = props.level || view.zOrder || UILevel.POPUP;
             // 是否保留节点
@@ -37,7 +41,7 @@ module sunui {
             this.$makeProps(props);
 
             // 创建遮罩
-            const mask: Laya.Image = M.viewLayer.createMask(view, trans);
+            const mask: Laya.Image = M.viewLayer.createMask(view, block, trans);
             mask.name = `Mask$${view.name}`;
             mask.zOrder = view.zOrder = level;
 

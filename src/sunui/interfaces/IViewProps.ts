@@ -34,6 +34,12 @@ module sunui {
         ease?: Function;
 
         /**
+         * 是否阻断点击事件
+         * export
+         */
+        block?: boolean;
+
+        /**
          * 背景是否通透
          * export
          */

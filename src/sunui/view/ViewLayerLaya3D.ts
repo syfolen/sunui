@@ -33,15 +33,16 @@ module sunui {
         /**
          * 创建遮罩
          */
-        createMask(view: IView, trans: boolean): Laya.Image {
+        createMask(view: IView, block: boolean, trans: boolean): Laya.Image {
             const mask: Laya.Image = new Laya.Image("common/mask.png");
             mask.left = mask.right = mask.top = mask.bottom = 0;
             mask.sizeGrid = "1,1,1,1";
             mask.alpha = trans === true ? 0 : 1;
-            mask.mouseEnabled = true;
-            mask.mouseThrough = false;
 
-            mask.on(Laya.Event.CLICK, this, this.$onMaskClick, [view]);
+            if (block === true) {
+                mask.mouseThrough = false;
+                mask.on(Laya.Event.CLICK, this, this.$onMaskClick, [view]);
+            }
 
             return mask;
         }

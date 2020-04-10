@@ -28,7 +28,7 @@ module sunui {
         /**
          * 创建遮罩
          */
-        abstract createMask(view: IView, trans: boolean): Laya.Image;
+        abstract createMask(view: IView, block: boolean, trans: boolean): Laya.Image;
 
         /**
          * 销毁遮罩
