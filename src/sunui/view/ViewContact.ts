@@ -38,19 +38,19 @@ module sunui {
             if (M.viewLayer.getInfoByView(popup) === null) {
                 throw Error(`找不到${popup.name}的弹出信息，请确认其为弹出对象`);
             }
-            this.facade.registerObserver(NotifyKey.ON_POPUP_CLOSED, this.$onPopupClosed, this);
-            this.facade.registerObserver(NotifyKey.ON_POPUP_REMOVED, this.$onPopupRemoved, this);
+            this.facade.registerObserver(NotifyKey.ON_POPUP_CLOSED, this.$onPopupClosed, this, false, suncom.EventPriorityEnum.FWL);
+            this.facade.registerObserver(NotifyKey.ON_POPUP_REMOVED, this.$onPopupRemoved, this, false, suncom.EventPriorityEnum.FWL);
 
             // 若场景退出了，则应当销毁自己
-            this.facade.registerObserver(NotifyKey.EXIT_SCENE, this.$onCallerDestroy, this);
+            this.facade.registerObserver(NotifyKey.EXIT_SCENE, this.$onCallerDestroy, this, false, suncom.EventPriorityEnum.FWL);
             // 若caller为弹框则监听弹框销毁事件
             const info: IViewStackInfo = M.viewLayer.getInfoByView(caller);
             if (info !== null) {
-                this.facade.registerObserver(NotifyKey.ON_POPUP_REMOVED, this.$onCallerDestroy, this);
+                this.facade.registerObserver(NotifyKey.ON_POPUP_REMOVED, this.$onCallerDestroy, this, false, suncom.EventPriorityEnum.FWL);
             }
             // 否则应当监听由caller主动派发的销毁事件
             else {
-                this.facade.registerObserver(NotifyKey.ON_CALLER_DESTROYED, this.$onCallerDestroy, this);
+                this.facade.registerObserver(NotifyKey.ON_CALLER_DESTROYED, this.$onCallerDestroy, this, false, suncom.EventPriorityEnum.FWL);
             }
         }
 

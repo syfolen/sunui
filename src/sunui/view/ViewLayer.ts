@@ -12,7 +12,7 @@ module sunui {
         constructor() {
             super();
             // 监听场景被卸载消息，此消息最后被响应
-            this.facade.registerObserver(NotifyKey.UNLOAD_SCENE, this.$onUnloadScene, this, false, 0);
+            this.facade.registerObserver(NotifyKey.UNLOAD_SCENE, this.$onUnloadScene, this, false, suncom.EventPriorityEnum.EGL);
         }
 
         /**

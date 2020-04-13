@@ -17,7 +17,7 @@ module sunui {
         constructor(info: ISceneInfo) {
             super();
             this.$info = info;
-            this.facade.registerObserver(NotifyKey.LEAVE_SCENE, this.$onLeaveScene, this, true);
+            this.facade.registerObserver(NotifyKey.LEAVE_SCENE, this.$onLeaveScene, this, true, suncom.EventPriorityEnum.EGL);
         }
 
         /**

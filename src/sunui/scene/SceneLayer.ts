@@ -27,7 +27,7 @@ module sunui {
         constructor() {
             super();
             // 场景管理器应该对此消息优先响应
-            this.facade.registerObserver(NotifyKey.ENTER_SCENE, this.$onEnterScene, this, false, 5);
+            this.facade.registerObserver(NotifyKey.ENTER_SCENE, this.$onEnterScene, this, false, suncom.EventPriorityEnum.OSL);
         }
 
         /**

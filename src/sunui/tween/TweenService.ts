@@ -9,7 +9,7 @@ module sunui {
 
         protected $onRun(): void {
             this.facade.registerObserver(NotifyKey.ADD_TWEEN_OBJECT, this.$onAddTweenObject, this);
-            this.facade.registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this);
+            this.facade.registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this, false, suncom.EventPriorityEnum.EGL);
         }
 
         protected $onStop(): void {

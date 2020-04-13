@@ -24,7 +24,7 @@ module sunui {
             super();
             this.$info = info;
             this.$data = data;
-            this.facade.registerObserver(NotifyKey.ENTER_SCENE, this.$onEnterScene, this, true);
+            this.facade.registerObserver(NotifyKey.ENTER_SCENE, this.$onEnterScene, this, true, suncom.EventPriorityEnum.EGL);
         }
 
         /**
