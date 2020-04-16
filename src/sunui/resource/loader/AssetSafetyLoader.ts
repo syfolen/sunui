@@ -94,7 +94,7 @@ module sunui {
         private $onRetryConfirmed(option: ConfirmOptionValueEnum): void {
             if (option === ConfirmOptionValueEnum.NO) {
                 this.$retryer.reset();
-                suncom.Logger.warn(`失败：${this.$url}`);
+                suncom.Logger.warn(suncom.DebugMode.ANY, `失败：${this.$url}`);
                 this.facade.sendNotification(NotifyKey.ON_ASSET_SAFETY_LOADER_FAILED);
                 this.facade.registerObserver(NotifyKey.ASSET_SAFETY_LOADER_RETRY, this.$onAssetSafetyLoaderRetry, this, true);
             }
@@ -108,7 +108,7 @@ module sunui {
          */
         private $onAssetSafetyLoaderRetry(): void {
             if (this.$destroyed === false) {
-                suncom.Logger.warn(`重试：${this.$url}`);
+                suncom.Logger.warn(suncom.DebugMode.ANY, `重试：${this.$url}`);
                 this.$doLoad();
             }
         }

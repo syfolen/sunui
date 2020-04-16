@@ -8,7 +8,7 @@ module sunui {
         execute(view: IView, duration: number, props: IViewProps): void {
             // 若配置己存在，则说明节点己经被弹出了
             if (M.viewLayer.getInfoByView(view) !== null) {
-                suncom.Logger.error(`${view}[${view.name}] is already popup.`);
+                suncom.Logger.error(suncom.DebugMode.ANY, `${view}[${view.name}] is already popup.`);
                 return;
             }
             // 默认执行模块为CUSTOM

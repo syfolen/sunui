@@ -33,7 +33,7 @@ module sunui {
                 this.facade.sendNotification(NotifyKey.ADD_TWEEN_OBJECT, this);
             }
             else {
-                suncom.Logger.error(`尝试添加缓动，但时间轴己停止，mod:${suncore.ModuleEnum[mod]}`);
+                suncom.Logger.error(suncom.DebugMode.ANY, `尝试添加缓动，但时间轴己停止，mod:${suncore.ModuleEnum[mod]}`);
             }
         }
 

@@ -328,7 +328,7 @@ module sunui {
                         array.push(url);
                     }
                     else {
-                        suncom.Logger.error(`重复的预加载资源文件 ${url}`);
+                        suncom.Logger.error(suncom.DebugMode.ANY, `重复的预加载资源文件 ${url}`);
                     }
                 }
                 return array;
@@ -359,7 +359,7 @@ module sunui {
                             break;
                         }
                         urls.splice(index, 1);
-                        suncom.Logger.warn(`${msg} ${url}`);
+                        suncom.Logger.warn(suncom.DebugMode.ANY, `${msg} ${url}`);
                     } while (true);
                 }
             }

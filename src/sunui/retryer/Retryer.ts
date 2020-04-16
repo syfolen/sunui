@@ -99,7 +99,7 @@ module sunui {
                     this.$retryTimerId = suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, delay, this.$onRetryTimer, this);
                 }
                 else {
-                    suncom.Logger.warn(`己忽略的重试请求 method:${suncom.Common.getMethodName(handler.method, handler.caller)}, caller:${suncom.Common.getQualifiedClassName(handler.caller)}`);
+                    suncom.Logger.warn(suncom.DebugMode.ANY, `己忽略的重试请求 method:${suncom.Common.getMethodName(handler.method, handler.caller)}, caller:${suncom.Common.getQualifiedClassName(handler.caller)}`);
                 }
             }
             else {
@@ -115,7 +115,7 @@ module sunui {
                     }
                 }
                 else {
-                    suncom.Logger.warn(`己忽略的重试的询问请求 prompt:${this.$prompt}`);
+                    suncom.Logger.warn(suncom.DebugMode.ANY, `己忽略的重试的询问请求 prompt:${this.$prompt}`);
                 }
             }
         }
