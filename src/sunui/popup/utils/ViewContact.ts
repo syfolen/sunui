@@ -11,7 +11,7 @@ module sunui {
         private $caller: any;
 
         /**
-         * 被监视的弹框对象
+         * 被监视的显示对象
          */
         private $popup: Laya.Node;
 

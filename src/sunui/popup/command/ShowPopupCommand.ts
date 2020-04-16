@@ -6,31 +6,17 @@ module sunui {
     export class ShowPopupCommand extends AbstractPopupCommand {
 
         execute(view: IView, duration: number, props: IViewProps): void {
-            // 若配置己存在，则说明节点己经被弹出了
             if (M.viewLayer.getInfoByView(view) !== null) {
                 suncom.Logger.error(suncom.DebugMode.ANY, `${view}[${view.name}] is already popup.`);
                 return;
             }
-            // 默认执行模块为CUSTOM
             if (props.mod === void 0) { props.mod = suncore.ModuleEnum.CUSTOM; }
-            // 提供默认的缓动方法
             if (props.ease === void 0) { props.ease = Laya.Ease.backOut; }
-            // 默认阻断鼠标点击
-            if (props.block === void 0) { props.block = true; }
-            // 默认背景不通透
-            if (props.trans === void 0) { props.trans = false; }
-            // 默认不保存节点
+            if (props.flags === void 0) { props.flags = PopupFlagEnum.NONE; }
             if (props.keepNode === void 0) { props.keepNode = false; }
 
-            // 参数列表
             const args: any = props.args;
-            // 背景通透值
-            const trans: boolean = props.trans;
-            // 是否阻断鼠标点击
-            const block: boolean = props.block;
-            // 显示层级
             const level: UILevel = props.level || view.zOrder || UILevel.POPUP;
-            // 是否保留节点
             const keepNode: boolean = props.keepNode;
 
             delete props.args;
@@ -39,13 +25,16 @@ module sunui {
 
             // 避免props的默认属性不存在
             this.$makeProps(props);
+            // 由于历史遗留问题，故需要考虑props.trans的值
+            if (props.trans === true && (props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
+                suncom.Logger.warn(suncom.DebugMode.ANY, `ViewFacade：props的trans属性己弃用，请使用flags代替！！！`);
+                props.flags |= PopupFlagEnum.TRANSPARENT;
+            }
 
-            // 创建遮罩
-            const mask: Laya.Image = M.viewLayer.createMask(view, block, trans);
+            const mask: Laya.Image = M.viewLayer.createMask(view, props);
             mask.name = `Mask$${view.name}`;
             mask.zOrder = view.zOrder = level;
 
-            // 生成弹框信息
             const info: IViewStackInfo = {
                 view: view,
                 mask: mask,
@@ -56,19 +45,15 @@ module sunui {
                 duration: duration,
                 cancelAllowed: false
             };
-            // 保存视图信息
             M.viewLayer.addToStack(info);
 
-            // 显示视图
             M.viewLayer.addChild(mask);
             M.viewLayer.addChild(view);
 
             // 第一次显示的时候，轴心点可能会不正确
             view["pivot"](view.width * 0.5, view.height * 0.5);
-
-            // 调用IPopupView的$onOpen接口
             M.viewLayer.onViewCreate(view, args);
-            // 派发弹框创建完成事件
+
             if (args === void 0) {
                 this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, view);
             }
@@ -79,15 +64,16 @@ module sunui {
                 this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, [view, args]);
             }
 
-            // 应用缓动数据
+            if ((props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
+                if (props.flags & PopupFlagEnum.SYNC_FADE_TIME) {
+                    Tween.get(mask, info.props.mod).from({ alpha: 0 }, duration);
+                }
+                else {
+                    Tween.get(mask, info.props.mod).from({ alpha: 0 }, duration > 200 ? 200 : duration);
+                }
+            }
             this.$applyShowProps(view, props, duration);
 
-            // 遮罩不通透逻辑处理
-            if (trans === false) {
-                Tween.get(mask, info.props.mod).from({ alpha: 0 }, duration > 200 ? 200 : duration);
-            }
-
-            // 弹框弹出回调
             const handler: suncom.IHandler = suncom.Handler.create(this, this.$onPopupFinish, [view]);
             suncore.System.addTrigger(info.props.mod, duration, handler);
         }

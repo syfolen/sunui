@@ -9,35 +9,36 @@ module sunui {
          * 重组缓动信息
          */
         protected $makeProps(props: IViewProps): void {
-            // 水平默认居中
             if (props.x === void 0 && props.left === void 0 && props.right === void 0) {
                 props.centerX = 0;
             }
-            // 垂直默认居中
             if (props.y === void 0 && props.top === void 0 && props.bottom === void 0) {
                 props.centerY = 0;
             }
-            // 为弹框默认时间模块
-            if (suncore.System.isModuleStopped(suncore.ModuleEnum.CUSTOM) === true) {
-                props.mod = suncore.ModuleEnum.SYSTEM;
+            // 这里不确定是否这样做是合理的
+            if (suncore.System.isModuleStopped(props.mod) === true) {
+                if (props.mod === suncore.ModuleEnum.TIMELINE && suncore.System.isModuleStopped(suncore.ModuleEnum.CUSTOM) === false) {
+                    props.mod = suncore.ModuleEnum.CUSTOM;
+                }
+                else {
+                    props.mod = suncore.ModuleEnum.SYSTEM;
+                }
             }
         }
 
         /**
          * 应用展示缓动
-         * @duration: 若此值为0，则没有缓动过程
+         * @props: 若props.flags存在PopupFlagEnum.SIMPLY标记，则没有缓动过程
+         * @duration: 若此值为0，则亦没有缓动过程
          */
         protected $applyShowProps(view: IView, props: IViewProps, duration: number): void {
-            // 应用坐标
             if (props.x !== void 0) { view.x = props.x; }
             if (props.y !== void 0) { view.y = props.y; }
 
-            // 应用对齐方式
             if (props.centerX !== void 0) { view.centerX = props.centerX; }
             if (props.centerY !== void 0) { view.centerY = props.centerY; }
 
-            // 没有缓动
-            if (duration === 0) {
+            if (duration === 0 || (props.flags & PopupFlagEnum.SIMPLY)) {
                 if (props.left !== void 0) { view.left = props.left; }
                 if (props.right !== void 0) { view.right = props.right; }
 
@@ -45,11 +46,9 @@ module sunui {
                 if (props.bottom !== void 0) { view.bottom = props.bottom; }
             }
             else {
-                // 从左或右滑入
                 if (props.left !== void 0) { view.left = -view.width; }
                 if (props.right !== void 0) { view.right = -view.width; }
 
-                // 从上或下滑入
                 if (props.top !== void 0) { view.top = -view.height; }
                 if (props.bottom !== void 0) { view.bottom = -view.height; }
 
@@ -63,23 +62,20 @@ module sunui {
                     props.scaleX = 1;
                     props.scaleY = 1;
                 }
-
                 Tween.get(view, props.mod).to(props, duration, props.ease);
             }
         }
 
         /**
          * 应用关闭缓动
-         * @duration: 若此值为0，则没有缓动过程
+         * @props: 若props.flags存在PopupFlagEnum.SIMPLY标记，则没有缓动过程
+         * @duration: 若此值为0，则亦没有缓动过程
          */
         protected $applyCloseProps(view: Laya.Sprite, props: IViewProps, duration: number): void {
-            // 只有在缓动时间大于0时才会执行缓动
-            if (duration > 0) {
-                // 从左或右滑出
+            if (duration > 0 && (props.flags & PopupFlagEnum.SIMPLY) === PopupFlagEnum.NONE) {
                 if (props.left !== void 0) { props.left = -view.width; }
                 if (props.right !== void 0) { props.right = -view.width; }
 
-                // 从上或下滑出
                 if (props.top !== void 0) { props.top = -view.height; }
                 if (props.bottom !== void 0) { props.bottom = -view.height; }
 
@@ -89,7 +85,6 @@ module sunui {
                     props.scaleX = 0;
                     props.scaleY = 0;
                 }
-
                 Tween.get(view, props.mod).to(props, duration);
             }
         }

@@ -33,13 +33,18 @@ module sunui {
         /**
          * 创建遮罩
          */
-        createMask(view: IView, block: boolean, trans: boolean): Laya.Image {
+        createMask(view: IView, props: IViewProps): Laya.Image {
             const mask: Laya.Image = new Laya.Image("common/mask.png");
             mask.left = mask.right = mask.top = mask.bottom = 0;
             mask.sizeGrid = "1,1,1,1";
-            mask.alpha = trans === true ? 0 : 1;
 
-            if (block === true) {
+            if (props.flags & PopupFlagEnum.TRANSPARENT) {
+                mask.alpha = 0;
+            }
+            else {
+                mask.alpha = 1;
+            }
+            if ((props.flags & PopupFlagEnum.MOUSE_THROUGH) === PopupFlagEnum.NONE) {
                 mask.mouseThrough = false;
                 mask.on(Laya.Event.CLICK, this, this.$onMaskClick, [view]);
             }
