@@ -121,13 +121,11 @@ module sunui {
 		private $onEnterFrame(): void {
 			this.$currentSize += this.$getDowloadSpeed() * (10 - this.$priority) / 10;
 			if (this.$totalSize > 0 && this.$currentSize > this.$totalSize) {
-				if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
-					suncom.Logger.log(suncom.DebugMode.DEBUG, `[100%] ${this.$url}:{${this.$currentSize}:${this.$totalSize}}`);
-				}
+				suncom.Logger.log(suncom.DebugMode.DEBUG, `[100%] ${this.$url}:{${this.$currentSize}:${this.$totalSize}}`);
 				this.$handler.runWith(this.$data);
 				this.destroy();
 			}
-			else if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+			else {
 				if (this.$totalSize > 0) {
 					suncom.Logger.log(suncom.DebugMode.DEBUG, `[${Math.floor(this.$currentSize / this.$totalSize * 100)}%] ${this.$url}:{${this.$currentSize}:${this.$totalSize}}`);
 				}
