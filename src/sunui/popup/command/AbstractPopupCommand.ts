@@ -44,6 +44,9 @@ module sunui {
 
                 if (props.top !== void 0) { view.top = props.top; }
                 if (props.bottom !== void 0) { view.bottom = props.bottom; }
+
+                if (props.scaleX !== void 0) { view.scaleX = props.scaleX; }
+                if (props.scaleY !== void 0) { view.scaleY = props.scaleY; }
             }
             else {
                 if (props.left !== void 0) { view.left = -view.width; }
@@ -59,8 +62,8 @@ module sunui {
                     view.scaleY = 0;
 
                     props.alpha = 1;
-                    props.scaleX = 1;
-                    props.scaleY = 1;
+                    if (props.scaleX === void 0) { props.scaleX = 1; }
+                    if (props.scaleY === void 0) { props.scaleY = 1; }
                 }
                 Tween.get(view, props.mod).to(props, duration, props.ease);
             }
