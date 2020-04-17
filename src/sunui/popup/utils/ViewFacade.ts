@@ -46,7 +46,7 @@ module sunui {
          * 执行弹出逻辑
          * export
          */
-        popup(props: IViewProps): ViewFacade {
+        popup(props: IViewProps = {}): ViewFacade {
             this.facade.sendNotification(NotifyKey.SHOW_POPUP, [this.$view, this.$duration, props]);
             return this;
         }

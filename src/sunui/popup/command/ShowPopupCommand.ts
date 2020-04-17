@@ -5,7 +5,7 @@ module sunui {
      */
     export class ShowPopupCommand extends AbstractPopupCommand {
 
-        execute(view: IView, duration: number, props: IViewProps = {}): void {
+        execute(view: IView, duration: number, props: IViewProps): void {
             if (M.viewLayer.getInfoByView(view) !== null) {
                 suncom.Logger.error(suncom.DebugMode.ANY, `${view}[${view.name}] is already popup.`);
                 return;

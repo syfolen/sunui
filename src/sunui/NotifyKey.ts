@@ -70,6 +70,7 @@ module sunui {
          * 说明：
          * 1. 此命令在完成uniCls的构建之后被派发（此时uniCls.run尚未执行）
          * 2. 表现层中的数据应当在此处销毁
+         * depends
          */
         export const LEAVE_SCENE: string = "sunui.NotifyKey.LEAVE_SCENE";
 
