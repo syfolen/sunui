@@ -32,7 +32,7 @@ module sunui {
          * 1. 若caller为非弹出对象，则销毁前应当主动派发NotifyKey.ON_CALLER_DESTROYED事件，否则ViewContact不会自动回收
          * export
          */
-        constructor(caller: any, popup: IView) {
+        constructor(caller: any, popup: any) {
             super();
             this.$popup = popup || null;
             this.$caller = caller || null;
