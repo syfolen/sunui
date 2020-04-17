@@ -6,7 +6,7 @@ module sunui {
      * export
      */
     export function find(path: string, parent: Laya.Node): any {
-        const array: Array<string> = path.split("/");
+        const array: string[] = path.split("/");
         while (parent != null && array.length > 0) {
             const name: string = array.shift();
             parent = parent.getChildByName(name);

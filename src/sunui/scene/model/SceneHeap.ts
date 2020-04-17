@@ -7,12 +7,12 @@ module sunui {
         /**
          * 历史场景信息列表
          */
-        const $infos: Array<ISceneHeapInfo> = [];
+        const $infos: ISceneHeapInfo[] = [];
 
         /**
          * 根据场景名字获取信息索引
          */
-        function findHeapIndexByName(name: number): number {
+        function findLatestHeapIndexByName(name: number): number {
             for (let i: number = $infos.length - 1; i > -1; i--) {
                 if ($infos[i].name === name) {
                     return i;
@@ -37,7 +37,7 @@ module sunui {
          * 移除历史
          */
         export function removeHistory(name: number): boolean {
-            const index: number = findHeapIndexByName(name);
+            const index: number = findLatestHeapIndexByName(name);
             if (index > -1) {
                 $infos.splice(index, 1);
             }
@@ -48,13 +48,13 @@ module sunui {
          * 是否存在指定历史
          */
         export function hasHistory(name: number): boolean {
-            return findHeapIndexByName(name) > -1;
+            return findLatestHeapIndexByName(name) > -1;
         }
 
         /**
          * 返回上一个历史场景信息
          */
-        export function pop(): ISceneHeapInfo {
+        export function getLastestSceneInfo(): ISceneHeapInfo {
             if ($infos.length > 0) {
                 return $infos[$infos.length - 1];
             }
@@ -64,8 +64,8 @@ module sunui {
         /**
          * 根据名字返回历史场景信息
          */
-        export function popByName(name: number): ISceneHeapInfo {
-            const index: number = findHeapIndexByName(name);
+        export function getLastestSceneInfoByName(name: number): ISceneHeapInfo {
+            const index: number = findLatestHeapIndexByName(name);
             if (index > -1) {
                 return $infos[index];
             }

@@ -18,7 +18,7 @@ module sunui {
         /**
          * 缓动信息列表
          */
-        private $infos: Array<ITweenInfo> = [];
+        private $infos: ITweenInfo[] = [];
 
         /**
          * 最终属性（连续缓动时使用）
@@ -30,7 +30,7 @@ module sunui {
             this.$mod = mod;
             this.$item = item;
             if (suncore.System.isModuleStopped(mod) === false) {
-                this.facade.sendNotification(NotifyKey.ADD_TWEEN_OBJECT, this);
+                this.facade.sendNotification(NotifyKey.REGISTER_TWEEN_OBJECT, this);
             }
             else {
                 suncom.Logger.error(suncom.DebugMode.ANY, `尝试添加缓动，但时间轴己停止，mod:${suncore.ModuleEnum[mod]}`);
@@ -52,7 +52,7 @@ module sunui {
          * export
          */
         to(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
-            const keys: Array<string> = Object.keys(props);
+            const keys: string[] = Object.keys(props);
             const item: any = this.$props === null ? this.$item : this.$props;
             this.$createTweenInfo(keys, item, props, duration, ease, props.update || null, handler);
             return this;
@@ -63,7 +63,7 @@ module sunui {
          * export
          */
         from(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
-            const keys: Array<string> = Object.keys(props);
+            const keys: string[] = Object.keys(props);
             const item: any = this.$props === null ? this.$item : this.$props;
             this.$createTweenInfo(keys, props, item, duration, ease, props.update || null, handler);
             return this;
@@ -74,7 +74,7 @@ module sunui {
          * export
          */
         by(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
-            const keys: Array<string> = Object.keys(props);
+            const keys: string[] = Object.keys(props);
             const item: any = this.$props === null ? this.$item : this.$props;
             for (let i: number = 0; i < keys.length; i++) {
                 const key: string = keys[i];
@@ -92,12 +92,12 @@ module sunui {
         /**
          * 生成缓动信息
          */
-        private $createTweenInfo(keys: Array<string>, from: any, to: any, duration: number, ease: Function, update: suncom.IHandler, handler: suncom.IHandler): void {
+        private $createTweenInfo(keys: string[], from: any, to: any, duration: number, ease: Function, update: suncom.IHandler, handler: suncom.IHandler): void {
             // 最终属性
             this.$props = this.$props || {};
 
             // 动作列表
-            const actions: Array<ITweenAction> = [];
+            const actions: ITweenAction[] = [];
             for (let i: number = 0; i < keys.length; i++) {
                 const key: string = keys[i];
                 if (key === "update") {
@@ -150,22 +150,25 @@ module sunui {
 
         /**
          * 执行动作
+         * @return: 返回允许执行缓动的剩余时间
          */
-        doAction(): void {
+        doAction(): number {
             const time: number = suncore.System.getModuleTimestamp(this.$mod);
             const info: ITweenInfo = this.$infos[0];
 
-            // 有时候节点可能被销毁了
-            if (this.$item instanceof Laya.Node && this.$item.destroyed === true) {
+            // 缓动对象可能己经被销毁了
+            if (this.$item.destroyed === true) {
                 this.cancel();
-                return;
+                return 0;
             }
 
             let done: boolean = false;
+            let timeLeft: number = 0;
             let duration: number = time - info.time;
 
             if (duration > info.duration) {
                 done = true;
+                timeLeft = duration - info.duration;
                 duration = info.duration;
             }
 
@@ -183,19 +186,17 @@ module sunui {
                 info.update.run();
             }
 
-            // 缓动未完成
             if (done === false) {
-                return;
+                return 0;
             }
             this.$infos.shift();
 
-            // 缓动未完成
             if (this.$infos.length > 0) {
                 this.$infos[0].time = suncore.System.getModuleTimestamp(this.$mod);
             }
-
-            // 缓动回调
             info.handler !== null && info.handler.run();
+
+            return timeLeft;
         }
 
         /**

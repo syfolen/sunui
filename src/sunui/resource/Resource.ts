@@ -270,7 +270,7 @@ module sunui {
 
         /**
          * 获取3D资源地址
-         * @name: 如xxx.ls
+         * @name: 如xxx或xxx.ls，若未指定扩展名，则认为是.lh
          * @pack: 如LayaScene_xxxx中的xxxx，允许为空
          * 说明：
          * 1. 所有3d资源都必须放在${Resource.res3dRoot}目录下
@@ -282,6 +282,9 @@ module sunui {
                 return Resource.getRes3dPackRoot(name.pack) + name.name;
             }
             else {
+                if (suncom.Common.getFileExtension(name) === name) {
+                    name += ".lh";
+                }
                 return Resource.getRes3dPackRoot(suncom.Common.getFileName(name)) + name;
             }
         }
@@ -304,15 +307,12 @@ module sunui {
         }
 
         /**
-         * 确认资源加载列表
+         * 确认加载列表中的url正确性
          * export
          */
         export function checkLoadList(urls: string[]): string[] {
-            // 龙骨无需加载png资源
             Resource.removeUnnecessaryResources(urls, "sk", "png", "龙骨预加载无需指定PNG资源");
-            // 图集无需加载png资源
             Resource.removeUnnecessaryResources(urls, "atlas", "png", "图集预加载无需指定PNG资源");
-            // 移除重复项
             return Resource.removeDuplicateResources(urls);
         }
 

@@ -7,11 +7,11 @@ module sunui {
         /**
          * 视图信息栈
          */
-        private $stack: Array<IViewStackInfo> = [];
+        private $stack: IViewStackInfo[] = [];
 
         constructor() {
             super();
-            // 监听场景被卸载消息，此消息最后被响应
+            // 监听卸载场景事件，所有弹框应该在场景卸载之前被移除
             this.facade.registerObserver(NotifyKey.UNLOAD_SCENE, this.$onUnloadScene, this, false, suncom.EventPriorityEnum.EGL);
         }
 
@@ -64,7 +64,7 @@ module sunui {
          * 场景被卸载时，应当移除所有视图
          */
         private $onUnloadScene(): void {
-            const array: Array<IViewStackInfo> = this.$stack.concat();
+            const array: IViewStackInfo[] = this.$stack.concat();
             for (let i: number = array.length - 1; i > -1; i--) {
                 const info: IViewStackInfo = array[i];
                 if (info.props.mod !== suncore.ModuleEnum.SYSTEM) {
@@ -82,8 +82,6 @@ module sunui {
                 return;
             }
             this.$stack.splice(index, 1);
-
-            this.facade.sendNotification(NotifyKey.BEFORE_POPUP_REMOVE, info.view);
             this.onViewRemove(info.view);
 
             this.removeChild(info.view);

@@ -8,12 +8,12 @@ module sunui {
         private $tweens: Array<ITween | boolean> = [false];
 
         protected $onRun(): void {
-            this.facade.registerObserver(NotifyKey.ADD_TWEEN_OBJECT, this.$onAddTweenObject, this);
+            this.facade.registerObserver(NotifyKey.REGISTER_TWEEN_OBJECT, this.$onAddTweenObject, this);
             this.facade.registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this, false, suncom.EventPriorityEnum.EGL);
         }
 
         protected $onStop(): void {
-            this.facade.removeObserver(NotifyKey.ADD_TWEEN_OBJECT, this.$onAddTweenObject, this);
+            this.facade.removeObserver(NotifyKey.REGISTER_TWEEN_OBJECT, this.$onAddTweenObject, this);
             this.facade.removeObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this);
         }
 
@@ -29,8 +29,11 @@ module sunui {
                 if (suncore.System.isModulePaused(mod) === false) {
                     for (let i: number = tweens.length - 1; i > 0; i--) {
                         const tween: ITween = tweens[i] as ITween;
-                        if (tween.mod === mod && tween.canceled === false) {
-                            tween.doAction();
+                        if (tween.mod === mod) {
+                            let timeLeft: number = 1;
+                            while (timeLeft > 0 && tween.canceled === false) {
+                                timeLeft = tween.doAction();
+                            }
                         }
                     }
                 }

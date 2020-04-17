@@ -17,8 +17,8 @@ module sunui {
                 return;
             }
             info.closed = true;
-            // 避免因模块停止引起缓动意外
-            this.$makeProps(info.props);
+            // // 避免因模块停止引起缓动意外
+            // this.$makeProps(info.props);
 
             M.viewLayer.onViewClose(view);
             this.facade.sendNotification(NotifyKey.ON_POPUP_CLOSED, view);

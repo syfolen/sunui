@@ -6,38 +6,10 @@ module sunui {
      */
     export namespace NotifyKey {
         /**
-         * 加载场景 { name: number, data: any }
-         * 说明：
-         * 1. 此命令由外部注册并实现
-         * 2. 当场景加载完成时，外部应当派发ENTER_SCENE以通知sunui继续逻辑
+         * 重试确认请求 { mod: suncore.ModuleEnum, prompt: string, options: IRetryOption[], handler: suncom.IHandler }
          * export
          */
-        export const LOAD_SCENE: string = "sunui.NotifyKey.LOAD_SCENE";
-
-        /**
-         * 卸载场景 { info: ISceneInfo }
-         * 说明：
-         * 1. 此命令由外部注册并实现
-         * 2. 不同于LOAD_SCENE命令，当场景卸载完成时，EXIT_SCENE命令不需要由外部派发
-         * depends
-         */
-        export const UNLOAD_SCENE: string = "sunui.NotifyKey.UNLOAD_SCENE";
-
-        /**
-         * 销毁场景资源 { info: ISceneInfo }
-         * 说明：
-         * 1. 外部应监听此事件来销毁场景资源
-         * 2. 同UNLOAD_SCENE
-         * 3. 此通知后于UNLOAD_SCENE派发
-         * depends
-         */
-        export const DESTROY_SCENE: string = "sunui.NotifyKey.DESTROY_SCENE";
-
-        /**
-         * 加载场景之前 { none }
-         * export
-         */
-        export const BEFORE_LOAD_SCENE: string = "sunui.NotifyKey.BEFORE_LOAD_SCENE";
+        export const RETRY_CONFIRM: string = "sunui.NotifyKey.RETRY_CONFIRM";
 
         /**
          * 注册场景信息 { infos: ISceneInfo[] }
@@ -48,10 +20,37 @@ module sunui {
         export const REGISTER_SCENES: string = "sunui.NotifyKey.REGISTER_SCENES";
 
         /**
+         * 加载场景之前 { none }
+         * 说明：
+         * 1. 此事件主要用于展示LoadingView
+         * export
+         */
+        export const BEFORE_LOAD_SCENE: string = "sunui.NotifyKey.BEFORE_LOAD_SCENE";
+
+        /**
+         * 加载场景 { info: ISceneInfo }
+         * 说明：
+         * 1. 此命令由外部注册并实现
+         * 2. 当场景加载完成时，外部应当派发ENTER_SCENE命令以通知sunui继续逻辑
+         * export
+         */
+        export const LOAD_SCENE: string = "sunui.NotifyKey.LOAD_SCENE";
+
+        /**
+         * 卸载场景 { scene2d: Laya.Scene, scene3d: Laya.Scene3D }
+         * 说明：
+         * 1. 此命令由外部注册并实现
+         * 2. 不同于LOAD_SCENE命令，当场景卸载完成时，EXIT_SCENE命令不需要由外部派发
+         * depends
+         */
+        export const UNLOAD_SCENE: string = "sunui.NotifyKey.UNLOAD_SCENE";
+
+        /**
          * 进入场景命令 { scene2d: Laya.Scene, scene3d: Laya.Scene3D }
          * 说明：
-         * 1. 此命令由外部在实现LOAD_SCENE命令时于场景加载完成时派发
-         * 2. 此命令必然在iniCls被执行之后被派发
+         * 1. sunui优先响应此命令
+         * 2. 此命令由外部在实现LOAD_SCENE命令时于场景加载完成时派发
+         * 3. 此命令必然在iniCls.run()被执行之后被派发
          * export
          */
         export const ENTER_SCENE: string = "sunui.NotifyKey.ENTER_SCENE";
@@ -59,10 +58,9 @@ module sunui {
         /**
          * 退出场景命令 { sceneName: SceneNameEnum }
          * 说明：
-         * 1. 此命令由sunui在执行退出场景逻辑时派发
-         * 2. 此命令必然在uniCls被执行之前被派发
-         * 3. 场景退出与销毁并不相同，场景销毁的逻辑会执行在uniCls被执行之后
-         * 4. SceneNameEnum 为由外部定义的枚举值
+         * 1. 此命令被派发时，意味着退出场景的逻辑即将被执行
+         * 2. 场景时间轴将此命令被派发后自动停止，sunui开始进入退出与销毁场景的流程
+         * 3. SceneNameEnum 为由外部定义的枚举值
          * depends
          */
         export const EXIT_SCENE: string = "sunui.NotifyKey.EXIT_SCENE";
@@ -70,65 +68,36 @@ module sunui {
         /**
          * 离开场景命令 { none }
          * 说明：
-         * 1. 此命令后于EXIT_SCENE派发
+         * 1. 此命令在完成uniCls的构建之后被派发（此时uniCls.run尚未执行）
+         * 2. 表现层中的数据应当在此处销毁
          */
         export const LEAVE_SCENE: string = "sunui.NotifyKey.LEAVE_SCENE";
 
         /**
-         * 添加缓动对象 { tween: ITween }
+         * 清理场景资源 { none }
+         * 说明：
+         * 1. 当此事件被派发时，意味着场景己经彻底被销毁
+         * 2. 外部应监听此事件以清理场景资源
+         * depends
          */
-        export const ADD_TWEEN_OBJECT: string = "sunui.NotifyKey.ADD_TWEEN_OBJECT";
+        export const CLEAR_SCENE_RESOURCES: string = "sunui.NotifyKey.CLEAR_SCENE_RESOURCES";
 
         /**
-         * 显示弹框 { view: Laya.Sprite, duration: number, props: IViewProps, option: PopupMethodEnum | ITween }
+         * 显示弹框 { view: IView, duration: number, props: IViewProps }
          */
         export const SHOW_POPUP: string = "sunui.NotifyKey.SHOW_POPUP";
 
         /**
-         * 关闭弹框 { view: Laya.Sprite, duration: number, destroy: boolean, option: PopupMethodEnum | ITween }
+         * 关闭弹框 { view: IView, duration: number, destroy: boolean }
          */
         export const CLOSE_POPUP: string = "sunui.NotifyKey.CLOSE_POPUP";
-
-        /**
-         * 应用弹出效果 { view: Laya.Component, props: IViewProps, option: PopupMethodEnum | ITween, popup: boolean }
-         * @popup: true为弹出，false为关闭
-         */
-        export const APPLY_POPUP_METHOD: string = "sunui.NotifyKey.APPLY_POPUP_METHOD";
-
-        /**
-         * 弹框创建完成 { view: Laya.Sprite, args?: any[] }
-         * 说明：
-         * 1. 此事件会在IPopupView的$onCreate方法执行完毕之后被派发
-         * 2. 传递给$onCreate方法的所有参数均会在此命令中被传递，同时弹框对象亦会被传递
-         * 补充：
-         * 1. 接口己弃用，没有使用此接口的需求，另外事件的派发没有考虑在onCreate中直接关闭弹窗的情况
-         */
-        export const ON_POPUP_CREATED: string = "sunui.NotifyKey.ON_POPUP_CREATED";
-
-        /**
-         * 弹框己打开 { view: Laya.Sprite }
-         * 说明：
-         * 1. 此事件会在IPopupView的$onOpen方法执行完毕之后被派发
-         * 补充：
-         * 1. 接口己弃用，没有使用此接口的需求，另外事件的派发没有考虑在onOpen中直接关闭弹窗的情况
-         */
-        export const ON_POPUP_OPENED: string = "sunui.NotifyKey.ON_POPUP_OPENED";
 
         /**
          * 弹框己关闭 { view: Laya.Sprite }
          * 说明：
          * 1. 此事件会在IPopupView的$onClose方法执行完毕之后被派发
-         * export
          */
         export const ON_POPUP_CLOSED: string = "sunui.NotifyKey.ON_POPUP_CLOSED";
-
-        /**
-         * 弹框移除之前 { view: Laya.Sprite }
-         * 说明：
-         * 1. 此事件会在IPopupView的$onRemove方法执行之前被派发
-         * export
-         */
-        export const BEFORE_POPUP_REMOVE: string = "sunui.NotifyKey.BEFORE_POPUP_REMOVE";
 
         /**
          * 弹框己移除 { view: Laya.Sprite }
@@ -149,12 +118,6 @@ module sunui {
         export const ON_CALLER_DESTROYED: string = "sunui.NotifyKey.ON_CALLER_DESTROYED";
 
         /**
-         * 重试确认请求 { mod: suncore.ModuleEnum, prompt: string, options: IRetryOption[], handler: suncom.IHandler }
-         * export
-         */
-        export const RETRY_CONFIRM: string = "sunui.NotifyKey.RETRY_CONFIRM";
-
-        /**
          * 缓存资源安全加载器 { url: string, loader: AssetSafetyLoader }
          */
         export const CACHE_ASSET_SAFETY_LOADER: string = "sunui.NotifyKey.CACHE_ASSET_SAFETY_LOADER";
@@ -170,11 +133,6 @@ module sunui {
         export const ON_ASSET_SAFETY_LOADER_FAILED: string = "sunui.NotifyKey.ON_ASSET_SAFETY_LOADER_FAILED";
 
         /**
-         * 资源加载重试 { none }
-         */
-        export const ASSET_SAFETY_LOADER_RETRY: string = "sunui.NotifyKey.ASSET_SAFETY_LOADER_RETRY";
-
-        /**
          * UrlSafetyLoader对象创建通知 { loader: UrlSafetyLoader }
          */
         export const ON_URL_SAFETY_LOADER_CREATED: string = "sunui.NotifyKey.ON_URL_SAFETY_LOADER_CREATED";
@@ -183,5 +141,15 @@ module sunui {
          * UrlSafetyLoader加载完成通知 { loader: UrlSafetyLoader }
          */
         export const ON_URL_SAFETY_LOADER_COMPLETE: string = "sunui.NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE";
+
+        /**
+         * 资源加载重试 { none }
+         */
+        export const ASSET_SAFETY_LOADER_RETRY: string = "sunui.NotifyKey.ASSET_SAFETY_LOADER_RETRY";
+
+        /**
+         * 注册缓动对象 { tween: ITween }
+         */
+        export const REGISTER_TWEEN_OBJECT: string = "sunui.NotifyKey.REGISTER_TWEEN_OBJECT";
     }
 }

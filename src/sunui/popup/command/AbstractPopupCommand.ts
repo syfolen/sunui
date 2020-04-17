@@ -15,15 +15,15 @@ module sunui {
             if (props.y === void 0 && props.top === void 0 && props.bottom === void 0) {
                 props.centerY = 0;
             }
-            // 这里不确定是否这样做是合理的
-            if (suncore.System.isModuleStopped(props.mod) === true) {
-                if (props.mod === suncore.ModuleEnum.TIMELINE && suncore.System.isModuleStopped(suncore.ModuleEnum.CUSTOM) === false) {
-                    props.mod = suncore.ModuleEnum.CUSTOM;
-                }
-                else {
-                    props.mod = suncore.ModuleEnum.SYSTEM;
-                }
-            }
+            // // 这里不确定是否这样做是合理的
+            // if (suncore.System.isModuleStopped(props.mod) === true) {
+            //     if (props.mod === suncore.ModuleEnum.TIMELINE && suncore.System.isModuleStopped(suncore.ModuleEnum.CUSTOM) === false) {
+            //         props.mod = suncore.ModuleEnum.CUSTOM;
+            //     }
+            //     else {
+            //         props.mod = suncore.ModuleEnum.SYSTEM;
+            //     }
+            // }
         }
 
         /**

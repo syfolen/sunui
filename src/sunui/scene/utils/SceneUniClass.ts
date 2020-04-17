@@ -4,19 +4,13 @@ module sunui {
      * 场景反初始化入口类
      * export
      */
-    export abstract class SceneUniClass extends suncore.AbstractTask {
-        /**
-         * 场景配置信息
-         * export
-         */
-        protected $info: ISceneInfo = null;
+    export abstract class SceneUniClass extends AbstractSceneTask {
 
         /**
          * export
          */
-        constructor(info: ISceneInfo) {
-            super();
-            this.$info = info;
+        constructor(info: ISceneInfo, data?: any) {
+            super(info, data);
             this.facade.registerObserver(NotifyKey.LEAVE_SCENE, this.$onLeaveScene, this, true, suncom.EventPriorityEnum.EGL);
         }
 

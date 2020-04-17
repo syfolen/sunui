@@ -5,7 +5,7 @@ module sunui {
      */
     export class ShowPopupCommand extends AbstractPopupCommand {
 
-        execute(view: IView, duration: number, props: IViewProps): void {
+        execute(view: IView, duration: number, props: IViewProps = {}): void {
             if (M.viewLayer.getInfoByView(view) !== null) {
                 suncom.Logger.error(suncom.DebugMode.ANY, `${view}[${view.name}] is already popup.`);
                 return;
@@ -54,16 +54,6 @@ module sunui {
             view["pivot"](view.width * 0.5, view.height * 0.5);
             M.viewLayer.onViewCreate(view, args);
 
-            if (args === void 0) {
-                this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, view);
-            }
-            else if (args instanceof Array) {
-                this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, [view].concat(args));
-            }
-            else {
-                this.facade.sendNotification(NotifyKey.ON_POPUP_CREATED, [view, args]);
-            }
-
             if ((props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
                 if (props.flags & PopupFlagEnum.SYNC_FADE_TIME) {
                     Tween.get(mask, info.props.mod).from({ alpha: 0 }, duration);
@@ -86,7 +76,6 @@ module sunui {
             if (info !== null && info.closed === false) {
                 info.displayed = true;
                 M.viewLayer.onViewOpen(view);
-                this.facade.sendNotification(NotifyKey.ON_POPUP_OPENED, view);
             }
         }
     }

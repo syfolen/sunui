@@ -4,26 +4,13 @@ module sunui {
      * 场景初始化入口类
      * export
      */
-    export abstract class SceneIniClass extends suncore.AbstractTask {
-        /**
-         * 场景配置信息
-         * export
-         */
-        protected $info: ISceneInfo = null;
-
-        /**
-         * 场景跳转参数
-         * export
-         */
-        protected $data: any;
+    export abstract class SceneIniClass extends AbstractSceneTask {
 
         /**
          * export
          */
         constructor(info: ISceneInfo, data?: any) {
-            super();
-            this.$info = info;
-            this.$data = data;
+            super(info, data);
             this.facade.registerObserver(NotifyKey.ENTER_SCENE, this.$onEnterScene, this, true, suncom.EventPriorityEnum.EGL);
         }
 

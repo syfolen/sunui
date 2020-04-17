@@ -33,6 +33,6 @@ module sunui {
          * 反初始化类
          * export
          */
-        uniCls?: new (info: ISceneInfo) => sunui.SceneUniClass;
+        uniCls?: new (info: ISceneInfo, data?: any) => sunui.SceneUniClass;
     }
 }

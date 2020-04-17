@@ -7,7 +7,7 @@ module sunui {
         /**
          * 场景配置信息列表
          */
-        const $infos: Array<ISceneInfo> = [];
+        const $infos: ISceneInfo[] = [];
 
         /**
          * 注册场景

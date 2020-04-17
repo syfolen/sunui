@@ -6,14 +6,14 @@ module sunui {
      */
     export class ViewContact extends puremvc.Notifier {
         /**
-         * 执行脚本的视图对象
+         * 弹出框（显示对象）
          */
-        private $caller: any;
+        private $popup: IView;
 
         /**
-         * 被监视的显示对象
+         * 回调对象（脚本）
          */
-        private $popup: Laya.Node;
+        private $caller: any;
 
         /**
          * 弹框被关闭时需要执行的回调
@@ -26,14 +26,16 @@ module sunui {
         private $removedHandler: suncom.IHandler = null;
 
         /**
-         * @caller: 脚本回调对象，允许为非弹框对象
-         * @popup: 被监视的视图对象，必须为弹框对象
+         * @caller: 回调对象（脚本）
+         * @popup: 被监视的显示对象（必须为通过ViewFacade.popup弹出的显示对象）
+         * 说明：
+         * 1. 若caller为非弹出对象，则销毁前应当主动派发NotifyKey.ON_CALLER_DESTROYED事件，否则ViewContact不会自动回收
          * export
          */
-        constructor(caller: any, popup: any) {
+        constructor(caller: any, popup: IView) {
             super();
-            this.$popup = popup;
-            this.$caller = caller;
+            this.$popup = popup || null;
+            this.$caller = caller || null;
 
             if (M.viewLayer.getInfoByView(popup) === null) {
                 throw Error(`找不到${popup.name}的弹出信息，请确认其为弹出对象`);
@@ -41,24 +43,26 @@ module sunui {
             this.facade.registerObserver(NotifyKey.ON_POPUP_CLOSED, this.$onPopupClosed, this, false, suncom.EventPriorityEnum.FWL);
             this.facade.registerObserver(NotifyKey.ON_POPUP_REMOVED, this.$onPopupRemoved, this, false, suncom.EventPriorityEnum.FWL);
 
-            // 若场景退出了，则应当销毁自己
-            this.facade.registerObserver(NotifyKey.EXIT_SCENE, this.$onCallerDestroy, this, false, suncom.EventPriorityEnum.FWL);
-            // 若caller为弹框则监听弹框销毁事件
-            const info: IViewStackInfo = M.viewLayer.getInfoByView(caller);
-            if (info !== null) {
+            if (M.viewLayer.getInfoByView(caller) !== null) {
                 this.facade.registerObserver(NotifyKey.ON_POPUP_REMOVED, this.$onCallerDestroy, this, false, suncom.EventPriorityEnum.FWL);
             }
-            // 否则应当监听由caller主动派发的销毁事件
             else {
                 this.facade.registerObserver(NotifyKey.ON_CALLER_DESTROYED, this.$onCallerDestroy, this, false, suncom.EventPriorityEnum.FWL);
             }
+            // 此监听为系统级别的监听，这么做主要是为了让所有的视图关系在uniCls.$onLeaveScene执行之前解除
+            this.facade.registerObserver(NotifyKey.LEAVE_SCENE, this.$onLeaveScene, this, false, suncom.EventPriorityEnum.OSL);
         }
 
         /**
-         * 退出场景视为销毁caller
+         * 离开场景视为销毁caller
          */
-        private $onExitScene(): void {
-            this.$onCallerDestroy(this.$caller);
+        private $onLeaveScene(): void {
+            this.facade.removeObserver(NotifyKey.ON_POPUP_CLOSED, this.$onPopupClosed, this);
+            this.facade.removeObserver(NotifyKey.ON_POPUP_REMOVED, this.$onPopupRemoved, this);
+
+            this.facade.removeObserver(NotifyKey.LEAVE_SCENE, this.$onCallerDestroy, this);
+            this.facade.removeObserver(NotifyKey.ON_POPUP_REMOVED, this.$onCallerDestroy, this);
+            this.facade.removeObserver(NotifyKey.ON_CALLER_DESTROYED, this.$onCallerDestroy, this);
         }
 
         /**
@@ -66,35 +70,26 @@ module sunui {
          */
         private $onCallerDestroy(caller: any): void {
             if (caller === this.$caller) {
-                this.facade.removeObserver(NotifyKey.ON_POPUP_CLOSED, this.$onPopupClosed, this);
-                this.facade.removeObserver(NotifyKey.ON_POPUP_REMOVED, this.$onPopupRemoved, this);
-
-                this.facade.removeObserver(NotifyKey.EXIT_SCENE, this.$onCallerDestroy, this);
-                this.facade.removeObserver(NotifyKey.ON_POPUP_REMOVED, this.$onCallerDestroy, this);
-                this.facade.removeObserver(NotifyKey.ON_CALLER_DESTROYED, this.$onCallerDestroy, this);
+                this.$onLeaveScene();
             }
         }
 
         /**
-         * 弹框被关闭
+         * 弹框己关闭
          */
-        private $onPopupClosed(popup: Laya.Node): void {
+        private $onPopupClosed(popup: IView): void {
             if (popup === this.$popup) {
                 if (this.$closedHandler !== null) {
                     this.$closedHandler.run();
                     this.$closedHandler = null;
                 }
-                // 若不存在removed事件则需要销毁Contact
-                if (this.$removedHandler === null) {
-                    this.$onCallerDestroy(this.$caller);
-                }
             }
         }
 
         /**
-         * 弹框被移除
+         * 弹框己移除
          */
-        private $onPopupRemoved(popup: Laya.Node): void {
+        private $onPopupRemoved(popup: IView): void {
             if (popup === this.$popup) {
                 if (this.$removedHandler !== null) {
                     this.$removedHandler.run();
@@ -123,7 +118,7 @@ module sunui {
         }
 
         /**
-         * 注册弹框被销毁时需要执行的回调（详见ON_POPUP_REMOVED）
+         * 注册弹框被移除时需要执行的回调（详见ON_POPUP_REMOVED）
          * export
          */
         onPopupRemoved(method: Function, caller: any, args?: any[]): ViewContact {

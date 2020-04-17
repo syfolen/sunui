@@ -38,8 +38,9 @@ module sunui {
 
         /**
          * 执行动作
+         * @return: 返回允许执行缓动的剩余时间
          */
-        doAction(): void;
+        doAction(): number;
 
         /**
          * 执行缓动的模块
