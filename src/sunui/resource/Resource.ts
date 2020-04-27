@@ -282,7 +282,7 @@ module sunui {
                 return Resource.getRes3dPackRoot(name.pack) + name.name;
             }
             else {
-                if (suncom.Common.getFileExtension(name) === name) {
+                if (suncom.Common.getFileExtension(name) === null) {
                     name += ".lh";
                 }
                 return Resource.getRes3dPackRoot(suncom.Common.getFileName(name)) + name;
