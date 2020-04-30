@@ -107,9 +107,8 @@ module sunui {
 				}
 			}
 			else {
-				this.$totalSize = 1;
 				// 未知类型的预加载对象
-				debugger;
+				this.$totalSize = 1;
 			}
 			this.$data = res;
 			this.facade.registerObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
