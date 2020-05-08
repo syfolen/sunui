@@ -28,6 +28,7 @@ module sunui {
             this.$id = id;
             this.$urls = Resource.checkLoadList(urls);
             this.$handler = handler;
+            suncom.Test.expect(this.$urls.length).toBeGreaterThan(0);
 
             // 预加载资源
             for (let i: number = 0; i < this.$urls.length; i++) {
