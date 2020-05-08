@@ -23,15 +23,13 @@ module sunui {
          */
         export function unlock(url: string): void {
             const reference: number = M.references[url] || 0;
-            if (reference === 0) {
-                throw Error(`尝试解锁不存在的资源 url：${url}`);
-            }
-            else if (reference === 1) {
-                delete M.references[url];
-                $clearRes(url);
+            suncom.Test.expect(reference).interpret(`尝试解锁不存在的资源 url：${url}`).toBeGreaterThan(0);
+            if (reference > 1) {
+                M.references[url] = reference - 1;
             }
             else {
-                M.references[url] = reference - 1;
+                delete M.references[url];
+                $clearRes(url);
             }
         }
 
