@@ -172,15 +172,10 @@ module sunui {
          */
         export function release(id: number): number {
             const templet: Templet = M.templets[id] || null;
-            if (templet === null) {
-                return;
+            if (templet !== null) {
+                delete M.templets[id];
+                templet.destroy();
             }
-            delete M.templets[id];
-
-            // 资源组释放执行函数，此方法由release方法异步调用执行，以避免create回调中的释放请求不生效的问题
-            const handler: suncom.IHandler = suncom.Handler.create(templet, templet.release);
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
-
             return 0;
         }
 

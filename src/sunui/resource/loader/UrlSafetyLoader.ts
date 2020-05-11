@@ -98,5 +98,12 @@ module sunui {
         get destroyed(): boolean {
             return this.$destroyed;
         }
+
+        /**
+         * 加载的资源对象链接
+         */
+        get url(): string {
+            return this.$url;
+        }
     }
 }

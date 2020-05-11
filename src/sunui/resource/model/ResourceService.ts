@@ -21,6 +21,11 @@ module sunui {
         private $loadingList: UrlSafetyLoader[] = [];
 
         /**
+         * 正在执行加载的URL
+         */
+        private $loadingUrlMap: { [url: string]: boolean } = {};
+
+        /**
          * AssetSafetyLoader加载器缓存
          * 说明：
          * 1. 缓存加载器作为解锁资源的依据
@@ -62,7 +67,7 @@ module sunui {
          * UrlSafetyLoader创建通知回调
          */
         private $onUrlSafetyLoaderCreated(loader: UrlSafetyLoader): void {
-            this.$undoList.push(loader);
+            this.$undoList.unshift(loader);
             this.$next();
         }
 
@@ -73,6 +78,7 @@ module sunui {
             const index: number = this.$loadingList.indexOf(loader);
             if (index > -1) {
                 this.$loadingList.splice(index, 1);
+                delete this.$loadingUrlMap[loader.url];
                 this.$next();
             }
         }
@@ -82,10 +88,24 @@ module sunui {
          */
         private $next(): void {
             while (this.$undoList.length > 0 && this.$loadingList.length < ResourceService.MAX_LOAD_COUNT) {
-                const loader: UrlSafetyLoader = this.$undoList.shift();
-                if (loader.destroyed === false) {
+                let ok: boolean = false;
+                for (let i: number = this.$undoList.length - 1; i > -1; i--) {
+                    const loader: UrlSafetyLoader = this.$undoList[i];
+                    if (this.$loadingUrlMap[loader.url] === true) {
+                        continue;
+                    }
+                    if (loader.destroyed === true) {
+                        this.$undoList.splice(i, 1);
+                        continue;
+                    }
+                    ok = true;
                     loader.load();
                     this.$loadingList.push(loader);
+                    this.$loadingUrlMap[loader.url] = true;
+                    break;
+                }
+                if (ok === false) {
+                    break;
                 }
             }
         }
