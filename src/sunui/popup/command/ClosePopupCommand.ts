@@ -8,7 +8,7 @@ module sunui {
         execute(view: Laya.Sprite, duration: number, destroy: boolean): void {
             const info: IViewStackInfo = M.viewLayer.getInfoByView(view);
             if (info === null) {
-                suncom.Logger.error(suncom.DebugMode.ANY, `${view}[${view.name}]'s infomation is not exist.`);
+                suncom.Logger.error(suncom.DebugMode.ANY, `${view}[${view && view.name}]'s infomation is not exist.`);
                 return;
             }
             if (destroy !== void 0) { info.keepNode = !destroy; }

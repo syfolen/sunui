@@ -137,6 +137,7 @@ module sunui {
                     const item: AssetSafetyLoader = loaders[i];
                     if (item.complete.method === method && item.complete.caller === caller) {
                         index = i;
+                        loader = item;
                         break;
                     }
                 }
@@ -146,6 +147,7 @@ module sunui {
             }
 
             if (index > -1) {
+                loader.destroy();
                 loaders.splice(index, 1);
                 if (loaders.length === 0) {
                     delete this.$cacheLoaders[url];

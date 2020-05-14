@@ -31,11 +31,6 @@ module sunui {
          */
         private $retryer: Retryer = new Retryer(RetryMethodEnum.TERMINATE, suncom.Handler.create(this, this.$onRetryConfirmed), "资源加载失败，点击确定重新尝试！");
 
-        /**
-         * 是否己销毁
-         */
-        private $destroyed: boolean = false;
-
         constructor(url: string, complete: suncom.IHandler, data?: any) {
             super();
             this.$url = url;
@@ -51,9 +46,9 @@ module sunui {
             if (this.$destroyed === true) {
                 return;
             }
-            this.$destroyed = true;
-            this.$loader.destroy();
+            super.destroy();
             this.$retryer.cancel();
+            this.$loader !== null && this.$loader.destroy();
         }
 
         /**

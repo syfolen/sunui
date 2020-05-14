@@ -54,6 +54,11 @@ module sunui {
 		 * 销毁限制器
 		 */
 		destroy(): void {
+			if (this.$destroyed === true) {
+				return;
+			}
+			super.destroy();
+
 			const index: number = M.downloadLimiters.indexOf(this);
 			if (index < 0) {
 				throw Error(`加载限制器不存在：index:${index}`);

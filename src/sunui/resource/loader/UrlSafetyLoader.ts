@@ -28,23 +28,11 @@ module sunui {
          */
         private $loading: boolean = false;
 
-        /**
-         * 是否己销毁
-         */
-        private $destroyed: boolean = false;
-
         constructor(url: string, complete: suncom.IHandler) {
             super();
             this.$url = url;
             this.$complete = complete;
             this.facade.sendNotification(NotifyKey.ON_URL_SAFETY_LOADER_CREATED, this);
-        }
-
-        /**
-         * 销毁加载器
-         */
-        destroy(): void {
-            this.$destroyed = true;
         }
 
         /**
