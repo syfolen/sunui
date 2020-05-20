@@ -5,7 +5,6 @@ module sunui {
      * 说明：
      * 1. 该加载器的每个实例均仅只允许被执行一次
      * 2. 此类的设计主要用于确保正在执行加载的资源不会被清理
-     * export
      */
     export class UrlSafetyLoader extends puremvc.Notifier {
         /**
