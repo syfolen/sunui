@@ -41,6 +41,9 @@ module sunui {
             if (this.$loading === false && this.$destroyed === false) {
                 this.$loading = true;
                 UrlLocker.lock(this.$url);
+                if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+                    suncom.Logger.trace(suncom.DebugMode.ANY, `load ${this.$url}`);
+                }
                 if (Resource.isRes3dUrl(this.$url) === false || Resource.getRes3dJsonUrl(this.$url) === this.$url) {
                     Laya.loader.load(this.$url, Laya.Handler.create(this, this.$onComplete));
                 }
@@ -57,6 +60,9 @@ module sunui {
          * 加载结束回调
          */
         private $onComplete(data: any): void {
+            if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+                suncom.Logger.trace(suncom.DebugMode.ANY, `load ${this.$url} complete`);
+            }
             if (this.$limiter === null) {
                 if (this.$destroyed === false) {
                     this.$destroyed = true;

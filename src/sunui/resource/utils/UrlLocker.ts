@@ -13,6 +13,9 @@ module sunui {
          */
         export function lock(url: string): void {
             const reference: number = M.references[url] || 0;
+            if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+                suncom.Logger.trace(suncom.DebugMode.ANY, `reference:${reference}, lock:${url}`);
+            }
             M.references[url] = reference + 1;
         }
 
@@ -23,6 +26,9 @@ module sunui {
          */
         export function unlock(url: string): void {
             const reference: number = M.references[url] || 0;
+            if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+                suncom.Logger.trace(suncom.DebugMode.ANY, `reference:${reference}, unlock:${url}`);
+            }
             suncom.Test.expect(reference).interpret(`尝试解锁不存在的资源 url：${url}`).toBeGreaterThan(0);
             if (reference > 1) {
                 M.references[url] = reference - 1;
@@ -37,6 +43,9 @@ module sunui {
          * 根据Url清理资源
          */
         export function clearResByUrl(url: string): void {
+            if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+                suncom.Logger.trace(suncom.DebugMode.ANY, `clearResUrl:${url}`);
+            }
             // 销毁自定义缓存
             let item: any = M.cacheMap[url] || null;
             if (item !== null) {

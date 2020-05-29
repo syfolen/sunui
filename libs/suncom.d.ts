@@ -727,6 +727,11 @@ declare module suncom {
          * 文件日志
          */
         function log2f(mod: DebugMode, ...args: any[]): void;
+
+        /**
+         * 普通日志
+         */
+        function trace(mod: DebugMode, ...args: any[]): void;
     }
 
     /**

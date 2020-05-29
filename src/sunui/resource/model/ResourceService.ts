@@ -68,6 +68,9 @@ module sunui {
          */
         private $onUrlSafetyLoaderCreated(loader: UrlSafetyLoader): void {
             this.$undoList.unshift(loader);
+            if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+                suncom.Logger.trace(suncom.DebugMode.ANY, `create loader for url ${loader.url}, loading list length:${this.$loadingList.length}, undo list length:${this.$undoList.length}`);
+            }
             this.$next();
         }
 
@@ -76,6 +79,10 @@ module sunui {
          */
         private $onUrlSafetyLoaderComplete(loader: UrlSafetyLoader): void {
             const index: number = this.$loadingList.indexOf(loader);
+            if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+                const reg0: number = index === -1 ? this.$loadingList.length : this.$loadingList.length - 1;
+                suncom.Logger.trace(suncom.DebugMode.ANY, `finish loader for url ${loader.url}, loading list length:${reg0}, undo list length:${this.$undoList.length}`);
+            }
             if (index > -1) {
                 this.$loadingList.splice(index, 1);
                 delete this.$loadingUrlMap[loader.url];
@@ -97,6 +104,9 @@ module sunui {
                     if (loader.destroyed === true) {
                         this.$undoList.splice(i, 1);
                         continue;
+                    }
+                    if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+                        suncom.Logger.trace(suncom.DebugMode.ANY, `load next url ${loader.url}, loading list length:${this.$loadingList.length} + 1`);
                     }
                     ok = true;
                     loader.load();
