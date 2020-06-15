@@ -99,6 +99,7 @@ module sunui {
             this.facade.sendNotification(NotifyKey.LEAVE_SCENE);
             this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, [this.$scene2d, this.$scene3d]);
             this.facade.sendNotification(NotifyKey.CLEAR_SCENE_RESOURCES);
+            Resource.clearResByUrl(info.scene2d);
             // 当前场景名字应当于uniCls.run执行完毕之后再置空
             suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new suncore.SimpleTask(
                 suncom.Handler.create(this, this.$onExitScene)

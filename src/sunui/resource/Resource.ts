@@ -213,7 +213,6 @@ module sunui {
 
         /**
          * 根据Url清理资源
-         * export
          */
         export function clearResByUrl(url: string): void {
             UrlLocker.clearResByUrl(url);
