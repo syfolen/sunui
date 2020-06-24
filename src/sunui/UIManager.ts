@@ -30,8 +30,13 @@ module sunui {
          */
         constructor() {
             super();
-            M.viewLayer = new ViewLayerLaya3D();
             M.sceneLayer = new SceneLayer();
+            if (Laya.Scene3D === void 0) {
+                M.viewLayer = new ViewLayerLaya2D();
+            }
+            else {
+                M.viewLayer = new ViewLayerLaya3D();
+            }
 
             // 启动缓动服务
             suncom.DBService.put(-1, new TweenService()).run();
