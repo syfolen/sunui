@@ -51,6 +51,7 @@ module sunui {
             M.viewLayer.addChild(view);
 
             // 第一次显示的时候，轴心点可能会不正确
+            suncom.Test.expect(view["pivot"]).anything();
             view["pivot"](view.width * 0.5, view.height * 0.5);
             M.viewLayer.onViewCreate(view, args);
 
