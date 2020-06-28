@@ -75,15 +75,6 @@ module sunui {
         export const LEAVE_SCENE: string = "sunui.NotifyKey.LEAVE_SCENE";
 
         /**
-         * 清理场景资源 { none }
-         * 说明：
-         * 1. 当此事件被派发时，意味着场景己经彻底被销毁
-         * 2. 外部应监听此事件以清理场景资源
-         * depends
-         */
-        export const CLEAR_SCENE_RESOURCES: string = "sunui.NotifyKey.CLEAR_SCENE_RESOURCES";
-
-        /**
          * 显示弹框 { view: IView, duration: number, props: IViewProps }
          */
         export const SHOW_POPUP: string = "sunui.NotifyKey.SHOW_POPUP";

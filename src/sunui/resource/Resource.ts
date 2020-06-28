@@ -6,23 +6,10 @@ module sunui {
      */
     export namespace Resource {
         /**
-         * 种子ID
-         */
-        let $seedId: number = 0;
-
-        /**
          * 3D资源目录
          * export
          */
         export let res3dRoot: string = null;
-
-        /**
-         * 生成模版ID（唯一）
-         */
-        function createTempletId(): number {
-            $seedId++;
-            return $seedId;
-        }
 
         /**
          * 设置资源的加载速度
@@ -131,7 +118,7 @@ module sunui {
          * 1. 同create方法
          * export
          */
-        export function createRes3d(name: string | IRes3dName, method: (node: any, url: string) => void, caller: Object): any {
+        export function createRes3d(name: string, method: (node: any, url: string) => void, caller: Object): any {
             Resource.create(Resource.getRes3dUrlByName(name), method, caller);
         }
 
@@ -141,7 +128,7 @@ module sunui {
          * 1. 同destroy方法
          * export
          */
-        export function destroyRes3d(name: string | IRes3dName, method: (node: any, url: string) => void, caller: Object): void {
+        export function destroyRes3d(name: string, method: (node: any, url: string) => void, caller: Object): void {
             Resource.destroy(Resource.getRes3dUrlByName(name), method, caller);
         }
 
@@ -159,7 +146,7 @@ module sunui {
             else {
                 handler = suncom.Handler.create(caller, method);
             }
-            const id: number = createTempletId();
+            const id: number = suncom.Common.createHashId();
             M.templets[id] = new Templet(id, urls, handler);
             return id;
         }
@@ -207,7 +194,7 @@ module sunui {
          * 1. 同createSync
          * export
          */
-        export function createRes3dSync(name: string | IRes3dName): any {
+        export function createRes3dSync(name: string): any {
             return Resource.createSync(Resource.getRes3dUrlByName(name));
         }
 
@@ -229,25 +216,6 @@ module sunui {
         }
 
         /**
-         * 获取3d资源包名
-         */
-        function $getRes3dPackName(url: string): string {
-            const prefix: string = `${Resource.res3dRoot}/LayaScene_`;
-            const suffix: string = "/Conventional/";
-
-            if (url.indexOf(prefix) !== 0) {
-                throw Error(`解析3D资源包名失败 url:${url}`);
-            }
-            url = url.substr(prefix.length);
-
-            const index: number = url.indexOf(suffix);
-            if (index === -1) {
-                throw Error(`解析3D资源包名失败 url:${url}`);
-            }
-            return url.substr(0, index);
-        }
-
-        /**
          * 判断是否为3D资源
          */
         export function isRes3dUrl(url: string): boolean {
@@ -264,23 +232,17 @@ module sunui {
 
         /**
          * 获取3D资源地址
-         * @name: 如xxx或xxx.ls，若未指定扩展名，则认为是.lh
-         * @pack: 如LayaScene_xxxx中的xxxx，允许为空
+         * @name: 如xxx或xxx.lh，若未指定扩展名，则认为是.lh
          * 说明：
          * 1. 所有3d资源都必须放在${Resource.res3dRoot}目录下
          * 2. 完整的3D资源目录必须为 ${Resource.res3dRoot}/LayaScene_${pack}/Conventional/ 否则将不能正确解析
          * export
          */
-        export function getRes3dUrlByName(name: string | IRes3dName): string {
-            if (typeof name === "object") {
-                return Resource.getRes3dPackRoot(name.pack) + name.name;
+        export function getRes3dUrlByName(name: string): string {
+            if (suncom.Common.getFileExtension(name) === null) {
+                name += ".lh";
             }
-            else {
-                if (suncom.Common.getFileExtension(name) === null) {
-                    name += ".lh";
-                }
-                return Resource.getRes3dPackRoot(suncom.Common.getFileName(name)) + name;
-            }
+            return Resource.getRes3dPackRoot(suncom.Common.getFileName(name)) + name;
         }
 
         /**
@@ -353,7 +315,7 @@ module sunui {
                             break;
                         }
                         urls.splice(index, 1);
-                        suncom.Logger.warn(suncom.DebugMode.ANY, `${msg} ${url}`);
+                        suncom.Logger.error(suncom.DebugMode.ANY, `${msg} ${url}`);
                     } while (true);
                 }
             }

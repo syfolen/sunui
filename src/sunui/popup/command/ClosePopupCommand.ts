@@ -43,7 +43,7 @@ module sunui {
          */
         private $onCloseFinish(view: Laya.Sprite): void {
             // IPopupView的$onRemove方法在ViewLayer中实现
-            M.viewLayer.removeStackByView(view);
+            M.viewLayer.removeStackInfoByView(view);
         }
     }
 }

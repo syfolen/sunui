@@ -1,7 +1,7 @@
 
 module sunui {
     /**
-     * 缓动中介类，专门用于管理缓动
+     * 缓动服务类，专门用于管理缓动
      */
     export class TweenService extends suncore.BaseService {
 
@@ -21,13 +21,14 @@ module sunui {
          * 帧事件，缓动驱动函数
          */
         protected $frameLoop(): void {
-            const tweens: Array<boolean | ITween> = this.$tweens;
-
             this.$tweens[0] = true;
+
+            const tweens: Array<boolean | ITween> = this.$tweens;
 
             for (let mod: suncore.ModuleEnum = suncore.ModuleEnum.MIN; mod < suncore.ModuleEnum.MAX; mod++) {
                 if (suncore.System.isModulePaused(mod) === false) {
-                    for (let i: number = tweens.length - 1; i > 0; i--) {
+                    const length: number = tweens.length;
+                    for (let i: number = 0; i < length; i++) {
                         const tween: ITween = tweens[i] as ITween;
                         if (tween.mod === mod) {
                             let timeLeft: number = 1;
@@ -39,14 +40,14 @@ module sunui {
                 }
             }
 
-            this.$tweens[0] = false;
-
             for (let i: number = this.$tweens.length - 1; i > 0; i--) {
                 const tween: ITween = this.$tweens[i] as ITween;
                 if (tween.canceled === true) {
                     tweens.splice(i, 1);
                 }
             }
+
+            this.$tweens[0] = false;
         }
 
         /**

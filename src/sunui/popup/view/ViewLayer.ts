@@ -74,6 +74,27 @@ module sunui {
         }
 
         /**
+         * 获取视图信息
+         */
+        getInfoByView(view: IView): IViewStackInfo {
+            for (let i: number = 0; i < this.$stack.length; i++) {
+                const info: IViewStackInfo = this.$stack[i];
+                if (info.view === view) {
+                    return info;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * 保存视图信息至栈中
+         * NOTE: 保存时应当按UILevel从小到大的顺序排列，同级别的，后来的先处理
+         */
+        addToStack(newInfo: IViewStackInfo): void {
+            this.$stack.push(newInfo);
+        }
+
+        /**
          * 根据视图信息直接移除视图
          */
         removeStackInfo(info: IViewStackInfo): void {
@@ -96,30 +117,9 @@ module sunui {
         }
 
         /**
-         * 获取视图信息
-         */
-        getInfoByView(view: IView): IViewStackInfo {
-            for (let i: number = 0; i < this.$stack.length; i++) {
-                const info: IViewStackInfo = this.$stack[i];
-                if (info.view === view) {
-                    return info;
-                }
-            }
-            return null;
-        }
-
-        /**
-         * 保存视图信息至栈中
-         * NOTE: 保存时应当按UILevel从小到大的顺序排列，同级别的，后来的先处理
-         */
-        addToStack(newInfo: IViewStackInfo): void {
-            this.$stack.push(newInfo);
-        }
-
-        /**
          * 移除视图信息
          */
-        removeStackByView(view: IView): void {
+        removeStackInfoByView(view: IView): void {
             for (let i: number = 0; i < this.$stack.length; i++) {
                 const info: IViewStackInfo = this.$stack[i];
                 if (info.view === view) {
