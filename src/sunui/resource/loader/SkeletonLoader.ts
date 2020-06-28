@@ -4,15 +4,6 @@ module sunui {
      * 龙骨加载器
      */
     export class SkeletonLoader extends AssetLoader {
-        /**
-         * 龙骨动画模式
-         */
-        private $aniMode: number = 0;
-
-        constructor(url: string, handler: suncom.IHandler, aniMode: number = 0) {
-            super(url, handler);
-            this.$aniMode = aniMode;
-        }
 
         /**
          * 预加载龙骨资源
@@ -53,7 +44,7 @@ module sunui {
         private $onTempletCreated(): void {
             if (this.destroyed === false) {
                 const templet: Laya.Templet = M.cacheMap[this.$url];
-                this.$onComplete(true, templet.buildArmature(this.$aniMode));
+                this.$onComplete(true);
             }
             Resource.unlock(this.$url);
         }

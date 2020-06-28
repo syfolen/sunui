@@ -86,17 +86,17 @@ module sunui {
         }
 
         /**
-         * 是否己销毁
-         */
-        get destroyed(): boolean {
-            return this.$destroyed;
-        }
-
-        /**
          * 加载的资源对象链接
          */
         get url(): string {
             return this.$url;
+        }
+
+        /**
+         * 是否己销毁
+         */
+        get destroyed(): boolean {
+            return this.$destroyed;
         }
     }
 }

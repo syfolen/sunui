@@ -12,11 +12,6 @@ module sunui {
         private $url: string = null;
 
         /**
-         * 可选参数
-         */
-        private $data: any = void 0;
-
-        /**
          * 资源加载回调
          */
         private $complete: suncom.IHandler = null;
@@ -31,10 +26,10 @@ module sunui {
          */
         private $retryer: Retryer = new Retryer(RetryMethodEnum.TERMINATE, suncom.Handler.create(this, this.$onRetryConfirmed), "资源加载失败，点击确定重新尝试！");
 
-        constructor(url: string, complete: suncom.IHandler, data?: any) {
+        constructor(url: string, complete: suncom.IHandler) {
             super();
+            Resource.lock(url);
             this.$url = url;
-            this.$data = data;
             this.$complete = complete;
             this.$doLoad();
         }
@@ -49,6 +44,7 @@ module sunui {
             super.destroy();
             this.$retryer.cancel();
             this.$loader !== null && this.$loader.destroy();
+            Resource.unlock(this.$url);
         }
 
         /**
@@ -60,7 +56,7 @@ module sunui {
                 this.$loader = new Res3dLoader(this.$url, handler);
             }
             else if (suncom.Common.getFileExtension(this.$url) === "sk") {
-                this.$loader = new SkeletonLoader(this.$url, handler, this.$data);
+                this.$loader = new SkeletonLoader(this.$url, handler);
             }
             else {
                 this.$loader = new UrlLoader(this.$url, handler);
@@ -71,10 +67,10 @@ module sunui {
         /**
          * 加载结束回调
          */
-        private $onLoad(ok: boolean, data: any): void {
+        private $onLoad(ok: boolean): void {
             // 派发己加载事件
             if (ok === true) {
-                this.$complete.runWith([data, this.$url]);
+                this.$complete.runWith(this.$url);
             }
             // 若资源加载失败，则尝试重新加载
             else {

@@ -3,7 +3,7 @@ module sunui {
     /**
      * 资源加载器
      */
-    export abstract class AssetLoader {
+    export abstract class AssetLoader extends puremvc.Notifier {
         /**
          * 是否正在加载
          */
@@ -13,11 +13,6 @@ module sunui {
          * 加载回调
          */
         private $complete: suncom.IHandler = null;
-
-        /**
-         * 是否己销毁
-         */
-        private $destroyed: boolean = false;
 
         /**
          * 加载网址
@@ -35,6 +30,7 @@ module sunui {
         protected $doneCount: number = 0;
 
         constructor(url: string, complete: suncom.IHandler) {
+            super();
             this.$url = url;
             this.$complete = complete;
             Resource.lock(this.$url);
@@ -47,7 +43,7 @@ module sunui {
             if (this.$destroyed === true) {
                 return;
             }
-            this.$destroyed = true;
+            super.destroy();
             for (let i: number = 0; i < this.$loaders.length; i++) {
                 this.$loaders[i].destroy();
             }
@@ -102,19 +98,12 @@ module sunui {
         /**
          * 加载结束回调
          */
-        protected $onComplete(ok: boolean, data: any = null): void {
+        protected $onComplete(ok: boolean): void {
             if (this.$destroyed === false) {
-                this.$complete.runWith([ok, data]);
+                this.$complete.runWith(ok);
             }
             this.destroy();
             this.$loading = false;
-        }
-
-        /**
-         * 是否己销毁
-         */
-        get destroyed(): boolean {
-            return this.$destroyed;
         }
     }
 }

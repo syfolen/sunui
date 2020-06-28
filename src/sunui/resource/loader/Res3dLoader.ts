@@ -49,7 +49,7 @@ module sunui {
                 if (res === null) {
                     res = M.cacheMap[this.$url] = Laya.loader.getRes(this.$url);
                 }
-                this.$onComplete(ok, ok === false ? null : Laya.Sprite3D.instantiate(res));
+                this.$onComplete(ok);
             }
         }
     }

@@ -110,16 +110,6 @@ module sunui {
         export const ON_CALLER_DESTROYED: string = "sunui.NotifyKey.ON_CALLER_DESTROYED";
 
         /**
-         * 缓存资源安全加载器 { url: string, loader: AssetSafetyLoader }
-         */
-        export const CACHE_ASSET_SAFETY_LOADER: string = "sunui.NotifyKey.CACHE_ASSET_SAFETY_LOADER";
-
-        /**
-         * 移除资源安全加载器 { url: string, loader: AssetSafetyLoader }
-         */
-        export const REMOVE_ASSET_SAFETY_LOADER: string = "sunui.NotifyKey.REMOVE_ASSET_SAFETY_LOADER";
-
-        /**
          * 资源加载失败 { none }
          */
         export const ON_ASSET_SAFETY_LOADER_FAILED: string = "sunui.NotifyKey.ON_ASSET_SAFETY_LOADER_FAILED";

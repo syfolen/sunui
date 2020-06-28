@@ -21,18 +21,6 @@ module sunui {
         private $loadingList: UrlSafetyLoader[] = [];
 
         /**
-         * 正在执行加载的URL
-         */
-        private $loadingUrlMap: { [url: string]: boolean } = {};
-
-        /**
-         * AssetSafetyLoader加载器缓存
-         * 说明：
-         * 1. 缓存加载器作为解锁资源的依据
-         */
-        private $cacheLoaders: { [url: string]: AssetSafetyLoader[] } = {};
-
-        /**
          * 己询问资源是否重新加载
          */
         private $isRetryPrompting: boolean = false;
@@ -44,9 +32,6 @@ module sunui {
             this.facade.registerObserver(NotifyKey.ON_URL_SAFETY_LOADER_CREATED, this.$onUrlSafetyLoaderCreated, this);
             this.facade.registerObserver(NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE, this.$onUrlSafetyLoaderComplete, this);
 
-            this.facade.registerObserver(NotifyKey.CACHE_ASSET_SAFETY_LOADER, this.$onCacheAssetSafetyLoader, this);
-            this.facade.registerObserver(NotifyKey.REMOVE_ASSET_SAFETY_LOADER, this.$onRemoveAssetSafetyLoader, this);
-
             this.facade.registerObserver(NotifyKey.ON_ASSET_SAFETY_LOADER_FAILED, this.$onAssetSafetyLoaderFailed, this);
         }
 
@@ -57,8 +42,6 @@ module sunui {
             this.facade.removeObserver(NotifyKey.ON_URL_SAFETY_LOADER_CREATED, this.$onUrlSafetyLoaderCreated, this);
             this.facade.removeObserver(NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE, this.$onUrlSafetyLoaderComplete, this);
 
-            this.facade.removeObserver(NotifyKey.CACHE_ASSET_SAFETY_LOADER, this.$onCacheAssetSafetyLoader, this);
-            this.facade.removeObserver(NotifyKey.REMOVE_ASSET_SAFETY_LOADER, this.$onRemoveAssetSafetyLoader, this);
             this.facade.removeObserver(NotifyKey.ON_ASSET_SAFETY_LOADER_FAILED, this.$onAssetSafetyLoaderFailed, this);
 
         }
@@ -79,15 +62,14 @@ module sunui {
          */
         private $onUrlSafetyLoaderComplete(loader: UrlSafetyLoader): void {
             const index: number = this.$loadingList.indexOf(loader);
+            suncom.Test.expect(index).toBeGreaterOrEqualThan(0);
+
+            this.$loadingList.splice(index, 1);
             if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
-                const reg0: number = index === -1 ? this.$loadingList.length : this.$loadingList.length - 1;
-                suncom.Logger.trace(suncom.DebugMode.ANY, `finish loader for url ${loader.url}, loading list length:${reg0}, undo list length:${this.$undoList.length}`);
+                suncom.Logger.trace(suncom.DebugMode.ANY, `remove loader for url ${loader.url}, loading list length:${this.$loadingList.length}, undo list length:${this.$undoList.length}`);
             }
-            if (index > -1) {
-                this.$loadingList.splice(index, 1);
-                delete this.$loadingUrlMap[loader.url];
-                this.$next();
-            }
+
+            this.$next();
         }
 
         /**
@@ -98,11 +80,11 @@ module sunui {
                 let ok: boolean = false;
                 for (let i: number = this.$undoList.length - 1; i > -1; i--) {
                     const loader: UrlSafetyLoader = this.$undoList[i];
-                    if (this.$loadingUrlMap[loader.url] === true) {
-                        continue;
-                    }
                     if (loader.destroyed === true) {
                         this.$undoList.splice(i, 1);
+                        continue;
+                    }
+                    if (this.$isUrlInLoading(loader.url) === true) {
                         continue;
                     }
                     if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
@@ -111,7 +93,6 @@ module sunui {
                     ok = true;
                     loader.load();
                     this.$loadingList.push(loader);
-                    this.$loadingUrlMap[loader.url] = true;
                     break;
                 }
                 if (ok === false) {
@@ -121,49 +102,16 @@ module sunui {
         }
 
         /**
-         * 缓存AssetSafetyLoader
+         * 判断被请求的Url是否正在加载
          */
-        private $onCacheAssetSafetyLoader(url: string, loader: AssetSafetyLoader): void {
-            let loaders: AssetSafetyLoader[] = this.$cacheLoaders[url] || null;
-            if (loaders === null) {
-                loaders = this.$cacheLoaders[url] = [];
-            }
-            loaders.push(loader);
-            Resource.lock(url);
-        }
-
-        /**
-         * 移除AssetSafetyLoader
-         */
-        private $onRemoveAssetSafetyLoader(url: string, loader: AssetSafetyLoader, method: Function, caller: Object): void {
-            const loaders: AssetSafetyLoader[] = this.$cacheLoaders[url] || null;
-            if (loaders === null) {
-                return;
-            }
-
-            let index: number = -1;
-            if (loader === null) {
-                for (let i: number = 0; i < loaders.length; i++) {
-                    const item: AssetSafetyLoader = loaders[i];
-                    if (item.complete.method === method && item.complete.caller === caller) {
-                        index = i;
-                        loader = item;
-                        break;
-                    }
+        private $isUrlInLoading(url: string): boolean {
+            for (let i: number = 0; i < this.$loadingList.length; i++) {
+                const loader: UrlSafetyLoader = this.$loadingList[i];
+                if (loader.url === url) {
+                    return true;
                 }
             }
-            else {
-                index = loaders.indexOf(loader);
-            }
-
-            if (index > -1) {
-                loader.destroy();
-                loaders.splice(index, 1);
-                if (loaders.length === 0) {
-                    delete this.$cacheLoaders[url];
-                }
-                Resource.unlock(url);
-            }
+            return false;
         }
 
         /**

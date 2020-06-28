@@ -86,56 +86,11 @@ module sunui {
         }
 
         /**
-         * 根据url创建对象
-         * @data: 可缺省参数，默认为：void 0
-         * 说明：
-         * 1. 调用此接口创建对象时，会产生一个计数，当计数为0时，资源会被彻底释放
-         * 2. 见destroy方法
-         * 参数data允许为以下几种类型：
-         * 1. aniMode：目前仅支持动画模式，0不支持换装，1、2支持换装，默认值与真正实现加载的Loader有关
-         * export
-         */
-        export function create(url: string, method: (res: any, url: string) => void = null, caller: Object = null, data?: any): void {
-            const loader: AssetSafetyLoader = new AssetSafetyLoader(url, suncom.Handler.create(caller, method), data);
-            puremvc.Facade.getInstance().sendNotification(NotifyKey.CACHE_ASSET_SAFETY_LOADER, [url, loader]);
-        }
-
-        /**
-         * 销毁对象
-         * 说明：
-         * 1. 见create方法
-         * 2. 调用此接口销毁对象时，会移除一个计数，当计数为0时，当计数为0时，资源会被彻底释放
-         * 3. 若存在有部分逻辑未使用此接口加载资源，却调用此接口销毁资源，则可能会导致该资源被卸载或不可用，请注意
-         * export
-         */
-        export function destroy(url: string, method: (res: any, url: string) => void = null, caller: Object = null): void {
-            puremvc.Facade.getInstance().sendNotification(NotifyKey.REMOVE_ASSET_SAFETY_LOADER, [url, null, method, caller]);
-        }
-
-        /**
-         * 创建3d对象
-         * 说明：
-         * 1. 同create方法
-         * export
-         */
-        export function createRes3d(name: string, method: (node: any, url: string) => void, caller: Object): any {
-            Resource.create(Resource.getRes3dUrlByName(name), method, caller);
-        }
-
-        /**
-         * 销毁3d对象
-         * 说明：
-         * 1. 同destroy方法
-         * export
-         */
-        export function destroyRes3d(name: string, method: (node: any, url: string) => void, caller: Object): void {
-            Resource.destroy(Resource.getRes3dUrlByName(name), method, caller);
-        }
-
-        /**
          * 资源预加载
-         * @method: 预加载完成时，id大于0，否则等于0，仅支持Skeleton和Texture
+         * @method: 预加载完成时，会执行此方法
          * @return: 返回资源组ID
+         * 说明：
+         * 1. 建议将业务逻辑的初始化代码放在资源加载完成之后，这样的话，在加载被取消时，也不需要对初始化进行撤销
          * export
          */
         export function prepare(urls: string[], method: (id: number) => void, caller: Object): number {
@@ -146,6 +101,7 @@ module sunui {
             else {
                 handler = suncom.Handler.create(caller, method);
             }
+
             const id: number = suncom.Common.createHashId();
             M.templets[id] = new Templet(id, urls, handler);
             return id;

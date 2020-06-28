@@ -16,7 +16,7 @@ module sunui {
          * 所有资源均己加载成功
          */
         protected $onAssetsLoaded(ok: boolean): void {
-            this.$onComplete(ok, Laya.Loader.getRes(this.$url));
+            this.$onComplete(ok);
         }
     }
 }
