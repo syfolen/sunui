@@ -42,7 +42,7 @@ module sunui {
 			super();
 			this.$url = url;
 			this.$handler = handler;
-			this.$priority = suncom.Common.random(0, 6);
+			this.$priority = suncom.Mathf.random(0, 6);
 			// 资源己存在
 			if (Laya.loader.getRes(url) !== void 0) {
 				this.$totalSize = -1;
