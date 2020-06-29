@@ -1177,7 +1177,7 @@ var sunui;
             _this.$priority = 0;
             _this.$url = url;
             _this.$handler = handler;
-            _this.$priority = suncom.Common.random(0, 6);
+            _this.$priority = suncom.Mathf.random(0, 6);
             if (Laya.loader.getRes(url) !== void 0) {
                 _this.$totalSize = -1;
             }
