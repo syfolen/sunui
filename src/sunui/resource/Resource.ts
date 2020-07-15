@@ -155,6 +155,16 @@ module sunui {
         }
 
         /**
+         * 创建预置体
+         * export
+         */
+        export function createPrefab(url: string): Laya.View {
+            const prefab: Laya.Prefab = new Laya.Prefab();
+            prefab.json = Laya.loader.getRes(url);
+            return prefab.create();
+        }
+
+        /**
          * 根据Url清理资源
          */
         export function clearResByUrl(url: string): void {

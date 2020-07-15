@@ -20,16 +20,18 @@ module sunui {
                 let templet: Laya.Templet = M.cacheMap[this.$url] || null;
                 if (templet === null) {
                     templet = M.cacheMap[this.$url] = new Laya.Templet();
-                    templet.on(Laya.Event.COMPLETE, this, this.$onTempletCreated);
+                    // templet.on(Laya.Event.COMPLETE, this, this.$onTempletCreated);
                     templet.loadAni(this.$url);
                 }
-                else if (templet.isParserComplete === false) {
-                    templet.on(Laya.Event.COMPLETE, this, this.$onTempletCreated);
-                }
-                else {
-                    const handler: suncom.IHandler = suncom.Handler.create(this, this.$onTempletCreated);
-                    suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
-                }
+                // else if (templet.isParserComplete === false) {
+                //     templet.on(Laya.Event.COMPLETE, this, this.$onTempletCreated);
+                // }
+                // else {
+                //     const handler: suncom.IHandler = suncom.Handler.create(this, this.$onTempletCreated);
+                //     suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
+                // }
+                const handler: suncom.IHandler = suncom.Handler.create(this, this.$onTempletCreated);
+                suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
                 // 加锁防止Laya.Event.COMPLETE事件不被回调
                 Resource.lock(this.$url);
             }

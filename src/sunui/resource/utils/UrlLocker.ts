@@ -63,6 +63,15 @@ module sunui {
                 res.destroy && res.destroy();
                 Laya.loader.clearRes(url);
             }
+
+            const suffix: string = suncom.Common.getFileExtension(url);
+            if (suffix === "ani") {
+                Laya.Animation.clearCache(url);
+            }
+            else if (suffix === "sk") {
+                Laya.Templet.TEMPLET_DICTIONARY[url] && Laya.Templet.TEMPLET_DICTIONARY[url].destroy();
+                delete Laya.Templet.TEMPLET_DICTIONARY[url];
+            }
         }
 
         /**

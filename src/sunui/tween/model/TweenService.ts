@@ -9,18 +9,20 @@ module sunui {
 
         protected $onRun(): void {
             this.facade.registerObserver(NotifyKey.REGISTER_TWEEN_OBJECT, this.$onAddTweenObject, this);
+            this.facade.registerObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this, false, suncom.EventPriorityEnum.EGL);
             this.facade.registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this, false, suncom.EventPriorityEnum.EGL);
         }
 
         protected $onStop(): void {
             this.facade.removeObserver(NotifyKey.REGISTER_TWEEN_OBJECT, this.$onAddTweenObject, this);
+            this.facade.removeObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
             this.facade.removeObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this);
         }
 
         /**
          * 帧事件，缓动驱动函数
          */
-        protected $frameLoop(): void {
+        private $onEnterFrame(): void {
             this.$tweens[0] = true;
 
             const tweens: Array<boolean | ITween> = this.$tweens;

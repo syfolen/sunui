@@ -133,5 +133,26 @@ module sunui {
          * 注册缓动对象 { tween: ITween }
          */
         export const REGISTER_TWEEN_OBJECT: string = "sunui.NotifyKey.REGISTER_TWEEN_OBJECT";
+
+        /**
+         * 解锁下一个逻辑命令 { command: LogicCommand }
+         */
+        export const NEXT_LOGIC_COMMAND: string = "sunui.NotifyKey.NEXT_LOGIC_COMMAND";
+
+        /**
+         * 依赖命令己解锁
+         */
+        export const ON_INTERCEPTOR_RELIEVED: string = "sunui.NotifyKey.ON_INTERCEPTOR_RELIEVED";
+
+        /**
+         * 销毁逻辑命令 { hashId: number }
+         * export
+         */
+        export const DESTROY_LOGIC_RUNNABLE: string = "sunui.NotifyKey.DESTROY_LOGIC_RUNNABLE";
+
+        /**
+         * 销毁所有逻辑命令
+         */
+        export const DESTROY_ALL_LOGIC_RUNNABLE: string = "sunui.NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE";
     }
 }
