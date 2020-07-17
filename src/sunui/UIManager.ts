@@ -91,8 +91,9 @@ module sunui {
 
         /**
          * 移除视图
+         * export
          */
-        removeView(view: Laya.Sprite): void {
+        removeView(view: any): void {
             M.viewLayer.removeStackInfoByView(view);
         }
 

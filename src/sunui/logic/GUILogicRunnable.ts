@@ -43,7 +43,7 @@ module sunui {
             }
             super.destroy();
             this.facade.removeObserver(NotifyKey.NEXT_LOGIC_COMMAND, this.$onNextLogicCommand, this);
-            this.facade.removeObserver(NotifyKey.DESTROY_LOGIC_RUNNABLE, this.$onDestroyAllLogicRunnable, this);
+            this.facade.removeObserver(NotifyKey.DESTROY_LOGIC_RUNNABLE, this.$onDestroyLogicRunnable, this);
             this.facade.removeObserver(NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE, this.$onDestroyAllLogicRunnable, this);
 
             for (let i: number = 0; i < this.$commands.length; i++) {
