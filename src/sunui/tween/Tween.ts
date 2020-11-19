@@ -4,16 +4,16 @@ module sunui {
      * 缓动类
      * export
      */
-    export class Tween extends puremvc.Notifier implements ITween {
+    export class Tween extends puremvc.Notifier {
         /**
          * 执行缓动的模块
          */
-        private $mod: suncore.ModuleEnum;
+        private $mod: suncore.ModuleEnum = suncore.ModuleEnum.SYSTEM;
 
         /**
          * 缓动对象
          */
-        private $item: any;
+        private $item: any = null;
 
         /**
          * 缓动信息列表
@@ -24,6 +24,11 @@ module sunui {
          * 最终属性（连续缓动时使用）
          */
         private $props: { [name: string]: number } = null;
+
+        /**
+         * 是否使用对象池
+         */
+        private $usePool: boolean = false;
 
         constructor(item: any, mod: suncore.ModuleEnum) {
             super();
@@ -41,39 +46,54 @@ module sunui {
          * 取消缓动
          * export
          */
-        cancel(): ITween {
+        cancel(): Tween {
             this.$props = null;
             this.$infos.length = 0;
             return this;
         }
 
         /**
-         * 从当前属性缓动至props属性
+         * 回收到对象池
          * export
          */
-        to(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
+        recover(): void {
+            this.$usePool = true;
+            this.cancel();
+        }
+
+        /**
+         * 从当前属性缓动至props属性
+         * @props: 变化的属性集合，其中update属性的类型只能指定为suncom.Handler，可用其来观察缓动数值的变化
+         * @duration: 缓动时长
+         * @ease: 缓动函数，默认为: null
+         * @complete: 缓动结束时的回调，默认为: null
+         * export
+         */
+        to(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
             const keys: string[] = Object.keys(props);
             const item: any = this.$props === null ? this.$item : this.$props;
-            this.$createTweenInfo(keys, item, props, duration, ease, props.update || null, handler);
+            this.$createTweenInfo(keys, item, props, duration, ease, props.update || null, complete);
             return this;
         }
 
         /**
          * 从props属性缓动至当前属性
+         * @参数详细说明请参考Tween.to
          * export
          */
-        from(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
+        from(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
             const keys: string[] = Object.keys(props);
             const item: any = this.$props === null ? this.$item : this.$props;
-            this.$createTweenInfo(keys, props, item, duration, ease, props.update || null, handler);
+            this.$createTweenInfo(keys, props, item, duration, ease, props.update || null, complete);
             return this;
         }
 
         /**
          * 以props属性的幅度进行缓动
+         * @参数详细说明请参考Tween.to
          * export
          */
-        by(props: any, duration: number, ease: Function = null, handler: suncom.IHandler = null): ITween {
+        by(props: any, duration: number, ease: Function = null, complete: suncom.IHandler = null): Tween {
             const keys: string[] = Object.keys(props);
             const item: any = this.$props === null ? this.$item : this.$props;
             for (let i: number = 0; i < keys.length; i++) {
@@ -85,14 +105,14 @@ module sunui {
                     props[key] += item[key];
                 }
             }
-            this.to(props, duration, ease, handler);
+            this.to(props, duration, ease, complete);
             return this;
         }
 
         /**
          * 生成缓动信息
          */
-        private $createTweenInfo(keys: string[], from: any, to: any, duration: number, ease: Function, update: suncom.IHandler, handler: suncom.IHandler): void {
+        private $createTweenInfo(keys: string[], from: any, to: any, duration: number, ease: Function, update: suncom.IHandler, complete: suncom.IHandler): void {
             // 最终属性
             this.$props = this.$props || {};
 
@@ -124,7 +144,7 @@ module sunui {
                 ease: ease,
                 actions: actions,
                 update: update,
-                handler: handler,
+                complete: complete,
                 time: suncore.System.getModuleTimestamp(this.$mod),
                 duration: duration
             }
@@ -135,12 +155,12 @@ module sunui {
          * 等待指定时间
          * export
          */
-        wait(delay: number, handler: suncom.IHandler = null): ITween {
+        wait(delay: number, complete: suncom.IHandler = null): Tween {
             const info: ITweenInfo = {
                 ease: null,
                 actions: [],
                 update: null,
-                handler: handler,
+                complete: complete,
                 time: suncore.System.getModuleTimestamp(this.$mod),
                 duration: delay
             }
@@ -194,7 +214,7 @@ module sunui {
             if (this.$infos.length > 0) {
                 this.$infos[0].time = suncore.System.getModuleTimestamp(this.$mod);
             }
-            info.handler !== null && info.handler.run();
+            info.complete !== null && info.complete.run();
 
             return timeLeft;
         }
@@ -228,7 +248,7 @@ module sunui {
          * @mod: 执行缓动的模块，默认为：CUSTOM
          * export
          */
-        static get(item: any, mod: suncore.ModuleEnum = suncore.ModuleEnum.CUSTOM): ITween {
+        static get(item: any, mod: suncore.ModuleEnum = suncore.ModuleEnum.CUSTOM): Tween {
             return new Tween(item, mod);
         }
     }

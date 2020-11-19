@@ -4,34 +4,41 @@ module sunui {
      * 缓动服务类，专门用于管理缓动
      */
     export class TweenService extends suncore.BaseService {
+        /**
+         * 避免添加或移除缓动对象时对正在执行的缓动列表产生干扰
+         */
+        private $locker: boolean = false;
 
-        private $tweens: Array<ITween | boolean> = [false];
+        /**
+         * 缓动对象列表
+         */
+        private $tweens: Tween[] = [];
 
         protected $onRun(): void {
-            this.facade.registerObserver(NotifyKey.REGISTER_TWEEN_OBJECT, this.$onAddTweenObject, this);
             this.facade.registerObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this, false, suncom.EventPriorityEnum.EGL);
             this.facade.registerObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this, false, suncom.EventPriorityEnum.EGL);
+            this.facade.registerObserver(NotifyKey.REGISTER_TWEEN_OBJECT, this.$onRegisterTweenObject, this);
         }
 
         protected $onStop(): void {
-            this.facade.removeObserver(NotifyKey.REGISTER_TWEEN_OBJECT, this.$onAddTweenObject, this);
             this.facade.removeObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
             this.facade.removeObserver(suncore.NotifyKey.PAUSE_TIMELINE, this.$onTimelinePause, this);
+            this.facade.removeObserver(NotifyKey.REGISTER_TWEEN_OBJECT, this.$onRegisterTweenObject, this);
         }
 
         /**
          * 帧事件，缓动驱动函数
          */
         private $onEnterFrame(): void {
-            this.$tweens[0] = true;
+            this.$locker = true;
 
-            const tweens: Array<boolean | ITween> = this.$tweens;
+            // 使用临时变量持有tweens列表，因为列表在执行的过程中可能会被复制
+            const tweens: Tween[] = this.$tweens;
 
             for (let mod: suncore.ModuleEnum = suncore.ModuleEnum.MIN; mod < suncore.ModuleEnum.MAX; mod++) {
                 if (suncore.System.isModulePaused(mod) === false) {
-                    const length: number = tweens.length;
-                    for (let i: number = 0; i < length; i++) {
-                        const tween: ITween = tweens[i] as ITween;
+                    for (let i: number = 0; i < tweens.length; i++) {
+                        const tween: Tween = tweens.length[i];
                         if (tween.mod === mod) {
                             let timeLeft: number = 1;
                             while (timeLeft > 0 && tween.canceled === false) {
@@ -42,14 +49,15 @@ module sunui {
                 }
             }
 
-            for (let i: number = this.$tweens.length - 1; i > 0; i--) {
-                const tween: ITween = this.$tweens[i] as ITween;
+            // 移除己被取消的缓动对象
+            for (let i: number = this.$tweens.length - 1; i > -1; i--) {
+                const tween: Tween = this.$tweens[i];
                 if (tween.canceled === true) {
                     tweens.splice(i, 1);
                 }
             }
 
-            this.$tweens[0] = false;
+            this.$locker = false;
         }
 
         /**
@@ -57,8 +65,8 @@ module sunui {
          */
         private $onTimelinePause(mod: suncore.ModuleEnum, stop: boolean): void {
             if (stop === true) {
-                for (let i: number = 1; i < this.$tweens.length; i++) {
-                    const tween: ITween = this.$tweens[i] as ITween;
+                for (let i: number = 0; i < this.$tweens.length; i++) {
+                    const tween: Tween = this.$tweens[i];
                     if (tween.mod === mod) {
                         tween.cancel();
                     }
@@ -69,11 +77,11 @@ module sunui {
         /**
          * 添加缓动对象
          */
-        private $onAddTweenObject(tween: ITween): void {
+        private $onRegisterTweenObject(tween: Tween): void {
             // 避免干扰
-            if (this.$tweens[0] === true) {
+            if (this.$locker === true) {
                 this.$tweens = this.$tweens.slice(0);
-                this.$tweens[0] = false;
+                this.$locker = false;
             }
             this.$tweens.push(tween);
         }

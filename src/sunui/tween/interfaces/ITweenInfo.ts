@@ -20,9 +20,9 @@ module sunui {
         update: suncom.IHandler;
 
         /**
-         * 缓动回调
+         * 结束回调
          */
-        handler: suncom.IHandler;
+        complete: suncom.IHandler;
 
         /**
          * 开始时间
