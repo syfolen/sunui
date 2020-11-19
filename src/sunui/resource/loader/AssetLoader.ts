@@ -12,7 +12,7 @@ module sunui {
         /**
          * 加载回调
          */
-        private $complete: suncom.IHandler = null;
+        private $complete: suncom.Handler = null;
 
         /**
          * 加载网址
@@ -29,7 +29,7 @@ module sunui {
          */
         protected $doneCount: number = 0;
 
-        constructor(url: string, complete: suncom.IHandler) {
+        constructor(url: string, complete: suncom.Handler) {
             super();
             this.$url = url;
             this.$complete = complete;

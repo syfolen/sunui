@@ -6,7 +6,7 @@ module sunui {
      */
     export namespace NotifyKey {
         /**
-         * 重试确认请求 { mod: suncore.ModuleEnum, prompt: string, options: IRetryOption[], handler: suncom.IHandler }
+         * 重试确认请求 { mod: suncore.ModuleEnum, prompt: string, options: IRetryOption[], handler: suncom.Handler }
          * export
          */
         export const RETRY_CONFIRM: string = "sunui.NotifyKey.RETRY_CONFIRM";

@@ -13,7 +13,7 @@ module sunui {
          * @return: 返回true表示允许重试
          * export
          */
-        run(delay: number, handler: suncom.IHandler, maxRetries?: number): void;
+        run(delay: number, handler: suncom.Handler, maxRetries?: number): void;
 
         /**
          * 取消重试

@@ -12,7 +12,7 @@ module sunui {
         /**
          * 回调执行器
          */
-        private $handler: suncom.IHandler = null;
+        private $handler: suncom.Handler = null;
 
         /**
          * 完成加载的资源列表
@@ -24,7 +24,7 @@ module sunui {
          */
         private $loaders: AssetSafetyLoader[] = [];
 
-        constructor(id: number, urls: string[], handler: suncom.IHandler) {
+        constructor(id: number, urls: string[], handler: suncom.Handler) {
             super();
             this.$id = id;
             this.$handler = handler;
@@ -34,7 +34,7 @@ module sunui {
 
             while (urls.length > 0) {
                 const url: string = urls.shift();
-                const handler: suncom.IHandler = suncom.Handler.create(this, this.$onResourceCreated);
+                const handler: suncom.Handler = suncom.Handler.create(this, this.$onResourceCreated);
                 const loader: AssetSafetyLoader = new AssetSafetyLoader(url, handler);
                 this.$loaders.push(loader);
             }
@@ -49,7 +49,7 @@ module sunui {
             }
             super.destroy();
             // 资源组释放执行函数，此方法由release方法异步调用执行，以避免create回调中的释放请求不生效的问题
-            const handler: suncom.IHandler = suncom.Handler.create(this, this.$releaseAllResources);
+            const handler: suncom.Handler = suncom.Handler.create(this, this.$releaseAllResources);
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
         }
 

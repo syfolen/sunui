@@ -24,7 +24,7 @@ module sunui {
             this.facade.sendNotification(NotifyKey.ON_POPUP_CLOSED, view);
 
             if ((info.props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
-                const tween: ITween = Tween.get(info.mask, info.props.mod);
+                const tween: Tween = Tween.get(info.mask, info.props.mod);
                 if (duration > 200 && (info.props.flags & PopupFlagEnum.SYNC_FADE_TIME) === PopupFlagEnum.NONE) {
                     tween.wait(duration - 200).to({ alpha: 0 }, 200);
                 }
@@ -34,7 +34,7 @@ module sunui {
             }
             this.$applyCloseProps(view, info.props, duration);
 
-            const handler: suncom.IHandler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
+            const handler: suncom.Handler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
             suncore.System.addTrigger(info.props.mod, duration, handler);
         }
 

@@ -18,7 +18,7 @@ module sunui {
         /**
          * 询问回调
          */
-        private $confirmHandler: suncom.IHandler;
+        private $confirmHandler: suncom.Handler;
 
         /**
          * 提示文本
@@ -38,7 +38,7 @@ module sunui {
         /**
          * 重试回调
          */
-        private $retryHandler: suncom.IHandler = null;
+        private $retryHandler: suncom.Handler = null;
 
         /**
          * 重试定时器
@@ -59,7 +59,7 @@ module sunui {
          * 3. 若未输入 suncore.ModuleEnum ，则默认值为 suncore.ModuleEnum.SYSTEM
          * export 
          */
-        constructor(modOrMethod: suncore.ModuleEnum | RetryMethodEnum, confirmHandler: suncom.IHandler = null, prompt: string = null, ...options: Array<ConfirmOptionValueEnum | string>) {
+        constructor(modOrMethod: suncore.ModuleEnum | RetryMethodEnum, confirmHandler: suncom.Handler = null, prompt: string = null, ...options: Array<ConfirmOptionValueEnum | string>) {
             super(suncore.MsgQModEnum.MMI);
 
             if ((modOrMethod & RetryMethodEnum.CONFIRM) === RetryMethodEnum.CONFIRM) {
@@ -92,7 +92,7 @@ module sunui {
          * @return: 返回true表示允许重试
          * export
          */
-        run(delay: number, handler: suncom.IHandler, maxRetries: number = 2): void {
+        run(delay: number, handler: suncom.Handler, maxRetries: number = 2): void {
             if (this.$method === RetryMethodEnum.AUTO || this.$currentRetries < maxRetries) {
                 if (this.$retryTimerId === 0) {
                     this.$retryHandler = handler;
@@ -106,11 +106,11 @@ module sunui {
                 if (this.$prompting === false) {
                     this.$prompting = true;
                     if (this.$method === RetryMethodEnum.TERMINATE) {
-                        const handler: suncom.IHandler = suncom.Handler.create(this, this.$onConfirmReplied, [ConfirmOptionValueEnum.NO]);
+                        const handler: suncom.Handler = suncom.Handler.create(this, this.$onConfirmReplied, [ConfirmOptionValueEnum.NO]);
                         suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
                     }
                     else {
-                        const handler: suncom.IHandler = suncom.Handler.create(this, this.$onConfirmReplied);
+                        const handler: suncom.Handler = suncom.Handler.create(this, this.$onConfirmReplied);
                         this.facade.sendNotification(NotifyKey.RETRY_CONFIRM, [this.$mod, this.$prompt, this.$options, handler]);
                     }
                 }

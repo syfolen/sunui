@@ -19,7 +19,7 @@ module sunui {
          */
         private $running: boolean = false;
 
-        constructor(command: string, condition: suncom.IHandler, dependencies: GUILogicDependence[]) {
+        constructor(command: string, condition: suncom.Handler, dependencies: GUILogicDependence[]) {
             super(command, condition);
             this.$dependencies = dependencies;
             suncom.Test.expect(dependencies.length).toBeGreaterThan(0);
@@ -59,7 +59,7 @@ module sunui {
                 }
             }
             if (relieved === true) {
-                const handler: suncom.IHandler = suncom.Handler.create(this, this.$onCommandRelieved);
+                const handler: suncom.Handler = suncom.Handler.create(this, this.$onCommandRelieved);
                 suncore.System.addMessage(suncore.ModuleEnum.TIMELINE, suncore.MessagePriorityEnum.PRIORITY_0, handler);
             }
         }
