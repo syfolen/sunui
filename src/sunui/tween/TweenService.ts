@@ -52,8 +52,8 @@ module sunui {
             // 移除己被取消的缓动对象
             for (let i: number = this.$tweens.length - 1; i > -1; i--) {
                 const tween: Tween = this.$tweens[i];
-                if (tween.canceled === true) {
-                    tweens.splice(i, 1);
+                if (tween.canceled === true && tween.getUsePool() === true) {
+                    suncom.Pool.recover("sunui.Tweeen", tweens.splice(i, 1)[0]);
                 }
             }
 

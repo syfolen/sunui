@@ -6,6 +6,11 @@ module sunui {
      */
     export class Tween extends puremvc.Notifier {
         /**
+         * 唯一ID
+         */
+        private $hashId: number = 0;
+
+        /**
          * 执行缓动的模块
          */
         private $mod: suncore.ModuleEnum = suncore.ModuleEnum.SYSTEM;
@@ -28,11 +33,15 @@ module sunui {
         /**
          * 是否使用对象池
          */
-        private $usePool: boolean = false;
+        private $usePool: boolean = true;
 
         private $setTo(item: any, mod: suncore.ModuleEnum): Tween {
+            if (this.$hashId === -1) {
+                throw Error(`Tween己被回收！！！`);
+            }
             this.$mod = mod;
             this.$item = item;
+            this.$hashId = suncom.Common.createHashId();
             if (suncore.System.isModuleStopped(mod) === false) {
                 this.facade.sendNotification(NotifyKey.REGISTER_TWEEN_OBJECT, this);
             }
@@ -52,6 +61,16 @@ module sunui {
                 this.$actions.pop().recover();
             }
             return this;
+        }
+
+        /**
+         * 回收到对象池
+         * export
+         */
+        recover(): void {
+            if (suncom.Pool.recover("sunui.Tween", this.cancel()) === true) {
+                this.$hashId = -1;
+            }
         }
 
         /**
@@ -115,7 +134,7 @@ module sunui {
             action.complete = complete;
             action.time = suncore.System.getModuleTimestamp(this.$mod);
             action.duration = duration;
-            this.$actions.push(action);
+            this.$addAction(action);
 
             // 解析动作列表
             for (let i: number = 0; i < keys.length; i++) {
@@ -141,6 +160,16 @@ module sunui {
         }
 
         /**
+         * 添加动作
+         */
+        private $addAction(action: TweenAction): void {
+            if (this.$hashId === -1) {
+                throw Error(`Tween己被回收！！！`);
+            }
+            this.$actions.push(action);
+        }
+
+        /**
          * 等待指定时间
          * export
          */
@@ -149,7 +178,7 @@ module sunui {
             action.complete = complete;
             action.time = suncore.System.getModuleTimestamp(this.$mod);
             action.duration = delay;
-            this.$actions.push(action);
+            this.$addAction(action);
             return this;
         }
 
@@ -216,6 +245,24 @@ module sunui {
         }
 
         /**
+         * 是否使用对象池
+         * 说明：
+         * 1. 若使用了对象池，且缓动结束或被取消后没有重新指定动作，则在下一帧自动回收
+         * export
+         */
+        usePool(value: boolean): Tween {
+            this.$usePool = value;
+            return this;
+        }
+
+        /**
+         * 查询是否使用了对象池
+         */
+        getUsePool(): boolean {
+            return this.$usePool;
+        }
+
+        /**
          * 执行缓动的模块
          */
         get mod(): suncore.ModuleEnum {
@@ -230,24 +277,16 @@ module sunui {
         }
 
         /**
-         * 是否使用对象池
-         * 说明：
-         * 1. 若使用了对象池，且缓动结束或被取消后没有重新指定动作，则自动回收
-         * export
-         */
-        get usePool(): boolean {
-            return this.$usePool;
-        }
-        set usePool(value: boolean) {
-            this.$usePool = value;
-        }
-
-        /**
+         * @item: 执行缓动的对象
          * @mod: 执行缓动的模块，默认为：CUSTOM
+         * 说明：
+         * 1. 缓动默认使用对象池，缓动对象会在缓动结束或取消后的下一帧被回收，若想持有缓动对象，请调用usePool(false)
          * export
          */
         static get(item: any, mod: suncore.ModuleEnum = suncore.ModuleEnum.CUSTOM): Tween {
-            return new Tween().$setTo(item, mod);
+            const tween: Tween = new Tween();
+            tween.$hashId = 0;
+            return tween.usePool(true).$setTo(item, mod);
         }
     }
 }
