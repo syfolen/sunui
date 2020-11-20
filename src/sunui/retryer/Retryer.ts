@@ -4,7 +4,7 @@ module sunui {
      * 重试机制
      * export
      */
-    export class Retryer extends puremvc.Notifier implements IRetryer {
+    export class Retryer extends puremvc.Notifier {
         /**
          * 响应重试机制的模块
          */

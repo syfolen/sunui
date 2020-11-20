@@ -2,6 +2,11 @@
 module sunui {
     /**
      * 缓动类
+     * 说明：
+     * 1. 缓动类内置了对象池，当缓动结束或被取消后没有立即被重新指定动作，则会在下一帧自动回收
+     * 2. 由于缓动对象只有在被回收后才会自动释放资源，故不建议在外部持有不工作的缓动对象
+     * 3. 若你的需求必须这么做，则可以这么来防止Tween被回收：Tween.get(target).usePool(false);
+     * 4. 当外部持有的Tween被弃用时，请记得及时回收
      * export
      */
     export class Tween extends puremvc.Notifier {
@@ -18,7 +23,7 @@ module sunui {
         /**
          * 缓动对象
          */
-        private $item: any = null;
+        private $target: any = null;
 
         /**
          * 最终属性（连续缓动时使用）
@@ -33,14 +38,14 @@ module sunui {
         /**
          * 是否使用对象池
          */
-        private $usePool: boolean = true;
+        private $usePool: boolean = false;
 
-        private $setTo(item: any, mod: suncore.ModuleEnum): Tween {
+        private $setTo(target: any, mod: suncore.ModuleEnum): Tween {
             if (this.$hashId === -1) {
                 throw Error(`Tween己被回收！！！`);
             }
             this.$mod = mod;
-            this.$item = item;
+            this.$target = target;
             this.$hashId = suncom.Common.createHashId();
             if (suncore.System.isModuleStopped(mod) === false) {
                 this.facade.sendNotification(NotifyKey.REGISTER_TWEEN_OBJECT, this);
@@ -83,7 +88,7 @@ module sunui {
          */
         to(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
             const keys: string[] = Object.keys(props);
-            const item: any = this.$props === null ? this.$item : this.$props;
+            const item: any = this.$props === null ? this.$target : this.$props;
             this.$createTweenInfo(keys, item, props, duration, ease, props.update || null, complete);
             return this;
         }
@@ -95,7 +100,7 @@ module sunui {
          */
         from(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
             const keys: string[] = Object.keys(props);
-            const item: any = this.$props === null ? this.$item : this.$props;
+            const item: any = this.$props === null ? this.$target : this.$props;
             this.$createTweenInfo(keys, props, item, duration, ease, props.update || null, complete);
             return this;
         }
@@ -107,11 +112,11 @@ module sunui {
          */
         by(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
             const keys: string[] = Object.keys(props);
-            const item: any = this.$props === null ? this.$item : this.$props;
+            const item: any = this.$props === null ? this.$target : this.$props;
             for (let i: number = 0; i < keys.length; i++) {
                 const key: string = keys[i];
                 if (this.$props === null || this.$props[key] === void 0) {
-                    props[key] += this.$item[key];
+                    props[key] += this.$target[key];
                 }
                 else {
                     props[key] += item[key];
@@ -147,13 +152,13 @@ module sunui {
                 clip.from = from[key];
                 clip.prop = key;
                 if (clip.from === void 0) {
-                    clip.from = this.$item[key];
+                    clip.from = this.$target[key];
                 }
                 // 更新最终属性，用来支持连续缓动的实现
                 this.$props[key] = to[key];
                 // 第一次执行from缓动时会有点问题
                 if (this.$actions.length === 0) {
-                    this.$item[clip.prop] = clip.from;
+                    this.$target[clip.prop] = clip.from;
                 }
                 action.clips.push(clip);
             }
@@ -191,7 +196,7 @@ module sunui {
             const action: TweenAction = this.$actions[0];
 
             // 缓动对象可能己经被销毁了
-            if (this.$item.destroyed === true) {
+            if (this.$target.destroyed === true) {
                 this.cancel();
                 return 0;
             }
@@ -210,10 +215,10 @@ module sunui {
             for (let i: number = 0; i < action.clips.length; i++) {
                 const clip: TweenActionClip = action.clips[i];
                 if (done === true) {
-                    this.$item[clip.prop] = clip.to;
+                    this.$target[clip.prop] = clip.to;
                 }
                 else {
-                    this.$item[clip.prop] = func(duration, clip.from, clip.to - clip.from, action.duration);
+                    this.$target[clip.prop] = func(duration, clip.from, clip.to - clip.from, action.duration);
                 }
             }
             if (action.update !== null) {
@@ -277,16 +282,14 @@ module sunui {
         }
 
         /**
-         * @item: 执行缓动的对象
+         * @target: 执行缓动的对象
          * @mod: 执行缓动的模块，默认为：CUSTOM
-         * 说明：
-         * 1. 缓动默认使用对象池，缓动对象会在缓动结束或取消后的下一帧被回收，若想持有缓动对象，请调用usePool(false)
          * export
          */
-        static get(item: any, mod: suncore.ModuleEnum = suncore.ModuleEnum.CUSTOM): Tween {
+        static get(target: any, mod: suncore.ModuleEnum = suncore.ModuleEnum.CUSTOM): Tween {
             const tween: Tween = new Tween();
             tween.$hashId = 0;
-            return tween.usePool(true).$setTo(item, mod);
+            return tween.usePool(true).$setTo(target, mod);
         }
     }
 }
