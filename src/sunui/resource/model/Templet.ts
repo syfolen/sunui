@@ -49,8 +49,7 @@ module sunui {
             }
             super.destroy();
             // 资源组释放执行函数，此方法由release方法异步调用执行，以避免create回调中的释放请求不生效的问题
-            const handler: suncom.Handler = suncom.Handler.create(this, this.$releaseAllResources);
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, this, this.$releaseAllResources);
         }
 
         /**

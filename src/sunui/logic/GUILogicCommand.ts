@@ -37,13 +37,13 @@ module sunui {
         run(): void {
             suncom.Test.expect(this.$running).toBe(false);
             for (let i: number = 0; i < this.$dependencies.length; i++) {
-                this.$dependencies[i].active = true;
+                this.$dependencies[i].var_active = true;
             }
             this.$running = true;
         }
 
         private $onInterceptorRelieved(dependence: GUILogicDependence): void {
-            if (this.$relieved === true) {
+            if (this.$var_relieved === true) {
                 return;
             }
             if (this.$dependencies.indexOf(dependence) < 0) {
@@ -53,29 +53,28 @@ module sunui {
 
             let relieved: boolean = true;
             for (let i: number = 0; i < this.$dependencies.length; i++) {
-                if (this.$dependencies[i].relieved === false) {
+                if (this.$dependencies[i].var_relieved === false) {
                     relieved = false;
                     break;
                 }
             }
             if (relieved === true) {
-                const handler: suncom.Handler = suncom.Handler.create(this, this.$onCommandRelieved);
-                suncore.System.addMessage(suncore.ModuleEnum.TIMELINE, suncore.MessagePriorityEnum.PRIORITY_0, handler);
+                suncore.System.addMessage(suncore.ModuleEnum.TIMELINE, suncore.MessagePriorityEnum.PRIORITY_0, this, this.$onCommandRelieved);
             }
         }
 
         private $onCommandRelieved(): void {
-            if (this.$destroyed === false && this.$relieved === false) {
-                this.$relieved = true;
+            if (this.$destroyed === false && this.$var_relieved === false) {
+                this.$var_relieved = true;
                 this.facade.sendNotification(NotifyKey.NEXT_LOGIC_COMMAND, this, true);
                 for (let i: number = 0; i < this.$dataList.length; i++) {
-                    this.facade.sendNotification(this.$command, this.$dataList[i]);
+                    this.facade.sendNotification(this.$var_command, this.$dataList[i]);
                 }
             }
         }
 
-        protected $onCommandCallback(): void {
-            if (this.$relieved === true) {
+        protected $func_onCommandCallback(): void {
+            if (this.$var_relieved === true) {
                 return;
             }
 
@@ -84,19 +83,19 @@ module sunui {
                 args.push(arguments[i]);
             }
 
-            if (this.$condition.runWith(args) === false) {
+            if (this.$var_condition.runWith(args) === false) {
                 return;
             }
 
-            this.$relieved = true;
+            this.$var_relieved = true;
             for (let i: number = 0; i < this.$dependencies.length; i++) {
-                if (this.$dependencies[i].relieved === false) {
-                    this.$relieved = false;
+                if (this.$dependencies[i].var_relieved === false) {
+                    this.$var_relieved = false;
                     break;
                 }
             }
 
-            if (this.$relieved === false) {
+            if (this.$var_relieved === false) {
                 this.$dataList.push(args);
                 this.facade.notifyCancel();
             }

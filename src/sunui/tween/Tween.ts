@@ -13,40 +13,40 @@ module sunui {
         /**
          * 唯一ID
          */
-        private $hashId: number = 0;
+        private $var_hashId: number = 0;
 
         /**
          * 执行缓动的模块
          */
-        private $mod: suncore.ModuleEnum = suncore.ModuleEnum.SYSTEM;
+        private $var_mod: suncore.ModuleEnum = suncore.ModuleEnum.SYSTEM;
 
         /**
          * 缓动对象
          */
-        private $target: any = null;
+        private $var_target: any = null;
 
         /**
          * 最终属性（连续缓动时使用）
          */
-        private $props: { [name: string]: number } = null;
+        private $var_props: { [name: string]: number } = null;
 
         /**
          * 缓动信息列表
          */
-        private $actions: TweenAction[] = [];
+        private $var_actions: TweenAction[] = [];
 
         /**
          * 是否使用对象池
          */
-        private $usePool: boolean = false;
+        private $var_usePool: boolean = false;
 
-        private $setTo(target: any, mod: suncore.ModuleEnum): Tween {
-            if (this.$hashId === -1) {
+        private $func_setTo(target: any, mod: suncore.ModuleEnum): Tween {
+            if (this.$var_hashId === -1) {
                 throw Error(`Tween己被回收！！！`);
             }
-            this.$mod = mod;
-            this.$target = target;
-            this.$hashId = suncom.Common.createHashId();
+            this.$var_mod = mod;
+            this.$var_target = target;
+            this.$var_hashId = suncom.Common.createHashId();
             if (suncore.System.isModuleStopped(mod) === false) {
                 this.facade.sendNotification(NotifyKey.REGISTER_TWEEN_OBJECT, this);
             }
@@ -61,9 +61,9 @@ module sunui {
          * export
          */
         cancel(): Tween {
-            this.$props = null;
-            while (this.$actions.length > 0) {
-                this.$actions.pop().recover();
+            this.$var_props = null;
+            while (this.$var_actions.length > 0) {
+                this.$var_actions.pop().recover();
             }
             return this;
         }
@@ -74,7 +74,7 @@ module sunui {
          */
         recover(): void {
             if (suncom.Pool.recover("sunui.Tween", this.cancel()) === true) {
-                this.$hashId = -1;
+                this.$var_hashId = -1;
             }
         }
 
@@ -88,8 +88,8 @@ module sunui {
          */
         to(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
             const keys: string[] = Object.keys(props);
-            const item: any = this.$props === null ? this.$target : this.$props;
-            this.$createTweenInfo(keys, item, props, duration, ease, props.update || null, complete);
+            const item: any = this.$var_props === null ? this.$var_target : this.$var_props;
+            this.$func_createTweenInfo(keys, item, props, duration, ease, props.update || null, complete);
             return this;
         }
 
@@ -100,8 +100,8 @@ module sunui {
          */
         from(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
             const keys: string[] = Object.keys(props);
-            const item: any = this.$props === null ? this.$target : this.$props;
-            this.$createTweenInfo(keys, props, item, duration, ease, props.update || null, complete);
+            const item: any = this.$var_props === null ? this.$var_target : this.$var_props;
+            this.$func_createTweenInfo(keys, props, item, duration, ease, props.update || null, complete);
             return this;
         }
 
@@ -112,11 +112,11 @@ module sunui {
          */
         by(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
             const keys: string[] = Object.keys(props);
-            const item: any = this.$props === null ? this.$target : this.$props;
+            const item: any = this.$var_props === null ? this.$var_target : this.$var_props;
             for (let i: number = 0; i < keys.length; i++) {
                 const key: string = keys[i];
-                if (this.$props === null || this.$props[key] === void 0) {
-                    props[key] += this.$target[key];
+                if (this.$var_props === null || this.$var_props[key] === void 0) {
+                    props[key] += this.$var_target[key];
                 }
                 else {
                     props[key] += item[key];
@@ -129,17 +129,17 @@ module sunui {
         /**
          * 生成缓动信息
          */
-        private $createTweenInfo(keys: string[], from: any, to: any, duration: number, ease: Function, update: suncom.Handler, complete: suncom.Handler): void {
+        private $func_createTweenInfo(keys: string[], from: any, to: any, duration: number, ease: Function, update: suncom.Handler, complete: suncom.Handler): void {
             // 最终属性
-            this.$props = this.$props || {};
+            this.$var_props = this.$var_props || {};
 
             const action: TweenAction = TweenAction.create();
             action.ease = ease;
             action.update = update;
             action.complete = complete;
-            action.time = suncore.System.getModuleTimestamp(this.$mod);
+            action.time = suncore.System.getModuleTimestamp(this.$var_mod);
             action.duration = duration;
-            this.$addAction(action);
+            this.$func_addAction(action);
 
             // 解析动作列表
             for (let i: number = 0; i < keys.length; i++) {
@@ -152,13 +152,13 @@ module sunui {
                 clip.from = from[key];
                 clip.prop = key;
                 if (clip.from === void 0) {
-                    clip.from = this.$target[key];
+                    clip.from = this.$var_target[key];
                 }
                 // 更新最终属性，用来支持连续缓动的实现
-                this.$props[key] = to[key];
+                this.$var_props[key] = to[key];
                 // 第一次执行from缓动时会有点问题
-                if (this.$actions.length === 0) {
-                    this.$target[clip.prop] = clip.from;
+                if (this.$var_actions.length === 0) {
+                    this.$var_target[clip.prop] = clip.from;
                 }
                 action.clips.push(clip);
             }
@@ -167,11 +167,11 @@ module sunui {
         /**
          * 添加动作
          */
-        private $addAction(action: TweenAction): void {
-            if (this.$hashId === -1) {
+        private $func_addAction(action: TweenAction): void {
+            if (this.$var_hashId === -1) {
                 throw Error(`Tween己被回收！！！`);
             }
-            this.$actions.push(action);
+            this.$var_actions.push(action);
         }
 
         /**
@@ -181,9 +181,9 @@ module sunui {
         wait(delay: number, complete: suncom.Handler = null): Tween {
             const action: TweenAction = TweenAction.create();
             action.complete = complete;
-            action.time = suncore.System.getModuleTimestamp(this.$mod);
+            action.time = suncore.System.getModuleTimestamp(this.$var_mod);
             action.duration = delay;
-            this.$addAction(action);
+            this.$func_addAction(action);
             return this;
         }
 
@@ -191,12 +191,12 @@ module sunui {
          * 执行动作
          * @return: 返回允许执行缓动的剩余时间
          */
-        doAction(): number {
-            const time: number = suncore.System.getModuleTimestamp(this.$mod);
-            const action: TweenAction = this.$actions[0];
+        func_doAction(): number {
+            const time: number = suncore.System.getModuleTimestamp(this.$var_mod);
+            const action: TweenAction = this.$var_actions[0];
 
             // 缓动对象可能己经被销毁了
-            if (this.$target.destroyed === true) {
+            if (this.$var_target.destroyed === true) {
                 this.cancel();
                 return 0;
             }
@@ -211,14 +211,14 @@ module sunui {
                 duration = action.duration;
             }
 
-            const func: Function = action.ease || this.$easeNone;
+            const func: Function = action.ease || this.$func_easeNone;
             for (let i: number = 0; i < action.clips.length; i++) {
                 const clip: TweenActionClip = action.clips[i];
                 if (done === true) {
-                    this.$target[clip.prop] = clip.to;
+                    this.$var_target[clip.prop] = clip.to;
                 }
                 else {
-                    this.$target[clip.prop] = func(duration, clip.from, clip.to - clip.from, action.duration);
+                    this.$var_target[clip.prop] = func(duration, clip.from, clip.to - clip.from, action.duration);
                 }
             }
             if (action.update !== null) {
@@ -228,10 +228,10 @@ module sunui {
             if (done === false) {
                 return 0;
             }
-            this.$actions.shift().recover();
+            this.$var_actions.shift().recover();
 
-            if (this.$actions.length > 0) {
-                this.$actions[0].time = suncore.System.getModuleTimestamp(this.$mod);
+            if (this.$var_actions.length > 0) {
+                this.$var_actions[0].time = suncore.System.getModuleTimestamp(this.$var_mod);
             }
             action.complete !== null && action.complete.run();
 
@@ -241,7 +241,7 @@ module sunui {
         /**
          * 默认的缓动函数
          */
-        private $easeNone(t: number, b: number, c: number, d: number): number {
+        private $func_easeNone(t: number, b: number, c: number, d: number): number {
             let a: number = t / d;
             if (a > 1) {
                 a = 1;
@@ -256,29 +256,29 @@ module sunui {
          * export
          */
         usePool(value: boolean): Tween {
-            this.$usePool = value;
+            this.$var_usePool = value;
             return this;
         }
 
         /**
          * 查询是否使用了对象池
          */
-        getUsePool(): boolean {
-            return this.$usePool;
+        func_getUsePool(): boolean {
+            return this.$var_usePool;
         }
 
         /**
          * 执行缓动的模块
          */
-        get mod(): suncore.ModuleEnum {
-            return this.$mod;
+        get var_mod(): suncore.ModuleEnum {
+            return this.$var_mod;
         }
 
         /**
          * 缓动是否己取消
          */
-        get canceled(): boolean {
-            return this.$actions.length === 0;
+        get var_canceled(): boolean {
+            return this.$var_actions.length === 0;
         }
 
         /**
@@ -288,8 +288,8 @@ module sunui {
          */
         static get(target: any, mod: suncore.ModuleEnum = suncore.ModuleEnum.CUSTOM): Tween {
             const tween: Tween = new Tween();
-            tween.$hashId = 0;
-            return tween.usePool(true).$setTo(target, mod);
+            tween.$var_hashId = 0;
+            return tween.usePool(true).$func_setTo(target, mod);
         }
     }
 }

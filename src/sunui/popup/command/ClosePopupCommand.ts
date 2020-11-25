@@ -33,9 +33,7 @@ module sunui {
                 }
             }
             this.$applyCloseProps(view, info.props, duration);
-
-            const handler: suncom.Handler = suncom.Handler.create(this, this.$onCloseFinish, [view]);
-            suncore.System.addTrigger(info.props.mod, duration, handler);
+            suncore.System.addTrigger(info.props.mod, duration, this, this.$onCloseFinish, [view]);
         }
 
         /**

@@ -8,17 +8,17 @@ module sunui {
         /**
          * 需要拦截的命令
          */
-        protected $command: string;
+        protected $var_command: string;
 
         /**
          * 拦截条件（返回true时表示符合拦截条件）
          */
-        protected $condition: suncom.Handler;
+        protected $var_condition: suncom.Handler;
 
         /**
          * 是否解除拦截
          */
-        protected $relieved: boolean = false;
+        protected $var_relieved: boolean = false;
 
         /**
          * @condition: 返回true时表示符合拦截条件
@@ -26,9 +26,9 @@ module sunui {
          */
         constructor(command: string, condition: suncom.Handler) {
             super();
-            this.$command = command;
-            this.$condition = condition;
-            this.facade.registerObserver(command, this.$onCommandCallback, this, false, suncom.EventPriorityEnum.HIGHEST);
+            this.$var_command = command;
+            this.$var_condition = condition;
+            this.facade.registerObserver(command, this.$func_onCommandCallback, this, false, suncom.EventPriorityEnum.HIGHEST);
         }
 
         destroy(): void {
@@ -36,17 +36,17 @@ module sunui {
                 return;
             }
             super.destroy();
-            this.facade.removeObserver(this.$command, this.$onCommandCallback, this);
+            this.facade.removeObserver(this.$var_command, this.$func_onCommandCallback, this);
         }
 
-        protected abstract $onCommandCallback(): void;
+        protected abstract $func_onCommandCallback(): void;
 
-        get command(): string {
-            return this.$command;
+        get var_command(): string {
+            return this.$var_command;
         }
 
-        get relieved(): boolean {
-            return this.$relieved;
+        get var_relieved(): boolean {
+            return this.$var_relieved;
         }
     }
 }

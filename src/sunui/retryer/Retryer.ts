@@ -8,47 +8,47 @@ module sunui {
         /**
          * 响应重试机制的模块
          */
-        private $mod: suncore.ModuleEnum;
+        private $var_mod: suncore.ModuleEnum;
 
         /**
          * 提示类型
          */
-        private $method: RetryMethodEnum | suncore.ModuleEnum;
+        private $var_method: RetryMethodEnum | suncore.ModuleEnum;
 
         /**
          * 询问回调
          */
-        private $confirmHandler: suncom.Handler;
+        private $var_confirmHandler: suncom.Handler;
 
         /**
          * 提示文本
          */
-        private $prompt: string;
+        private $var_prompt: string;
 
         /**
          * 提示选项
          */
-        private $options: Array<ConfirmOptionValueEnum | string> = [];
+        private $var_options: Array<ConfirmOptionValueEnum | string> = [];
 
         /**
          * 当前重试次数
          */
-        private $currentRetries: number = 0;
+        private $var_currentRetries: number = 0;
 
         /**
          * 重试回调
          */
-        private $retryHandler: suncom.Handler = null;
+        private $var_retryHandler: suncom.Handler = null;
 
         /**
          * 重试定时器
          */
-        private $retryTimerId: number = 0;
+        private $var_retryTimerId: number = 0;
 
         /**
          * 是否正在询问
          */
-        private $prompting: boolean = false;
+        private $var_prompting: boolean = false;
 
         /**
          * @confirmHandler: 若重试超过最大次数，则会执行此回调
@@ -63,26 +63,26 @@ module sunui {
             super(suncore.MsgQModEnum.MMI);
 
             if ((modOrMethod & RetryMethodEnum.CONFIRM) === RetryMethodEnum.CONFIRM) {
-                this.$method = RetryMethodEnum.CONFIRM;
+                this.$var_method = RetryMethodEnum.CONFIRM;
             }
             else if ((modOrMethod & RetryMethodEnum.TERMINATE) === RetryMethodEnum.TERMINATE) {
-                this.$method = RetryMethodEnum.TERMINATE;
+                this.$var_method = RetryMethodEnum.TERMINATE;
             }
             else {
-                this.$method = RetryMethodEnum.AUTO;
+                this.$var_method = RetryMethodEnum.AUTO;
             }
 
             const mode: suncore.ModuleEnum = modOrMethod &= 0xF;
             if (modOrMethod === suncore.ModuleEnum.CUSTOM || modOrMethod === suncore.ModuleEnum.TIMELINE) {
-                this.$mod = modOrMethod;
+                this.$var_mod = modOrMethod;
             }
             else {
-                this.$mod = suncore.ModuleEnum.SYSTEM;
+                this.$var_mod = suncore.ModuleEnum.SYSTEM;
             }
 
-            this.$prompt = prompt;
-            this.$options = options;
-            this.$confirmHandler = confirmHandler;
+            this.$var_prompt = prompt;
+            this.$var_options = options;
+            this.$var_confirmHandler = confirmHandler;
         }
 
         /**
@@ -93,29 +93,28 @@ module sunui {
          * export
          */
         run(delay: number, handler: suncom.Handler, maxRetries: number = 2): void {
-            if (this.$method === RetryMethodEnum.AUTO || this.$currentRetries < maxRetries) {
-                if (this.$retryTimerId === 0) {
-                    this.$retryHandler = handler;
-                    this.$retryTimerId = suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, delay, this.$onRetryTimer, this);
+            if (this.$var_method === RetryMethodEnum.AUTO || this.$var_currentRetries < maxRetries) {
+                if (this.$var_retryTimerId === 0) {
+                    this.$var_retryHandler = handler;
+                    this.$var_retryTimerId = suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, delay, this.$func_onRetryTimer, this);
                 }
                 else {
                     suncom.Logger.warn(suncom.DebugMode.ANY, `己忽略的重试请求 method:${suncom.Common.getMethodName(handler.method, handler.caller)}, caller:${suncom.Common.getQualifiedClassName(handler.caller)}`);
                 }
             }
             else {
-                if (this.$prompting === false) {
-                    this.$prompting = true;
-                    if (this.$method === RetryMethodEnum.TERMINATE) {
-                        const handler: suncom.Handler = suncom.Handler.create(this, this.$onConfirmReplied, [ConfirmOptionValueEnum.NO]);
-                        suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, handler);
+                if (this.$var_prompting === false) {
+                    this.$var_prompting = true;
+                    if (this.$var_method === RetryMethodEnum.TERMINATE) {
+                        suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, this, this.$func_onConfirmReplied, [ConfirmOptionValueEnum.NO]);
                     }
                     else {
-                        const handler: suncom.Handler = suncom.Handler.create(this, this.$onConfirmReplied);
-                        this.facade.sendNotification(NotifyKey.RETRY_CONFIRM, [this.$mod, this.$prompt, this.$options, handler]);
+                        const handler: suncom.Handler = suncom.Handler.create(this, this.$func_onConfirmReplied);
+                        this.facade.sendNotification(NotifyKey.RETRY_CONFIRM, [this.$var_mod, this.$var_prompt, this.$var_options, handler]);
                     }
                 }
                 else {
-                    suncom.Logger.warn(suncom.DebugMode.ANY, `己忽略的重试的询问请求 prompt:${this.$prompt}`);
+                    suncom.Logger.warn(suncom.DebugMode.ANY, `己忽略的重试的询问请求 prompt:${this.$var_prompt}`);
                 }
             }
         }
@@ -123,11 +122,11 @@ module sunui {
         /**
          * 询问得到答复
          */
-        private $onConfirmReplied(option: ConfirmOptionValueEnum): void {
-            if (this.$prompting === true) {
-                this.$prompting = false;
-                if (this.$confirmHandler !== null) {
-                    this.$confirmHandler.runWith(option);
+        private $func_onConfirmReplied(option: ConfirmOptionValueEnum): void {
+            if (this.$var_prompting === true) {
+                this.$var_prompting = false;
+                if (this.$var_confirmHandler !== null) {
+                    this.$var_confirmHandler.runWith(option);
                 }
             }
         }
@@ -135,10 +134,10 @@ module sunui {
         /**
          * 重试定时器响应回调（执行重试的函数）
          */
-        private $onRetryTimer(): void {
-            this.$retryTimerId = 0;
-            this.$currentRetries++;
-            this.$retryHandler.run();
+        private $func_onRetryTimer(): void {
+            this.$var_retryTimerId = 0;
+            this.$var_currentRetries++;
+            this.$var_retryHandler.run();
         }
 
         /**
@@ -146,8 +145,8 @@ module sunui {
          * export
          */
         cancel(): void {
-            this.$prompting = false;
-            this.$retryTimerId = suncore.System.removeTimer(this.$retryTimerId);
+            this.$var_prompting = false;
+            this.$var_retryTimerId = suncore.System.removeTimer(this.$var_retryTimerId);
         }
 
         /**
@@ -155,7 +154,7 @@ module sunui {
          * export
          */
         reset(): void {
-            this.$currentRetries = 0;
+            this.$var_currentRetries = 0;
         }
 
         /**
@@ -163,7 +162,7 @@ module sunui {
          * export
          */
         get currentRetries(): number {
-            return this.$currentRetries;
+            return this.$var_currentRetries;
         }
     }
 }

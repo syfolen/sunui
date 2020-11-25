@@ -8,26 +8,26 @@ module sunui {
         /**
          * 是否己激活
          */
-        private $active: boolean = false;
+        private $var_active: boolean = false;
 
-        protected $onCommandCallback(): void {
-            if (this.$active === true && this.$relieved === false) {
+        protected $func_onCommandCallback(): void {
+            if (this.$var_active === true && this.$var_relieved === false) {
                 const args: any[] = [];
                 for (let i: number = 0; i < arguments.length; i++) {
                     args.push(arguments[i]);
                 }
-                if (this.$condition.runWith(args) === true) {
-                    this.$relieved = true;
+                if (this.$var_condition.runWith(args) === true) {
+                    this.$var_relieved = true;
                     this.facade.sendNotification(NotifyKey.ON_INTERCEPTOR_RELIEVED, this, true);
                 }
             }
         }
 
-        get active(): boolean {
-            return this.$active;
+        get var_active(): boolean {
+            return this.$var_active;
         }
-        set active(value: boolean) {
-            this.$active = value;
+        set var_active(value: boolean) {
+            this.$var_active = value;
         }
     }
 }

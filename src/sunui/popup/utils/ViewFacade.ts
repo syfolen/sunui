@@ -8,17 +8,17 @@ module sunui {
         /**
          * 弹出对象
          */
-        private $view: IView;
+        private $var_view: IView;
 
         /**
          * 弹出信息配置
          */
-        private $info: IViewStackInfo = null;
+        private $var_info: IViewStackInfo = null;
 
         /**
          * 缓动时间
          */
-        private $duration: number;
+        private $var_duration: number;
 
         /**
          * 弹出框外观
@@ -28,17 +28,17 @@ module sunui {
          */
         constructor(view: any, duration?: number) {
             super();
-            this.$view = view;
+            this.$var_view = view;
             // 若存在配置
-            if (this.info !== null) {
-                this.$duration = this.info.duration;
+            if (this.var_info !== null) {
+                this.$var_duration = this.var_info.duration;
             }
             // 若缓动时间未设置，则使用默认值
             else if (duration === void 0) {
-                this.$duration = 200;
+                this.$var_duration = 200;
             }
             else {
-                this.$duration = duration;
+                this.$var_duration = duration;
             }
         }
 
@@ -47,7 +47,7 @@ module sunui {
          * export
          */
         popup(props: IViewProps = {}): ViewFacade {
-            this.facade.sendNotification(NotifyKey.SHOW_POPUP, [this.$view, this.$duration, props]);
+            this.facade.sendNotification(NotifyKey.SHOW_POPUP, [this.$var_view, this.$var_duration, props]);
             return this;
         }
 
@@ -57,7 +57,7 @@ module sunui {
          * export
          */
         close(destroy?: boolean): void {
-            this.facade.sendNotification(NotifyKey.CLOSE_POPUP, [this.$view, this.$duration, destroy]);
+            this.facade.sendNotification(NotifyKey.CLOSE_POPUP, [this.$var_view, this.$var_duration, destroy]);
         }
 
         /**
@@ -65,24 +65,24 @@ module sunui {
          * export
          */
         get cancelAllowed(): boolean {
-            return this.info.cancelAllowed;
+            return this.var_info.cancelAllowed;
         }
 
         /**
          * depends
          */
         set cancelAllowed(yes: boolean) {
-            this.info.cancelAllowed = yes;
+            this.var_info.cancelAllowed = yes;
         }
 
         /**
          * 获取配置信息
          */
-        get info(): IViewStackInfo {
-            if (this.$info === null) {
-                this.$info = M.viewLayer.getInfoByView(this.$view);
+        get var_info(): IViewStackInfo {
+            if (this.$var_info === null) {
+                this.$var_info = M.viewLayer.getInfoByView(this.$var_view);
             }
-            return this.$info;
+            return this.$var_info;
         }
     }
 }

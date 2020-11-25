@@ -44,9 +44,9 @@ module sunui {
             // 获取场景配置信息
             const info: ISceneInfo = SceneManager.getConfigByName(name);
             // 初始化场景（应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$beforeLoadScene, [info, data]));
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, this, this.$beforeLoadScene, [info, data]);
             // 加载当前场景（应当被无限延后，因为初始化方法中可能会增加一些加载资源的任务）
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$loadScene, [info]));
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, this, this.$loadScene, [info]);
         }
 
         /**
@@ -88,7 +88,7 @@ module sunui {
             this.facade.sendNotification(suncore.NotifyKey.PAUSE_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
             // 离开当前场景（应当被无限延后，因为需要等待Loading界面的展示）
             const info: ISceneInfo = SceneManager.getConfigByName(this.$sceneName);
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, suncom.Handler.create(this, this.$onLeaveScene, [info]));
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, this, this.$onLeaveScene, [info]);
         }
 
         /**
@@ -101,9 +101,7 @@ module sunui {
             this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, [this.$scene2d, this.$scene3d]);
             info.scene2d !== null && Resource.clearResByUrl(info.scene2d);
             // 当前场景名字应当于uniCls.run执行完毕之后再置空
-            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new suncore.SimpleTask(
-                suncom.Handler.create(this, this.$onExitScene)
-            ));
+            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new suncore.SimpleTask(this, this.$onExitScene));
         }
 
         /**

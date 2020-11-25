@@ -8,22 +8,22 @@ module sunui {
         /**
          * 哈希ID
          */
-        private $hashId: number = suncom.Common.createHashId();
+        private $var_hashId: number = suncom.Common.createHashId();
 
         /**
          * 超时定时器
          */
-        private $timerId: number = 0;
+        private $var_timerId: number = 0;
 
         /**
          * 命令序列
          */
-        private $commands: GUILogicCommand[] = [];
+        private $var_commands: GUILogicCommand[] = [];
 
         /**
          * 是否自动销毁
          */
-        private $autoDestroy: boolean = false;
+        private $var_autoDestroy: boolean = false;
 
         /**
          * @autoDestroy: 是否自动销毁，默认为：true
@@ -31,10 +31,10 @@ module sunui {
          */
         constructor(autoDestroy: boolean = true) {
             super();
-            this.$autoDestroy = autoDestroy;
-            this.facade.registerObserver(NotifyKey.NEXT_LOGIC_COMMAND, this.$onNextLogicCommand, this);
-            this.facade.registerObserver(NotifyKey.DESTROY_LOGIC_RUNNABLE, this.$onDestroyLogicRunnable, this);
-            this.facade.registerObserver(NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE, this.$onDestroyAllLogicRunnable, this);
+            this.$var_autoDestroy = autoDestroy;
+            this.facade.registerObserver(NotifyKey.NEXT_LOGIC_COMMAND, this.$func_onNextLogicCommand, this);
+            this.facade.registerObserver(NotifyKey.DESTROY_LOGIC_RUNNABLE, this.$func_onDestroyLogicRunnable, this);
+            this.facade.registerObserver(NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE, this.$func_onDestroyAllLogicRunnable, this);
         }
 
         destroy(): void {
@@ -42,29 +42,29 @@ module sunui {
                 return;
             }
             super.destroy();
-            this.facade.removeObserver(NotifyKey.NEXT_LOGIC_COMMAND, this.$onNextLogicCommand, this);
-            this.facade.removeObserver(NotifyKey.DESTROY_LOGIC_RUNNABLE, this.$onDestroyLogicRunnable, this);
-            this.facade.removeObserver(NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE, this.$onDestroyAllLogicRunnable, this);
+            this.facade.removeObserver(NotifyKey.NEXT_LOGIC_COMMAND, this.$func_onNextLogicCommand, this);
+            this.facade.removeObserver(NotifyKey.DESTROY_LOGIC_RUNNABLE, this.$func_onDestroyLogicRunnable, this);
+            this.facade.removeObserver(NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE, this.$func_onDestroyAllLogicRunnable, this);
 
-            for (let i: number = 0; i < this.$commands.length; i++) {
-                this.$commands[i].destroy();
+            for (let i: number = 0; i < this.$var_commands.length; i++) {
+                this.$var_commands[i].destroy();
             }
         }
 
-        private $onDestroyAllLogicRunnable(): void {
+        private $func_onDestroyAllLogicRunnable(): void {
             this.destroy();
         }
 
-        private $onDestroyLogicRunnable(hashId: number): void {
-            if (this.$autoDestroy === false && this.$hashId === hashId) {
+        private $func_onDestroyLogicRunnable(hashId: number): void {
+            if (this.$var_autoDestroy === false && this.$var_hashId === hashId) {
                 this.destroy();
             }
         }
 
-        private $onNextLogicCommand(command: GUILogicCommand): void {
+        private $func_onNextLogicCommand(command: GUILogicCommand): void {
             let index: number = -1;
-            for (let i: number = 0; i < this.$commands.length; i++) {
-                if (this.$commands[i] === command) {
+            for (let i: number = 0; i < this.$var_commands.length; i++) {
+                if (this.$var_commands[i] === command) {
                     index = i;
                     break;
                 }
@@ -75,13 +75,13 @@ module sunui {
             index++;
             this.facade.notifyCancel();
 
-            if (index < this.$commands.length) {
-                const command: GUILogicCommand = this.$commands[index];
+            if (index < this.$var_commands.length) {
+                const command: GUILogicCommand = this.$var_commands[index];
                 if (command.running === false) {
                     command.run();
                 }
             }
-            else if (this.$autoDestroy === true) {
+            else if (this.$var_autoDestroy === true) {
                 this.destroy();
             }
         }
@@ -93,9 +93,9 @@ module sunui {
          * export
          */
         protected $addCommand(command: string, condition: suncom.Handler, dependencies: GUILogicDependence[]): void {
-            this.$commands.push(new GUILogicCommand(command, condition, dependencies));
-            if (this.$commands[0].running === false) {
-                this.$commands[0].run();
+            this.$var_commands.push(new GUILogicCommand(command, condition, dependencies));
+            if (this.$var_commands[0].running === false) {
+                this.$var_commands[0].run();
             }
         }
 
@@ -104,7 +104,7 @@ module sunui {
          * export
          */
         get hashId(): number {
-            return this.$hashId;
+            return this.$var_hashId;
         }
     }
 }

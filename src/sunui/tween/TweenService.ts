@@ -35,14 +35,14 @@ module sunui {
             // 使用临时变量持有tweens列表，因为列表在执行的过程中可能会被复制
             const tweens: Tween[] = this.$tweens;
 
-            for (let mod: suncore.ModuleEnum = suncore.ModuleEnum.MIN; mod < suncore.ModuleEnum.MAX; mod++) {
+            for (let mod: suncore.ModuleEnum = 0; mod < suncore.ModuleEnum.MAX; mod++) {
                 if (suncore.System.isModulePaused(mod) === false) {
                     for (let i: number = 0; i < tweens.length; i++) {
                         const tween: Tween = tweens.length[i];
-                        if (tween.mod === mod) {
+                        if (tween.var_mod === mod) {
                             let timeLeft: number = 1;
-                            while (timeLeft > 0 && tween.canceled === false) {
-                                timeLeft = tween.doAction();
+                            while (timeLeft > 0 && tween.var_canceled === false) {
+                                timeLeft = tween.func_doAction();
                             }
                         }
                     }
@@ -52,7 +52,7 @@ module sunui {
             // 移除己被取消的缓动对象
             for (let i: number = this.$tweens.length - 1; i > -1; i--) {
                 const tween: Tween = this.$tweens[i];
-                if (tween.canceled === true && tween.getUsePool() === true) {
+                if (tween.var_canceled === true && tween.func_getUsePool() === true) {
                     suncom.Pool.recover("sunui.Tweeen", tweens.splice(i, 1)[0]);
                 }
             }
@@ -67,7 +67,7 @@ module sunui {
             if (stop === true) {
                 for (let i: number = 0; i < this.$tweens.length; i++) {
                     const tween: Tween = this.$tweens[i];
-                    if (tween.mod === mod) {
+                    if (tween.var_mod === mod) {
                         tween.cancel();
                     }
                 }
