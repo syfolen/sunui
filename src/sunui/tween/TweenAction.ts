@@ -17,12 +17,12 @@ module sunui {
         /**
          * 更新回调
          */
-        update: suncom.Handler = null;
+        update: suncom.IHandler = null;
 
         /**
          * 结束回调
          */
-        complete: suncom.Handler = null;
+        complete: suncom.IHandler = null;
 
         /**
          * 开始时间

@@ -12,7 +12,7 @@ module sunui {
         /**
          * 回调执行器
          */
-        private $handler: suncom.Handler = null;
+        private $handler: suncom.IHandler = null;
 
         /**
          * 完成加载的资源列表
@@ -24,7 +24,7 @@ module sunui {
          */
         private $loaders: AssetSafetyLoader[] = [];
 
-        constructor(id: number, urls: string[], handler: suncom.Handler) {
+        constructor(id: number, urls: string[], handler: suncom.IHandler) {
             super();
             this.$id = id;
             this.$handler = handler;
@@ -34,7 +34,7 @@ module sunui {
 
             while (urls.length > 0) {
                 const url: string = urls.shift();
-                const handler: suncom.Handler = suncom.Handler.create(this, this.$onResourceCreated);
+                const handler: suncom.IHandler = suncom.Handler.create(this, this.$onResourceCreated);
                 const loader: AssetSafetyLoader = new AssetSafetyLoader(url, handler);
                 this.$loaders.push(loader);
             }

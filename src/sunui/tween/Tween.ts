@@ -86,7 +86,7 @@ module sunui {
          * @complete: 缓动结束时的回调，默认为: null
          * export
          */
-        to(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
+        to(props: any, duration: number, ease: Function = null, complete: suncom.IHandler = null): Tween {
             const keys: string[] = Object.keys(props);
             const item: any = this.$var_props === null ? this.$var_target : this.$var_props;
             this.$func_createTweenInfo(keys, item, props, duration, ease, props.update || null, complete);
@@ -98,7 +98,7 @@ module sunui {
          * @参数详细说明请参考Tween.to
          * export
          */
-        from(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
+        from(props: any, duration: number, ease: Function = null, complete: suncom.IHandler = null): Tween {
             const keys: string[] = Object.keys(props);
             const item: any = this.$var_props === null ? this.$var_target : this.$var_props;
             this.$func_createTweenInfo(keys, props, item, duration, ease, props.update || null, complete);
@@ -110,7 +110,7 @@ module sunui {
          * @参数详细说明请参考Tween.to
          * export
          */
-        by(props: any, duration: number, ease: Function = null, complete: suncom.Handler = null): Tween {
+        by(props: any, duration: number, ease: Function = null, complete: suncom.IHandler = null): Tween {
             const keys: string[] = Object.keys(props);
             const item: any = this.$var_props === null ? this.$var_target : this.$var_props;
             for (let i: number = 0; i < keys.length; i++) {
@@ -129,7 +129,7 @@ module sunui {
         /**
          * 生成缓动信息
          */
-        private $func_createTweenInfo(keys: string[], from: any, to: any, duration: number, ease: Function, update: suncom.Handler, complete: suncom.Handler): void {
+        private $func_createTweenInfo(keys: string[], from: any, to: any, duration: number, ease: Function, update: suncom.IHandler, complete: suncom.IHandler): void {
             // 最终属性
             this.$var_props = this.$var_props || {};
 
@@ -178,7 +178,7 @@ module sunui {
          * 等待指定时间
          * export
          */
-        wait(delay: number, complete: suncom.Handler = null): Tween {
+        wait(delay: number, complete: suncom.IHandler = null): Tween {
             const action: TweenAction = TweenAction.create();
             action.complete = complete;
             action.time = suncore.System.getModuleTimestamp(this.$var_mod);

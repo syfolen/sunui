@@ -92,7 +92,7 @@ module sunui {
          * @dependencies：依赖列表
          * export
          */
-        protected $addCommand(command: string, condition: suncom.Handler, dependencies: GUILogicDependence[]): void {
+        protected $addCommand(command: string, condition: suncom.IHandler, dependencies: GUILogicDependence[]): void {
             this.$var_commands.push(new GUILogicCommand(command, condition, dependencies));
             if (this.$var_commands[0].running === false) {
                 this.$var_commands[0].run();

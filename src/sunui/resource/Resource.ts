@@ -94,7 +94,7 @@ module sunui {
          * export
          */
         export function prepare(urls: string[], method: (id: number) => void, caller: Object): number {
-            let handler: suncom.Handler = null;
+            let handler: suncom.IHandler = null;
             if (method === null) {
                 handler = suncom.Handler.create(null, (id: number): void => { });
             }

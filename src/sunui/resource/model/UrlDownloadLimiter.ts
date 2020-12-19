@@ -21,7 +21,7 @@ module sunui {
 		 * 说明：
 		 * 1. 在模拟的网速限制下，完成下载后会执行此回调器
 		 */
-		private $handler: suncom.Handler = null;
+		private $handler: suncom.IHandler = null;
 
 		/**
 		 * 总大小，若为-1，则视为己存在
@@ -38,7 +38,7 @@ module sunui {
 		 */
 		private $priority: number = 0;
 
-		constructor(url: string, handler: suncom.Handler) {
+		constructor(url: string, handler: suncom.IHandler) {
 			super();
 			this.$url = url;
 			this.$handler = handler;

@@ -18,12 +18,12 @@ module sunui {
         /**
          * 弹框被关闭时需要执行的回调
          */
-        private $var_closedHandler: suncom.Handler = null;
+        private $var_closedHandler: suncom.IHandler = null;
 
         /**
          * 弹框被移除时需要执行的回调
          */
-        private $var_removedHandler: suncom.Handler = null;
+        private $var_removedHandler: suncom.IHandler = null;
 
         /**
          * @caller: 回调对象（脚本）

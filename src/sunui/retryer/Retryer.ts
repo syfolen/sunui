@@ -18,7 +18,7 @@ module sunui {
         /**
          * 询问回调
          */
-        private $var_confirmHandler: suncom.Handler;
+        private $var_confirmHandler: suncom.IHandler;
 
         /**
          * 提示文本
@@ -38,7 +38,7 @@ module sunui {
         /**
          * 重试回调
          */
-        private $var_retryHandler: suncom.Handler = null;
+        private $var_retryHandler: suncom.IHandler = null;
 
         /**
          * 重试定时器
@@ -59,7 +59,7 @@ module sunui {
          * 3. 若未输入 suncore.ModuleEnum ，则默认值为 suncore.ModuleEnum.SYSTEM
          * export 
          */
-        constructor(modOrMethod: suncore.ModuleEnum | RetryMethodEnum, confirmHandler: suncom.Handler = null, prompt: string = null, ...options: Array<ConfirmOptionValueEnum | string>) {
+        constructor(modOrMethod: suncore.ModuleEnum | RetryMethodEnum, confirmHandler: suncom.IHandler = null, prompt: string = null, ...options: Array<ConfirmOptionValueEnum | string>) {
             super(suncore.MsgQModEnum.MMI);
 
             if ((modOrMethod & RetryMethodEnum.CONFIRM) === RetryMethodEnum.CONFIRM) {
@@ -92,7 +92,7 @@ module sunui {
          * @return: 返回true表示允许重试
          * export
          */
-        run(delay: number, handler: suncom.Handler, maxRetries: number = 2): void {
+        run(delay: number, handler: suncom.IHandler, maxRetries: number = 2): void {
             if (this.$var_method === RetryMethodEnum.AUTO || this.$var_currentRetries < maxRetries) {
                 if (this.$var_retryTimerId === 0) {
                     this.$var_retryHandler = handler;
@@ -109,7 +109,7 @@ module sunui {
                         suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, this, this.$func_onConfirmReplied, [ConfirmOptionValueEnum.NO]);
                     }
                     else {
-                        const handler: suncom.Handler = suncom.Handler.create(this, this.$func_onConfirmReplied);
+                        const handler: suncom.IHandler = suncom.Handler.create(this, this.$func_onConfirmReplied);
                         this.facade.sendNotification(NotifyKey.RETRY_CONFIRM, [this.$var_mod, this.$var_prompt, this.$var_options, handler]);
                     }
                 }

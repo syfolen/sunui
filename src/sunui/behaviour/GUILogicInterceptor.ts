@@ -13,7 +13,7 @@ module sunui {
         /**
          * 拦截条件（返回true时表示符合拦截条件）
          */
-        protected $var_condition: suncom.Handler;
+        protected $var_condition: suncom.IHandler;
 
         /**
          * 是否解除拦截
@@ -24,7 +24,7 @@ module sunui {
          * @condition: 返回true时表示符合拦截条件
          * export
          */
-        constructor(command: string, condition: suncom.Handler) {
+        constructor(command: string, condition: suncom.IHandler) {
             super();
             this.$var_command = command;
             this.$var_condition = condition;

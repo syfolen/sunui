@@ -14,7 +14,7 @@ module sunui {
         /**
          * 资源加载回调
          */
-        private $complete: suncom.Handler = null;
+        private $complete: suncom.IHandler = null;
 
         /**
          * 加载器
@@ -26,7 +26,7 @@ module sunui {
          */
         private $retryer: Retryer = new Retryer(RetryMethodEnum.TERMINATE, suncom.Handler.create(this, this.$onRetryConfirmed), "资源加载失败，点击确定重新尝试！");
 
-        constructor(url: string, complete: suncom.Handler) {
+        constructor(url: string, complete: suncom.IHandler) {
             super();
             Resource.lock(url);
             this.$url = url;
@@ -51,7 +51,7 @@ module sunui {
          * 执行资源加载
          */
         private $doLoad(): void {
-            const handler: suncom.Handler = suncom.Handler.create(this, this.$onLoad);
+            const handler: suncom.IHandler = suncom.Handler.create(this, this.$onLoad);
             if (Resource.isRes3dUrl(this.$url) === true) {
                 this.$loader = new Res3dLoader(this.$url, handler);
             }
@@ -107,7 +107,7 @@ module sunui {
         /**
          * 获取回调方法
          */
-        get complete(): suncom.Handler {
+        get complete(): suncom.IHandler {
             return this.$complete;
         }
     }

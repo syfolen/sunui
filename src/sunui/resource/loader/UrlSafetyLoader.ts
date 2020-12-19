@@ -20,14 +20,14 @@ module sunui {
         /**
          * 加载回调
          */
-        private $complete: suncom.Handler = null;
+        private $complete: suncom.IHandler = null;
 
         /**
          * 是否正在加载
          */
         private $loading: boolean = false;
 
-        constructor(url: string, complete: suncom.Handler) {
+        constructor(url: string, complete: suncom.IHandler) {
             super();
             this.$url = url;
             this.$complete = complete;

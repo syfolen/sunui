@@ -57,7 +57,7 @@ module sunui {
             this.$sceneName = info.name;
             // 此事件主要用于展示LoadingView
             this.facade.sendNotification(NotifyKey.BEFORE_LOAD_SCENE);
-            info.iniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new info.iniCls(info, data));
+            info.iniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new info.iniCls(info, data));
         }
 
         /**
@@ -95,13 +95,13 @@ module sunui {
          * 离开当前场景
          */
         private $onLeaveScene(info: ISceneInfo): void {
-            info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new info.uniCls(info, this.$data));
+            info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new info.uniCls(info, this.$data));
             this.facade.sendNotification(NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE);
             this.facade.sendNotification(NotifyKey.LEAVE_SCENE);
             this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, [this.$scene2d, this.$scene3d]);
             info.scene2d !== null && Resource.clearResByUrl(info.scene2d);
             // 当前场景名字应当于uniCls.run执行完毕之后再置空
-            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, 0, new suncore.SimpleTask(this, this.$onExitScene));
+            suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new suncore.SimpleTask(this, this.$onExitScene));
         }
 
         /**

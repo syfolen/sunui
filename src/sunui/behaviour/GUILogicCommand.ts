@@ -19,7 +19,7 @@ module sunui {
          */
         private $running: boolean = false;
 
-        constructor(command: string, condition: suncom.Handler, dependencies: GUILogicDependence[]) {
+        constructor(command: string, condition: suncom.IHandler, dependencies: GUILogicDependence[]) {
             super(command, condition);
             this.$dependencies = dependencies;
             suncom.Test.expect(dependencies.length).toBeGreaterThan(0);
