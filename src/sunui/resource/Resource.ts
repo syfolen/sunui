@@ -37,12 +37,8 @@ module sunui {
             const str: string = url.substr(0, url.length - ext.length);
 
             const urls: string[] = [url];
-            // 图集和龙骨需要同时锁定PNG图片
-            if (ext === "sk" || ext === "atlas") {
-                urls.push(str + "png");
-            }
             // 3d资源需要同时锁定json配置文件
-            else if (Resource.isRes3dUrl(url) === true) {
+            if (Resource.isRes3dUrl(url) === true) {
                 urls.push(str + "json");
             }
 
@@ -68,15 +64,11 @@ module sunui {
                 }
             }
             const ext: string = suncom.Common.getFileExtension(url);
-            const str: string = url.substr(0, url.length - ext.length);
+            const str: string = url.substr(0, url.length - ext.length - 1);
 
             const urls: string[] = [url];
-            // 图集和龙骨需要同时解锁PNG图片
-            if (ext === "sk" || ext === "atlas") {
-                urls.push(str + "png");
-            }
-            // 3d资源只需要解锁json配置文件
-            else if (Resource.isRes3dUrl(url) === true) {
+            // 3d资源需要解锁json配置文件
+            if (Resource.isRes3dUrl(url) === true) {
                 urls.push(str + "json");
             }
 
@@ -234,6 +226,7 @@ module sunui {
          */
         export function checkLoadList(urls: string[]): string[] {
             Resource.removeUnnecessaryResources(urls, "sk", "png", "龙骨预加载无需指定PNG资源");
+            Resource.removeUnnecessaryResources(urls, "fui", "png", "FGUI预加载无需指定PNG资源");
             Resource.removeUnnecessaryResources(urls, "atlas", "png", "图集预加载无需指定PNG资源");
             return Resource.removeDuplicateResources(urls);
         }

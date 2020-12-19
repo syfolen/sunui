@@ -20,15 +20,8 @@ module sunui {
                 let templet: Laya.Templet = M.cacheMap[this.$url] || null;
                 if (templet === null) {
                     templet = M.cacheMap[this.$url] = new Laya.Templet();
-                    // templet.on(Laya.Event.COMPLETE, this, this.$onTempletCreated);
                     templet.loadAni(this.$url);
                 }
-                // else if (templet.isParserComplete === false) {
-                //     templet.on(Laya.Event.COMPLETE, this, this.$onTempletCreated);
-                // }
-                // else {
-                //     suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, this, this.$onTempletCreated);
-                // }
                 suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, this, this.$onTempletCreated);
                 // 加锁防止Laya.Event.COMPLETE事件不被回调
                 Resource.lock(this.$url);

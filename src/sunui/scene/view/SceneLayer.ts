@@ -46,7 +46,7 @@ module sunui {
             // 初始化场景（应当被无限延后，因为上一个场景反初始化方法中可能会增加一些卸载资源的任务）
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, this, this.$beforeLoadScene, [info, data]);
             // 加载当前场景（应当被无限延后，因为初始化方法中可能会增加一些加载资源的任务）
-            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, this, this.$loadScene, [info]);
+            suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_LAZY, this, this.$loadScene, [info, data]);
         }
 
         /**
@@ -63,10 +63,10 @@ module sunui {
         /**
          * 加载场景
          */
-        private $loadScene(info: ISceneInfo): void {
+        private $loadScene(info: ISceneInfo, data: any): void {
             this.facade.sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, true]);
             info.scene3d = info.scene3d || null;
-            this.facade.sendNotification(NotifyKey.LOAD_SCENE, info);
+            this.facade.sendNotification(NotifyKey.LOAD_SCENE, [info, data]);
         }
 
         /**
