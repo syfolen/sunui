@@ -52,7 +52,10 @@ module sunui {
          */
         private $doLoad(): void {
             const handler: suncom.IHandler = suncom.Handler.create(this, this.$onLoad);
-            if (Resource.isRes3dUrl(this.$url) === true) {
+            if (Resource.isFGuiUrl(this.$url) === true) {
+                this.$loader = new FGuiLoader(this.$url, handler);
+            }
+            else if (Resource.isRes3dUrl(this.$url) === true) {
                 this.$loader = new Res3dLoader(this.$url, handler);
             }
             else if (suncom.Common.getFileExtension(this.$url) === "sk") {

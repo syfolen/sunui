@@ -40,11 +40,14 @@ module sunui {
         load(): void {
             if (this.$loading === false && this.$destroyed === false) {
                 this.$loading = true;
-                UrlLocker.lock(this.$url);
+                RES.lock(this.$url);
                 if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
                     suncom.Logger.trace(suncom.DebugMode.ANY, `load ${this.$url}`);
                 }
-                if (Resource.isRes3dUrl(this.$url) === false || Resource.getRes3dJsonUrl(this.$url) === this.$url) {
+                if (Resource.isFGuiUrl(this.$url) === true) {
+                    fairygui.UIPackage.loadPackage(this.$url, Laya.Handler.create(this, this.$onComplete));
+                }
+                else if (Resource.isRes3dUrl(this.$url) === false || Resource.getRes3dJsonUrl(this.$url) === this.$url) {
                     Laya.loader.load(this.$url, Laya.Handler.create(this, this.$onComplete));
                 }
                 else {
@@ -69,7 +72,7 @@ module sunui {
                     this.$complete.runWith([data === null ? false : true, this.$url]);
                 }
                 this.facade.sendNotification(NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE, this);
-                UrlLocker.unlock(this.$url);
+                RES.unlock(this.$url);
                 this.$loading = false;
             }
             else {

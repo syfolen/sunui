@@ -33,7 +33,7 @@ module sunui {
                     return;
                 }
             }
-            const ext: string = suncom.Common.getFileExtension(url);
+            const ext: string = suncom.Common.getFileExtension(url) || "";
             const str: string = url.substr(0, url.length - ext.length);
 
             const urls: string[] = [url];
@@ -43,7 +43,7 @@ module sunui {
             }
 
             for (let i: number = 0; i < urls.length; i++) {
-                UrlLocker.lock(urls[i]);
+                RES.lock(urls[i]);
             }
         }
 
@@ -63,7 +63,7 @@ module sunui {
                     return;
                 }
             }
-            const ext: string = suncom.Common.getFileExtension(url);
+            const ext: string = suncom.Common.getFileExtension(url) || "";
             const str: string = url.substr(0, url.length - ext.length - 1);
 
             const urls: string[] = [url];
@@ -73,7 +73,7 @@ module sunui {
             }
 
             for (let i: number = 0; i < urls.length; i++) {
-                UrlLocker.unlock(urls[i]);
+                RES.unlock(urls[i]);
             }
         }
 
@@ -160,7 +160,7 @@ module sunui {
          * 根据Url清理资源
          */
         export function clearResByUrl(url: string): void {
-            UrlLocker.clearResByUrl(url);
+            RES.clearResByUrl(url);
         }
 
         /**
@@ -186,6 +186,13 @@ module sunui {
          */
         export function getRes3dJsonUrl(url: string): string {
             return suncom.Common.replacePathExtension(url, "json");
+        }
+
+        /**
+         * 判断是否为fairygui资源
+         */
+        export function isFGuiUrl(url: string): boolean {
+            return url.substr(0, 4) === "fgui";
         }
 
         /**

@@ -9,6 +9,16 @@ module sunui {
         name: string;
 
         /**
+         * 是否为大分辨率
+         */
+        is1920x1080?: boolean;
+
+        /**
+         * 弹框大小
+         */
+        winSize?: PopupWinSizeEnum;
+
+        /**
          * 父级对象
          */
         parent?: Laya.Node;

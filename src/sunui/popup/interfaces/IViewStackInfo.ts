@@ -12,7 +12,7 @@ module sunui {
         /**
          * 遮罩对象
          */
-        mask: Laya.Image;
+        mask: Laya.Image | fairygui.GLoader;
 
         /**
          * 缓动信息

@@ -638,6 +638,12 @@ declare module suncom {
         function removeItemsFromArray<T>(items: T[], array: T[]): void;
 
         /**
+         * 复制数据对象
+         * export
+         */
+        function copy(data: any, deep?: boolean ): any ;
+
+        /**
          * 判断深度相等
          */
         function isEqual(oldData: any, newData: any, strict: boolean): boolean;

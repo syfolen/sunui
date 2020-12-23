@@ -31,12 +31,13 @@ module sunui {
         constructor() {
             super();
             M.sceneLayer = new SceneLayer();
-            if (Laya.Scene3D === void 0) {
-                M.viewLayer = new ViewLayerLaya2D();
-            }
-            else {
-                M.viewLayer = new ViewLayerLaya3D();
-            }
+            // if (Laya.Scene3D === void 0) {
+            //     M.viewLayer = new ViewLayerLaya2D();
+            // }
+            // else {
+            //     M.viewLayer = new ViewLayerLaya3D();
+            // }
+            M.viewLayer = new ViewLayerLayaFui();
 
             // 启动缓动服务
             suncom.DBService.put(-1, new TweenService()).run();
@@ -101,7 +102,7 @@ module sunui {
          * 获取2D场景对象
          * export
          */
-        get scene2d(): Laya.Scene {
+        get scene2d(): Laya.Scene | fairygui.GComponent {
             return M.sceneLayer.scene2d;
         }
 

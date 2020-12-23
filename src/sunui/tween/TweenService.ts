@@ -38,7 +38,7 @@ module sunui {
             for (let mod: suncore.ModuleEnum = 0; mod < suncore.ModuleEnum.MAX; mod++) {
                 if (suncore.System.isModulePaused(mod) === false) {
                     for (let i: number = 0; i < tweens.length; i++) {
-                        const tween: Tween = tweens.length[i];
+                        const tween: Tween = tweens[i];
                         if (tween.var_mod === mod) {
                             let timeLeft: number = 1;
                             while (timeLeft > 0 && tween.var_canceled === false) {

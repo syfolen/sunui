@@ -6,7 +6,7 @@ module sunui {
      * 1. 一个url仅锁定一个资源
      * 2. 释放3d资源json配置文件时会同时释放其所有的关联资源
      */
-    export namespace UrlLocker {
+    export namespace RES {
 
         /**
          * 锁定Url
@@ -46,6 +46,10 @@ module sunui {
             if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
                 suncom.Logger.trace(suncom.DebugMode.ANY, `clearResUrl:${url}`);
             }
+            // 销毁fairygui资源
+            if (Resource.isFGuiUrl(url) === true) {
+                return fairygui.UIPackage.removePackage(url);
+            }
             // 销毁自定义缓存
             let item: any = M.cacheMap[url] || null;
             if (item !== null) {
@@ -82,10 +86,10 @@ module sunui {
             if (Resource.isRes3dUrl(url) === true && Resource.getRes3dJsonUrl(url) === url) {
                 const urls: string[] = Resource.getAssetUrlsByRes3dJson(Laya.loader.getRes(url));
                 for (let i: number = 0; i < urls.length; i++) {
-                    UrlLocker.clearResByUrl(urls[i]);
+                    RES.clearResByUrl(urls[i]);
                 }
             }
-            UrlLocker.clearResByUrl(url);
+            RES.clearResByUrl(url);
         }
     }
 }

@@ -139,7 +139,6 @@ module sunui {
             action.complete = complete;
             action.time = suncore.System.getModuleTimestamp(this.$var_mod);
             action.duration = duration;
-            this.$func_addAction(action);
 
             // 解析动作列表
             for (let i: number = 0; i < keys.length; i++) {
@@ -162,6 +161,10 @@ module sunui {
                 }
                 action.clips.push(clip);
             }
+            if (action.update !== null) {
+                action.update.run();
+            }
+            this.$func_addAction(action);
         }
 
         /**

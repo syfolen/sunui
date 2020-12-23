@@ -75,41 +75,25 @@ module sunui {
 			if (res === null || this.$totalSize === -1) {
 				this.$totalSize = 1;
 			}
-			// 对于图集资源，大小视为altas和png的大小总和
+			// 对于图集资源，大小视为 2M
 			else if (suncom.Common.getFileExtension(this.$url) === "atlas") {
-				const png: Laya.Texture2D = Laya.loader.getRes(suncom.Common.replacePathExtension(this.$url, "png")) || null;
-				const size: number = (png === null ? 0 : png["gpuMemory"]) || 1;
-				this.$totalSize = size + this.$getStringSize(Laya.loader.getRes(this.$url) || null);
+				this.$totalSize = 2 * 1024 * 1024;
 			}
+			// 对于图片资源，大小视为 64K
 			else if (suncom.Common.getFileExtension(this.$url) === "png" || suncom.Common.getFileExtension(this.$url) === "jpg") {
-				const png: Laya.Texture = Laya.loader.getRes(suncom.Common.replacePathExtension(this.$url, "png")) || null;
-				this.$totalSize = (png === null ? 0 : png.bitmap["gpuMemory"]) || 1;
+				this.$totalSize = 64 * 1024;
 			}
+			// 对于JSON资源，大小视为 1K
 			else if (suncom.Common.getFileExtension(this.$url) === "json") {
-				this.$totalSize = this.$getStringSize(Laya.loader.getRes(this.$url) || null);
+				this.$totalSize = 1024;
 			}
+			// 对于龙骨资源，大小视为 1M
 			else if (suncom.Common.getFileExtension(this.$url) === "sk") {
-				const sk: ArrayBuffer = res as ArrayBuffer;
-				this.$totalSize = sk.byteLength;
+				this.$totalSize = 1024 * 1024;
 			}
+			// 对于3D资源，大小视为 256K
 			else if (suncom.Common.getFileExtension(this.$url) === "lh") {
-				const json: IRes3dJsonFile = Laya.loader.getRes(suncom.Common.replacePathExtension(this.$url, "json"));
-				const urls: string[] = Resource.getAssetUrlsByRes3dJson(json);
-				for (let i: number = 0; i < urls.length; i++) {
-					const url: string = urls[i];
-					const data: any = Laya.loader.getRes(url) || null;
-					if (data["gpuMemory"] > 0) {
-						this.$totalSize += data["gpuMemory"];
-					}
-					else {
-						try {
-							this.$totalSize += this.$getStringSize(data);
-						}
-						catch (error) {
-							this.$totalSize += 1;
-						}
-					}
-				}
+				this.$totalSize = 256 * 1024;
 			}
 			else {
 				// 未知类型的预加载对象

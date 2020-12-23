@@ -28,12 +28,12 @@ module sunui {
         /**
          * 创建遮罩
          */
-        abstract createMask(view: IView, props: IViewProps): Laya.Image;
+        abstract createMask(view: IView, props: IViewProps): Laya.Image | fairygui.GLoader;
 
         /**
          * 销毁遮罩
          */
-        abstract destroyMask(mask: Laya.Image): void;
+        abstract destroyMask(mask: Laya.Image | fairygui.GLoader): void;
 
         /**
          * 执行视图创建成功的回调
@@ -106,7 +106,7 @@ module sunui {
             this.onViewRemove(info.view);
 
             this.removeChild(info.view);
-            this.removeChild(info.mask);
+            this.removeChild(info.mask as IView);
 
             if (info.keepNode === false) {
                 this.destroyView(info.view);
