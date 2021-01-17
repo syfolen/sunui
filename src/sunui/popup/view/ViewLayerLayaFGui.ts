@@ -31,7 +31,7 @@ module sunui {
         createMask(view: IView, props: IViewProps): fairygui.GLoader {
             const mask: fairygui.GLoader = new fairygui.GLoader();
             mask.url = "ui://Public_Resource/B_bantoumingbeijing";
-            mask.fill = fairygui.LoaderFillType.ScaleFree
+            mask.fill = fairygui.LoaderFillType.ScaleFree;
             mask.setSize(suncom.Global.width, suncom.Global.height);
 
             if (props.flags & PopupFlagEnum.TRANSPARENT) {

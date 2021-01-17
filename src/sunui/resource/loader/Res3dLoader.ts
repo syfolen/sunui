@@ -10,7 +10,7 @@ module sunui {
          */
         protected $doLoad(): void {
             const url: string = Resource.getRes3dJsonUrl(this.$url);
-            const loaded: boolean = Laya.loader.getRes(this.$url) === void 0 ? false : true;
+            const loaded: boolean = Laya.loader.getRes(this.$url) ? true : false;
             if (suncom.Common.getFileExtension(this.$url) === "ls" || loaded === true) {
                 this.$loadAssets([url]);
             }

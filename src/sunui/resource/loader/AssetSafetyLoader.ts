@@ -3,7 +3,8 @@ module sunui {
     /**
      * 资源加载器（安全）
      * 说明：
-     * 2. 此类的设计主要用于确保资源加载必然成功
+     * 1. 此类的设计主要用于确保资源加载必然成功
+     * 2. 此对象持有对资源的引用，可确保资源不会被重复加载
      */
     export class AssetSafetyLoader extends puremvc.Notifier {
         /**
@@ -24,7 +25,7 @@ module sunui {
         /**
          * 加载重试机
          */
-        private $retryer: Retryer = new Retryer(RetryMethodEnum.TERMINATE, suncom.Handler.create(this, this.$onRetryConfirmed), "资源加载失败，点击确定重新尝试！");
+        private $retryer: Retryer = new Retryer(RetryMethodEnum.TERMINATE, suncom.Handler.create(this, this.$onRetryConfirmed), "资源加载失败！");
 
         constructor(url: string, complete: suncom.IHandler) {
             super();
@@ -32,19 +33,6 @@ module sunui {
             this.$url = url;
             this.$complete = complete;
             this.$doLoad();
-        }
-
-        /**
-         * 销毁加载器
-         */
-        destroy(): void {
-            if (this.$destroyed === true) {
-                return;
-            }
-            super.destroy();
-            this.$retryer.cancel();
-            this.$loader !== null && this.$loader.destroy();
-            Resource.unlock(this.$url);
         }
 
         /**
@@ -79,7 +67,20 @@ module sunui {
             else {
                 this.$retryer.run(1000, suncom.Handler.create(this, this.$doLoad), 2);
             }
-            this.$loader = null;
+        }
+
+        /**
+         * 销毁加载器
+         */
+        destroy(): void {
+            if (this.$destroyed === true) {
+                return;
+            }
+            super.destroy();
+            this.facade.removeObserver(NotifyKey.ASSET_SAFETY_LOADER_RETRY, this.$onAssetSafetyLoaderRetry, this);
+            this.$loader.destroy();
+            this.$retryer.cancel();
+            Resource.unlock(this.$url);
         }
 
         /**
@@ -107,11 +108,8 @@ module sunui {
             }
         }
 
-        /**
-         * 获取回调方法
-         */
-        get complete(): suncom.IHandler {
-            return this.$complete;
+        get progress(): number {
+            return this.$loader.progress;
         }
     }
 }

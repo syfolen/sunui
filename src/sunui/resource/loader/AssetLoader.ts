@@ -5,11 +5,6 @@ module sunui {
      */
     export abstract class AssetLoader extends puremvc.Notifier {
         /**
-         * 是否正在加载
-         */
-        private $loading: boolean = false;
-
-        /**
          * 加载回调
          */
         private $complete: suncom.IHandler = null;
@@ -54,8 +49,7 @@ module sunui {
          * 开始加载
          */
         load(): void {
-            if (this.$loading === false && this.$destroyed === false) {
-                this.$loading = true;
+            if (this.$destroyed === false) {
                 this.$doLoad();
             }
         }
@@ -103,7 +97,17 @@ module sunui {
                 this.$complete.runWith(ok);
             }
             this.destroy();
-            this.$loading = false;
+        }
+
+        /**
+         * 获取加载进度
+         */
+        get progress(): number {
+            let value: number = 0;
+            for (let i: number = 0; i < this.$loaders.length; i++) {
+                value += this.$loaders[i].progress;
+            }
+            return value / this.$loaders.length;
         }
     }
 }

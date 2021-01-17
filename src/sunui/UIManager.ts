@@ -42,7 +42,7 @@ module sunui {
             // 启动缓动服务
             suncom.DBService.put(-1, new TweenService()).run();
             // 启动资源加载管理服务
-            suncom.DBService.put(-1, new ResourceService()).run();
+            suncom.DBService.put(-1, new LoadingService()).run();
 
             this.facade.registerCommand(NotifyKey.SHOW_POPUP, ShowPopupCommand, suncom.EventPriorityEnum.OSL);
             this.facade.registerCommand(NotifyKey.CLOSE_POPUP, ClosePopupCommand, suncom.EventPriorityEnum.OSL);

@@ -4,7 +4,7 @@ module sunui {
      * 重试机制
      * export
      */
-    export class Retryer extends puremvc.Notifier {
+    export class Retryer extends puremvc.Notifier implements IRetryer {
         /**
          * 响应重试机制的模块
          */
@@ -51,8 +51,8 @@ module sunui {
         private $var_prompting: boolean = false;
 
         /**
-         * @confirmHandler: 若重试超过最大次数，则会执行此回调
-         * @options: [ConfirmOptionValueEnum, string, ...]
+         * @confirmHandler: 若重试超过最大次数，则会执行此回调，默认为: null
+         * @options: [ConfirmOptionValueEnum, string, ...]，默认为: null
          * 说明：
          * 1. method允许值为 RetryMethodEnum 或 suncore.ModuleEnum 或同时输入这两种值
          * 2. 若未输入 RetryMethodEnum ，则默认值为 RetryMethodEnum.AUTO

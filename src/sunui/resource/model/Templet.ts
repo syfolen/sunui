@@ -24,6 +24,11 @@ module sunui {
          */
         private $loaders: AssetSafetyLoader[] = [];
 
+        /**
+         * 加载进度
+         */
+        private $progress: number = -1;
+
         constructor(id: number, urls: string[], handler: suncom.IHandler) {
             super();
             this.$id = id;
@@ -38,6 +43,40 @@ module sunui {
                 const loader: AssetSafetyLoader = new AssetSafetyLoader(url, handler);
                 this.$loaders.push(loader);
             }
+            this.facade.registerObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
+        }
+
+        /**
+         * 资源加载成功回调
+         */
+        private $onResourceCreated(url: string): void {
+            if (this.$destroyed === true) {
+                return;
+            }
+            this.$doneList.push(url);
+            if (this.$doneList.length < this.$loaders.length) {
+                return;
+            }
+            this.facade.removeObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
+            this.$handler.runWith([this.$id, 1]);
+        }
+
+        /**
+         * 通知加载进度
+         */
+        private $onEnterFrame(): void {
+            let progress: number = 0;
+            for (let i: number = 0; i < this.$loaders.length; i++) {
+                progress += this.$loaders[i].progress;
+            }
+            progress /= this.$loaders.length;
+            if (this.$progress === progress) {
+                return;
+            }
+            this.$progress = progress;
+            if (this.$handler.method.length === 2) {
+                this.$handler.runWith([this.$id, this.$progress]);
+            }
         }
 
         /**
@@ -48,30 +87,18 @@ module sunui {
                 return;
             }
             super.destroy();
+
+            this.facade.removeObserver(suncore.NotifyKey.ENTER_FRAME, this.$onEnterFrame, this);
             // 资源组释放执行函数，此方法由release方法异步调用执行，以避免create回调中的释放请求不生效的问题
             suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, this, this.$releaseAllResources);
-        }
-
-        /**
-         * 资源加载成功回调
-         */
-        private $onResourceCreated(url: string): void {
-            this.$doneList.push(url);
-            if (this.$doneList.length < this.$loaders.length) {
-                return;
-            }
-            if (this.$destroyed === true) {
-                return;
-            }
-            this.$handler.runWith([this.$id]);
         }
 
         /**
          * 释放所有资源
          */
         private $releaseAllResources(): void {
-            for (let i: number = 0; i < this.$loaders.length; i++) {
-                this.$loaders[i].destroy();
+            while (this.$loaders.length > 0) {
+                this.$loaders.pop().destroy();
             }
         }
     }

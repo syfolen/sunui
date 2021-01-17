@@ -11,6 +11,7 @@ module sunui {
          */
         export let res3dRoot: string = null;
 
+
         /**
          * 设置资源的加载速度
          * export
@@ -85,15 +86,14 @@ module sunui {
          * 1. 建议将业务逻辑的初始化代码放在资源加载完成之后，这样的话，在加载被取消时，也不需要对初始化进行撤销
          * export
          */
-        export function prepare(urls: string[], method: (id: number) => void, caller: Object): number {
+        export function prepare(urls: string[], method: (id: number, progress?: number) => void, caller: Object): number {
             let handler: suncom.IHandler = null;
             if (method === null) {
-                handler = suncom.Handler.create(null, (id: number): void => { });
+                handler = suncom.Handler.create(null, (id: number): void => { }, void 0, false);
             }
             else {
-                handler = suncom.Handler.create(caller, method);
+                handler = suncom.Handler.create(caller, method, void 0, false);
             }
-
             const id: number = suncom.Common.createHashId();
             M.templets[id] = new Templet(id, urls, handler);
             return id;

@@ -3,8 +3,7 @@ module sunui {
     /**
      * URL加载器（安全）
      * 说明：
-     * 1. 该加载器的每个实例均仅只允许被执行一次
-     * 2. 此类的设计主要用于确保正在执行加载的资源不会被清理
+     * 1. 此类的设计主要用于确保正在执行加载的资源不会被清理
      */
     export class UrlSafetyLoader extends puremvc.Notifier {
         /**
@@ -13,19 +12,14 @@ module sunui {
         private $url: string = null;
 
         /**
-         * 下载限制器
-         */
-        private $limiter: UrlDownloadLimiter = null;
-
-        /**
          * 加载回调
          */
         private $complete: suncom.IHandler = null;
 
         /**
-         * 是否正在加载
+         * 加载进度 
          */
-        private $loading: boolean = false;
+        protected $progress: number = 0;
 
         constructor(url: string, complete: suncom.IHandler) {
             super();
@@ -38,54 +32,40 @@ module sunui {
          * 开始加载
          */
         load(): void {
-            if (this.$loading === false && this.$destroyed === false) {
-                this.$loading = true;
-                RES.lock(this.$url);
-                if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
-                    suncom.Logger.trace(suncom.DebugMode.ANY, `load ${this.$url}`);
-                }
-                if (Resource.isFGuiUrl(this.$url) === true) {
-                    fairygui.UIPackage.loadPackage(this.$url, Laya.Handler.create(this, this.$onComplete));
-                }
-                else if (Resource.isRes3dUrl(this.$url) === false || Resource.getRes3dJsonUrl(this.$url) === this.$url) {
-                    Laya.loader.load(this.$url, Laya.Handler.create(this, this.$onComplete));
-                }
-                else {
-                    Laya.loader.create(this.$url, Laya.Handler.create(this, this.$onComplete));
-                }
-                if (M.downloadSpeed !== ResourceDownloadSpeedEnum.NONE) {
-                    this.$limiter = new UrlDownloadLimiter(this.$url, suncom.Handler.create(this, this.$onDownloaded));
-                }
+            RES.lock(this.$url);
+            if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+                suncom.Logger.log(suncom.DebugMode.ANY, `load ${this.$url}`);
+            }
+            const complete: Laya.Handler = Laya.Handler.create(this, this.$onComplete);
+            const progress: Laya.Handler = Laya.Handler.create(this, this.$onProgress, void 0, false);
+            if (Resource.isFGuiUrl(this.$url) === true) {
+                fairygui.UIPackage.loadPackage(this.$url, complete, progress);
+            }
+            else if (Resource.isRes3dUrl(this.$url) === false || Resource.getRes3dJsonUrl(this.$url) === this.$url) {
+                Laya.loader.load(this.$url, complete, progress);
+            }
+            else {
+                Laya.loader.create(this.$url, complete, progress);
             }
         }
 
         /**
          * 加载结束回调
          */
-        private $onComplete(data: any): void {
+        protected $onComplete(data: any): void {
             if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
-                suncom.Logger.trace(suncom.DebugMode.ANY, `load ${this.$url} complete`);
+                suncom.Logger.log(suncom.DebugMode.ANY, `load ${this.$url} complete`);
             }
-            if (this.$limiter === null) {
-                if (this.$destroyed === false) {
-                    this.$destroyed = true;
-                    this.$complete.runWith([data === null ? false : true, this.$url]);
-                }
-                this.facade.sendNotification(NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE, this);
-                RES.unlock(this.$url);
-                this.$loading = false;
-            }
-            else {
-                this.$limiter.updateDownloadSize(data);
-            }
+            this.$complete.runWith([data ? true : false, this.$url]);
+            this.facade.sendNotification(NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE, this);
+            RES.unlock(this.$url);
         }
 
         /**
-         * 加载结束
+         * 加载进度
          */
-        private $onDownloaded(data: any): void {
-            this.$limiter = null;
-            this.$onComplete(data);
+        protected $onProgress(value: number): void {
+            this.$progress = value;
         }
 
         /**
@@ -96,10 +76,10 @@ module sunui {
         }
 
         /**
-         * 是否己销毁
+         * 获取加载进度
          */
-        get destroyed(): boolean {
-            return this.$destroyed;
+        get progress(): number {
+            return this.$progress;
         }
     }
 }

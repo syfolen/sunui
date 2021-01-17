@@ -14,7 +14,7 @@ module sunui {
         export function lock(url: string): void {
             const reference: number = M.references[url] || 0;
             if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
-                suncom.Logger.trace(suncom.DebugMode.ANY, `reference:${reference}, lock:${url}`);
+                suncom.Logger.log(suncom.DebugMode.ANY, `reference:${reference}, lock:${url}`);
             }
             M.references[url] = reference + 1;
         }
@@ -27,7 +27,7 @@ module sunui {
         export function unlock(url: string): void {
             const reference: number = M.references[url] || 0;
             if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
-                suncom.Logger.trace(suncom.DebugMode.ANY, `reference:${reference}, unlock:${url}`);
+                suncom.Logger.log(suncom.DebugMode.ANY, `reference:${reference}, unlock:${url}`);
             }
             suncom.Test.expect(reference).interpret(`尝试解锁不存在的资源 url：${url}`).toBeGreaterThan(0);
             if (reference > 1) {
@@ -44,7 +44,7 @@ module sunui {
          */
         export function clearResByUrl(url: string): void {
             if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
-                suncom.Logger.trace(suncom.DebugMode.ANY, `clearResUrl:${url}`);
+                suncom.Logger.log(suncom.DebugMode.ANY, `clearResUrl:${url}`);
             }
             // 销毁fairygui资源
             if (Resource.isFGuiUrl(url) === true) {

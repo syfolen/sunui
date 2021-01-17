@@ -3,27 +3,21 @@ module sunui {
     /**
      * 资源加载管理服务
      */
-    export class ResourceService extends suncore.BaseService {
-        /**
-         * 允许同时加载的最大个数
-         * export
-         */
-        static readonly MAX_LOAD_COUNT: number = 5;
-
+    export class LoadingService extends suncore.BaseService {
         /**
          * 待执行的UrlSafetyLoader
          */
         private $undoList: UrlSafetyLoader[] = [];
 
         /**
-         * 正在执行的UrlSafetyLoader
-         */
-        private $loadingList: UrlSafetyLoader[] = [];
-
-        /**
          * 己询问资源是否重新加载
          */
         private $isRetryPrompting: boolean = false;
+
+        /**
+         * 正在加载的 URL 集合
+         */
+        private $loadingMap: { [url: string]: boolean } = {};
 
         /**
          * 启动回调
@@ -52,7 +46,7 @@ module sunui {
         private $onUrlSafetyLoaderCreated(loader: UrlSafetyLoader): void {
             this.$undoList.unshift(loader);
             if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
-                suncom.Logger.trace(suncom.DebugMode.ANY, `create loader for url ${loader.url}, loading list length:${this.$loadingList.length}, undo list length:${this.$undoList.length}`);
+                suncom.Logger.log(suncom.DebugMode.ANY, `create loader for url ${loader.url}, loading list length:${M.loaders.length}, undo list length:${this.$undoList.length}`);
             }
             this.$next();
         }
@@ -61,14 +55,13 @@ module sunui {
          * UrlSafetyLoader加载完成通知回调
          */
         private $onUrlSafetyLoaderComplete(loader: UrlSafetyLoader): void {
-            const index: number = this.$loadingList.indexOf(loader);
+            const index: number = M.loaders.indexOf(loader);
             suncom.Test.expect(index).toBeGreaterOrEqualThan(0);
-
-            this.$loadingList.splice(index, 1);
+            M.loaders.splice(index, 1);
+            delete this.$loadingMap[loader.url];
             if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
-                suncom.Logger.trace(suncom.DebugMode.ANY, `remove loader for url ${loader.url}, loading list length:${this.$loadingList.length}, undo list length:${this.$undoList.length}`);
+                suncom.Logger.log(suncom.DebugMode.ANY, `remove loader for url ${loader.url}, loading list length:${M.loaders.length}, undo list length:${this.$undoList.length}`);
             }
-
             this.$next();
         }
 
@@ -76,42 +69,32 @@ module sunui {
          * 加载下一个
          */
         private $next(): void {
-            while (this.$undoList.length > 0 && this.$loadingList.length < ResourceService.MAX_LOAD_COUNT) {
+            while (this.$undoList.length > 0 && M.loaders.length < Laya.loader.maxLoader) {
                 let ok: boolean = false;
                 for (let i: number = this.$undoList.length - 1; i > -1; i--) {
                     const loader: UrlSafetyLoader = this.$undoList[i];
+                    const url: string = loader.url;
+                    if (this.$loadingMap[url] === true) {
+                        continue;
+                    }
+                    this.$undoList.splice(i, 1);
                     if (loader.destroyed === true) {
-                        this.$undoList.splice(i, 1);
                         continue;
                     }
-                    if (this.$isUrlInLoading(loader.url) === true) {
-                        continue;
-                    }
-                    if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
-                        suncom.Logger.trace(suncom.DebugMode.ANY, `load next url ${loader.url}, loading list length:${this.$loadingList.length} + 1`);
-                    }
+                    this.$loadingMap[url] = true;
+
                     ok = true;
+                    M.loaders.push(loader);
+                    if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
+                        suncom.Logger.log(suncom.DebugMode.ANY, `load next url ${loader.url}, loading list length:${M.loaders.length}`);
+                    }
                     loader.load();
-                    this.$loadingList.push(loader);
                     break;
                 }
                 if (ok === false) {
                     break;
                 }
             }
-        }
-
-        /**
-         * 判断被请求的Url是否正在加载
-         */
-        private $isUrlInLoading(url: string): boolean {
-            for (let i: number = 0; i < this.$loadingList.length; i++) {
-                const loader: UrlSafetyLoader = this.$loadingList[i];
-                if (loader.url === url) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         /**
