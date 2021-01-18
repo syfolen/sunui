@@ -32,7 +32,7 @@ module sunui {
          * 开始加载
          */
         load(): void {
-            RES.lock(this.$url);
+            RES.addReference(this.$url);
             if (suncom.Global.debugMode & suncom.DebugMode.DEBUG) {
                 suncom.Logger.log(suncom.DebugMode.ANY, `load ${this.$url}`);
             }
@@ -58,7 +58,7 @@ module sunui {
             }
             this.$complete.runWith([data ? true : false, this.$url]);
             this.facade.sendNotification(NotifyKey.ON_URL_SAFETY_LOADER_COMPLETE, this);
-            RES.unlock(this.$url);
+            RES.removeReference(this.$url);
         }
 
         /**

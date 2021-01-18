@@ -15,7 +15,7 @@ module sunui {
                 this.$loadAssets([url]);
             }
             else {
-                this.$loaders.push(new UrlSafetyLoader(url, suncom.Handler.create(this, this.$onUrlLoaded)));
+                this.$loaders.push(new UrlSafetyPuppetLoader(url, suncom.Handler.create(this, this.$onUrlLoaded)));
             }
         }
 

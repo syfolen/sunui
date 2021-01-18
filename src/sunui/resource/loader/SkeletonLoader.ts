@@ -24,7 +24,7 @@ module sunui {
                 }
                 suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, this, this.$onTempletCreated);
                 // 加锁防止Laya.Event.COMPLETE事件不被回调
-                Resource.lock(this.$url);
+                RES.lock(this.$url);
             }
             else {
                 this.$onComplete(false);
@@ -39,7 +39,7 @@ module sunui {
                 const templet: Laya.Templet = M.cacheMap[this.$url];
                 this.$onComplete(true);
             }
-            Resource.unlock(this.$url);
+            RES.unlock(this.$url);
         }
     }
 }

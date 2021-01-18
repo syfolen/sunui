@@ -15,14 +15,14 @@ module sunui {
         private $handler: suncom.IHandler = null;
 
         /**
-         * 完成加载的资源列表
-         */
-        private $doneList: string[] = [];
-
-        /**
          * 加载器列表
          */
         private $loaders: AssetSafetyLoader[] = [];
+
+        /**
+         * 完成加载的资源列表
+         */
+        private $doneList: string[] = [];
 
         /**
          * 加载进度

@@ -11,71 +11,12 @@ module sunui {
          */
         export let res3dRoot: string = null;
 
-
         /**
          * 设置资源的加载速度
          * export
          */
         export function setDownloadSpeed(speed: ResourceDownloadSpeedEnum): void {
             M.downloadSpeed = speed;
-        }
-
-        /**
-         * 锁定资源
-         * 说明：
-         * 1. 每次请求锁定资源，则资源的引用次数会-1
-         * 2. 若为3d资源，则应当同时锁定资源包的配置文件
-         * export
-         */
-        export function lock(url: string): void {
-            // 禁止单独锁定3d资源配置文件
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                if (Resource.isRes3dUrl(url) === true && Resource.getRes3dJsonUrl(url) === url) {
-                    return;
-                }
-            }
-            const ext: string = suncom.Common.getFileExtension(url) || "";
-            const str: string = url.substr(0, url.length - ext.length);
-
-            const urls: string[] = [url];
-            // 3d资源需要同时锁定json配置文件
-            if (Resource.isRes3dUrl(url) === true) {
-                urls.push(str + "json");
-            }
-
-            for (let i: number = 0; i < urls.length; i++) {
-                RES.lock(urls[i]);
-            }
-        }
-
-        /**
-         * 解锁资源
-         * 说明：
-         * 1. 每次请求解锁资源时，资源的引用次数会+1
-         * 2. 若为3d资源，则应当同时解锁资源包的配置文件
-         * 3. 当2d资源的引用次数为0时，资源会自动释放，当前的加载亦会取消
-         * 4. 3d资源只有在资源包的配置文件的引用次数为0时才会释放
-         * export
-         */
-        export function unlock(url: string): void {
-            // 禁止单独解锁3D资源配置文件
-            if (suncom.Global.debugMode & suncom.DebugMode.ENGINE) {
-                if (Resource.isRes3dUrl(url) === true && Resource.getRes3dJsonUrl(url) === url) {
-                    return;
-                }
-            }
-            const ext: string = suncom.Common.getFileExtension(url) || "";
-            const str: string = url.substr(0, url.length - ext.length - 1);
-
-            const urls: string[] = [url];
-            // 3d资源需要解锁json配置文件
-            if (Resource.isRes3dUrl(url) === true) {
-                urls.push(str + "json");
-            }
-
-            for (let i: number = 0; i < urls.length; i++) {
-                RES.unlock(urls[i]);
-            }
         }
 
         /**
@@ -137,9 +78,9 @@ module sunui {
         }
 
         /**
-         * 立即创建3d对象
+         * 立即创建 3d 对象
          * 说明：
-         * 1. 同createSync
+         * 1. 同 createSync
          * export
          */
         export function createRes3dSync(name: string): any {
@@ -154,13 +95,6 @@ module sunui {
             const prefab: Laya.Prefab = new Laya.Prefab();
             prefab.json = Laya.loader.getRes(url);
             return prefab.create();
-        }
-
-        /**
-         * 根据Url清理资源
-         */
-        export function clearResByUrl(url: string): void {
-            RES.clearResByUrl(url);
         }
 
         /**
@@ -208,23 +142,6 @@ module sunui {
                 name += ".lh";
             }
             return Resource.getRes3dPackRoot(suncom.Common.getFileName(name)) + name;
-        }
-
-        /**
-         * 根据JSON配置获取所有3D资源列表
-         */
-        export function getAssetUrlsByRes3dJson(json: IRes3dJsonFile): string[] {
-            const urls: string[] = [];
-            const root: string = Resource.getRes3dPackRoot(json.pack);
-
-            for (let i: number = 0; i < json.files.length; i++) {
-                urls.push(root + json.files[i]);
-            }
-            for (let i: number = 0; i < json.resources.length; i++) {
-                urls.push(root + json.resources[i]);
-            }
-
-            return urls;
         }
 
         /**

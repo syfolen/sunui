@@ -28,7 +28,7 @@ module sunui {
             super();
             this.$url = url;
             this.$complete = complete;
-            Resource.lock(this.$url);
+            RES.lock(this.$url);
         }
 
         /**
@@ -42,7 +42,7 @@ module sunui {
             for (let i: number = 0; i < this.$loaders.length; i++) {
                 this.$loaders[i].destroy();
             }
-            Resource.unlock(this.$url);
+            RES.unlock(this.$url);
         }
 
         /**
@@ -65,7 +65,7 @@ module sunui {
         protected $loadAssets(urls: string[]): void {
             this.$doneCount = this.$loaders.length;
             for (let i: number = 0; i < urls.length; i++) {
-                this.$loaders.push(new UrlSafetyLoader(urls[i], suncom.Handler.create(this, this.$onLoadAsset)));
+                this.$loaders.push(new UrlSafetyPuppetLoader(urls[i], suncom.Handler.create(this, this.$onLoadAsset)));
             }
         }
 
