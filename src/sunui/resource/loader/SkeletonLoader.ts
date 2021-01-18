@@ -17,14 +17,8 @@ module sunui {
          */
         protected $onAssetsLoaded(ok: boolean): void {
             if (ok === true) {
-                let templet: Laya.Templet = M.cacheMap[this.$url] || null;
-                if (templet === null) {
-                    templet = M.cacheMap[this.$url] = new Laya.Templet();
-                    templet.loadAni(this.$url);
-                }
-                suncore.System.addMessage(suncore.ModuleEnum.SYSTEM, suncore.MessagePriorityEnum.PRIORITY_0, this, this.$onTempletCreated);
-                // 加锁防止Laya.Event.COMPLETE事件不被回调
-                RES.lock(this.$url);
+                Resource.lock(this.$url);
+                new Laya.Skeleton().load(this.$url, Laya.Handler.create(this, this.$onSkeletonCreated));
             }
             else {
                 this.$onComplete(false);
@@ -34,12 +28,12 @@ module sunui {
         /**
          * 龙骨创建完成
          */
-        private $onTempletCreated(): void {
+        private $onSkeletonCreated(skeleton: Laya.Skeleton): void {
+            skeleton.destroy();
             if (this.destroyed === false) {
-                const templet: Laya.Templet = M.cacheMap[this.$url];
                 this.$onComplete(true);
             }
-            RES.unlock(this.$url);
+            Resource.unlock(this.$url);
         }
     }
 }

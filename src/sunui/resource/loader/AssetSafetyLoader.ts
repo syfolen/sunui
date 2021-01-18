@@ -29,7 +29,7 @@ module sunui {
 
         constructor(url: string, complete: suncom.IHandler) {
             super();
-            RES.lock(url);
+            Resource.lock(url);
             this.$url = url;
             this.$complete = complete;
             this.$doLoad();
@@ -80,7 +80,7 @@ module sunui {
             this.facade.removeObserver(NotifyKey.ASSET_SAFETY_LOADER_RETRY, this.$onAssetSafetyLoaderRetry, this);
             this.$loader.destroy();
             this.$retryer.cancel();
-            RES.unlock(this.$url);
+            Resource.unlock(this.$url);
         }
 
         /**

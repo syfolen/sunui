@@ -20,6 +20,66 @@ module sunui {
         }
 
         /**
+         * 锁定资源，此方法可确保正在使用的资源的安全性
+         * 说明：
+         * 1. 每次请求锁定资源，资源的引用次数会+1
+         * 2. 若为3d资源，则会同时自动锁定关联的资源配置文件
+         * 3. 禁止直接调用此方法来单独锁定3d资源配置文件
+         * export
+         */
+        export function lock(url: string): void {
+            if (suncom.Global.debugMode > 0) {
+                if (Resource.isRes3dUrl(url) === true && Resource.getRes3dJsonUrl(url) === url) {
+                    console.error(`禁止直接调用此方法来单独锁定3d资源配置文件`);
+                    return;
+                }
+            }
+
+            const urls: string[] = [url];
+            // 3d资源需要同时锁定json配置文件
+            if (Resource.isRes3dUrl(url) === true) {
+                const ext: string = suncom.Common.getFileExtension(url);
+                const str: string = url.substr(0, url.length - ext.length);
+                urls.push(str + "json");
+            }
+
+            for (let i: number = 0; i < urls.length; i++) {
+                RES.addReference(urls[i]);
+            }
+        }
+
+        /**
+         * 解锁资源，此方法可确保未在使用的资源不会出现内存泄露问题
+         * 说明：
+         * 1. 每次请求解锁资源时，资源的引用次数会-1
+         * 2. 若为3d资源，则会同时自动解锁关联的资源配置文件
+         * 3. 禁止直接调用此方法来单独解锁3d资源配置文件
+         * 4. 当2d资源的引用次数为0时，资源会自动释放，当前的加载亦会取消
+         * 5. 3d资源只有在资源包的配置文件的引用次数为0时才会释放
+         * export
+         */
+        export function unlock(url: string): void {
+            if (suncom.Global.debugMode > 0) {
+                if (Resource.isRes3dUrl(url) === true && Resource.getRes3dJsonUrl(url) === url) {
+                    console.error(`禁止直接调用此方法来单独解锁3d资源配置文件`);
+                    return;
+                }
+            }
+
+            const urls: string[] = [url];
+            // 3d资源需要同时解锁json配置文件
+            if (Resource.isRes3dUrl(url) === true) {
+                const ext: string = suncom.Common.getFileExtension(url);
+                const str: string = url.substr(0, url.length - ext.length);
+                urls.push(str + "json");
+            }
+
+            for (let i: number = 0; i < urls.length; i++) {
+                RES.removeReference(urls[i]);
+            }
+        }
+
+        /**
          * 资源预加载
          * @method: 预加载完成时，会执行此方法
          * @return: 返回资源组ID

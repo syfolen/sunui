@@ -28,7 +28,6 @@ module sunui {
             super();
             this.$url = url;
             this.$complete = complete;
-            RES.lock(this.$url);
         }
 
         /**
@@ -42,7 +41,6 @@ module sunui {
             for (let i: number = 0; i < this.$loaders.length; i++) {
                 this.$loaders[i].destroy();
             }
-            RES.unlock(this.$url);
         }
 
         /**
