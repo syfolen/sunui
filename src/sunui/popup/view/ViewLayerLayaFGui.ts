@@ -88,21 +88,24 @@ module sunui {
          * 执行视图完成弹出的回调
          */
         onViewOpen(view: IView): void {
-
+            const onOpen: Function = view["onOpen"];
+            onOpen && onOpen.call(view);
         }
 
         /**
          * 执行视图关闭被触发时的回调
          */
         onViewClose(view: IView): void {
-
+            const onClose: Function = view["onClose"];
+            onClose && onClose.call(view);
         }
 
         /**
          * 执行视图从舞台上被移除时的回调（尚未移除）
          */
         onViewRemove(view: IView): void {
-
+            const onRemove: Function = view["onRemove"];
+            onRemove && onRemove.call(view);
         }
     }
 }
