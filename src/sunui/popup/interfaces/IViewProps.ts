@@ -6,14 +6,6 @@ module sunui {
      */
     export interface IViewProps {
         /**
-         * 弹框的时间模块，默认为：suncore.ModuleEnum.CUSTOM
-         * 说明：
-         * 1. 若当前mod为CUSTOM，但该模块处于停止状态，则此值自动变更为SYSTEM
-         * export
-         */
-        mod?: suncore.ModuleEnum;
-
-        /**
          * 坐标
          * export
          */
@@ -36,15 +28,6 @@ module sunui {
         ease?: Function;
 
         /**
-         * 背景是否通透，默认为：false
-         * 说明：
-         * 1. 此属性己弃用，将在未来的某个版本移除，请知悉
-         * 2. 优先级次于PopupFlagEnum.TRANSPARENT标记
-         * export
-         */
-        trans?: boolean;
-
-        /**
          * 标记集合（多个标记允许并存）
          * export
          */
@@ -61,6 +44,12 @@ module sunui {
          * export
          */
         cancelAllowed?: boolean;
+
+        /**
+         * 是否自动销毁，默认为 true
+         * export
+         */
+        autoDestroyed?: boolean;
 
         /**
          * 弹框的左右自适应参数

@@ -10,10 +10,18 @@ module sunui {
                 suncom.Logger.error(suncom.DebugMode.ANY, `${view}[${view.name}] is already popup.`);
                 return;
             }
-            if (props.mod === void 0) { props.mod = suncore.ModuleEnum.CUSTOM; }
             if (props.ease === void 0) { props.ease = Laya.Ease.backOut; }
             if (props.flags === void 0) { props.flags = PopupFlagEnum.NONE; }
             if (props.keepNode === void 0) { props.keepNode = false; }
+
+            if (props.autoDestroyed === void 0) {
+                if (props.autoDestroyed === void 0) {
+                    props.autoDestroyed = true;
+                }
+                else {
+                    props.autoDestroyed = view.autoDestroy;
+                }
+            }
 
             // 默认为: SIMPLY
             if ((props.flags & PopupFlagEnum.SIMPLY) === PopupFlagEnum.SIMPLY) {
@@ -40,7 +48,7 @@ module sunui {
             // 避免props的默认属性不存在
             this.$makeProps(view, props);
             // 由于历史遗留问题，故需要考虑props.trans的值
-            if (props.trans === true && (props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
+            if ((props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
                 suncom.Logger.warn(suncom.DebugMode.ANY, `ViewFacade：props的trans属性己弃用，请使用flags代替！！！`);
                 props.flags |= PopupFlagEnum.TRANSPARENT;
             }

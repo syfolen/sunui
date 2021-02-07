@@ -34,6 +34,11 @@ module sunui {
         zOrder?: UILevel;
 
         /**
+         * 是否自动销毁
+         */
+        autoDestroy?: boolean;
+
+        /**
          * 弹框坐标
          */
         x?: number;
