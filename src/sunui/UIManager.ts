@@ -99,6 +99,14 @@ module sunui {
         }
 
         /**
+         * 场景是否己就绪
+         * export
+         */
+        get ready(): boolean {
+            return M.sceneLayer.ready;
+        }
+
+        /**
          * 获取2D场景对象
          * export
          */

@@ -6,7 +6,7 @@ module sunui {
      */
     export namespace NotifyKey {
         /**
-         * 重试确认请求 { mod: suncore.ModuleEnum, prompt: string, options: IRetryOption[], handler: suncom.IHandler }
+         * 重试确认请求 { prompt: string, options: IRetryOption[], handler: suncom.IHandler }
          * export
          */
         export const RETRY_CONFIRM: string = "sunui.NotifyKey.RETRY_CONFIRM";
@@ -64,6 +64,12 @@ module sunui {
          * depends
          */
         export const EXIT_SCENE: string = "sunui.NotifyKey.EXIT_SCENE";
+
+        /**
+         * 离开场景之前
+         * export
+         */
+        export const BEFORE_LEAVE_SCENE: string = "sunui.NotifyKey.BEFORE_LEAVE_SCENE";
 
         /**
          * 离开场景命令 { none }
@@ -154,5 +160,11 @@ module sunui {
          * 销毁所有逻辑命令
          */
         export const DESTROY_ALL_LOGIC_RUNNABLE: string = "sunui.NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE";
+
+        /**
+         * 场景己就绪 { ready: boolean }
+         * export
+         */
+        export const SCENE_IS_READY: string = "sunui.NotifyKey.SCENE_IS_READY";
     }
 }

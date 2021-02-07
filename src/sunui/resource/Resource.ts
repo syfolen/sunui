@@ -184,6 +184,7 @@ module sunui {
 
         /**
          * 判断是否为fairygui资源
+         * export
          */
         export function isFGuiUrl(url: string): boolean {
             return url.substr(0, 4) === "fgui";
@@ -206,6 +207,7 @@ module sunui {
 
         /**
          * 确认加载列表中的url正确性
+         * 注意：此方法修改和返回的数组均为数据源
          * export
          */
         export function checkLoadList(urls: string[]): string[] {

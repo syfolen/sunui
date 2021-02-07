@@ -104,8 +104,7 @@ module sunui {
          * 执行视图从舞台上被移除时的回调（尚未移除）
          */
         onViewRemove(view: IView): void {
-            const onRemove: Function = view["onRemove"];
-            onRemove && onRemove.call(view);
+
         }
     }
 }

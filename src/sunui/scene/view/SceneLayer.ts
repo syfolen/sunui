@@ -76,6 +76,7 @@ module sunui {
             this.$ready = true;
             this.$scene2d = scene2d || null;
             this.$scene3d = scene3d || null;
+            this.facade.sendNotification(NotifyKey.SCENE_IS_READY, true);
             this.facade.sendNotification(suncore.NotifyKey.START_TIMELINE, [suncore.ModuleEnum.CUSTOM, false]);
         }
 
@@ -97,6 +98,7 @@ module sunui {
         private $onLeaveScene(info: ISceneInfo): void {
             info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new info.uniCls(info, this.$data));
             this.facade.sendNotification(NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE);
+            this.facade.sendNotification(NotifyKey.BEFORE_LEAVE_SCENE);
             this.facade.sendNotification(NotifyKey.LEAVE_SCENE);
             this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, [this.$scene2d, this.$scene3d]);
             // info.scene2d !== null && RES.clearResByUrl(info.scene2d);
@@ -121,6 +123,7 @@ module sunui {
                 return false;
             }
             this.$ready = false;
+            this.facade.sendNotification(NotifyKey.SCENE_IS_READY, false);
 
             this.$sceneName != 0 && this.$exitScene();
 
@@ -137,6 +140,7 @@ module sunui {
                 return;
             }
             this.$ready = false;
+            this.facade.sendNotification(NotifyKey.SCENE_IS_READY, false);
 
             this.$sceneName != 0 && this.$exitScene();
             SceneHeap.removeHistory(this.$sceneName);
@@ -165,6 +169,13 @@ module sunui {
         }
 
         /**
+         * 场景是否己就绪
+         */
+        get ready(): boolean {
+            return this.$ready;
+        }
+
+        /**
          * 获取ui场景对象
          */
         get scene2d(): any {
@@ -182,7 +193,7 @@ module sunui {
          * 获取场景名字
          */
         get sceneName(): number {
-            return this.$ready === false ? 0 : this.$sceneName;
+            return this.$sceneName;
         }
     }
 }

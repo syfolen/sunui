@@ -203,6 +203,10 @@ module sunui {
                 this.cancel();
                 return 0;
             }
+            if (this.$var_target.isDisposed === true) {
+                this.cancel();
+                return 0;
+            }
 
             let done: boolean = false;
             let timeLeft: number = 0;
@@ -231,12 +235,13 @@ module sunui {
             if (done === false) {
                 return 0;
             }
-            this.$var_actions.shift().recover();
+            this.$var_actions.shift();
 
             if (this.$var_actions.length > 0) {
                 this.$var_actions[0].time = suncore.System.getModuleTimestamp(this.$var_mod);
             }
             action.complete !== null && action.complete.run();
+            action.recover();
 
             return timeLeft;
         }
