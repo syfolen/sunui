@@ -8,20 +8,20 @@ module sunui {
         execute(view: Laya.Sprite, duration: number, destroy: boolean): void {
             const info: IViewStackInfo = M.viewLayer.getInfoByView(view);
             if (info === null) {
-                suncom.Logger.error(suncom.DebugMode.ANY, `${view}[${view && view.name}]'s infomation is not exist.`);
+                console.warn(`${view}[${view && view.name}]'s pop info is not exist.`);
                 return;
             }
             if (destroy !== void 0) { info.keepNode = !destroy; }
 
             if (info.closed === true) {
+                console.warn(`${view}[${view && view.name}]'s pop is already closed.`);
                 return;
             }
             info.closed = true;
             M.viewLayer.onViewClose(view);
 
-            const mod: suncore.ModuleEnum = info.autoDestroy === true ? suncore.ModuleEnum.CUSTOM : suncore.ModuleEnum.SYSTEM;
             if ((info.props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
-                const tween: Tween = Tween.get(info.mask, mod);
+                const tween: Tween = Tween.get(info.mask, suncore.ModuleEnum.SYSTEM);
                 if (duration > 200 && (info.props.flags & PopupFlagEnum.SYNC_FADE_TIME) === PopupFlagEnum.NONE) {
                     tween.wait(duration - 200).to({ alpha: 0 }, 200);
                 }
@@ -30,7 +30,7 @@ module sunui {
                 }
             }
             this.$applyCloseProps(view, info.props, duration);
-            suncore.System.addTimer(mod, duration, this.$onCloseFinish, this, [info, view]);
+            suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, duration, this.$onCloseFinish, this, [view]);
         }
 
         /**

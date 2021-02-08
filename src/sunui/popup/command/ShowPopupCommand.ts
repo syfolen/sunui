@@ -7,12 +7,9 @@ module sunui {
 
         execute(view: IView, duration: number, props: IViewProps): void {
             if (M.viewLayer.getInfoByView(view) !== null) {
-                suncom.Logger.error(suncom.DebugMode.ANY, `${view}[${view.name}] is already popup.`);
+                console.warn(`${view}[${view.name}] is already popup.`);
                 return;
             }
-            if (props.ease === void 0) { props.ease = Laya.Ease.backOut; }
-            if (props.flags === void 0) { props.flags = PopupFlagEnum.NONE; }
-            if (props.keepNode === void 0) { props.keepNode = false; }
 
             let autoDestroy: boolean = true;
             if (props.autoDestroy !== void 0) {
@@ -22,6 +19,10 @@ module sunui {
                 autoDestroy = view.autoDestroy;
             }
             props.autoDestroy = autoDestroy;
+
+            if (props.ease === void 0) { props.ease = Laya.Ease.backOut; }
+            if (props.flags === void 0) { props.flags = PopupFlagEnum.NONE; }
+            if (props.keepNode === void 0) { props.keepNode = false; }
 
             const args: any = props.args;
             const level: UILevel = props.level || view.zOrder || UILevel.POPUP;
@@ -64,24 +65,30 @@ module sunui {
             M.viewLayer.addChild(view);
             M.viewLayer.onViewCreate(view, args);
 
-            const mod: suncore.ModuleEnum = autoDestroy === true ? suncore.ModuleEnum.CUSTOM : suncore.ModuleEnum.SYSTEM;
             if ((props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
                 if (props.flags & PopupFlagEnum.SYNC_FADE_TIME) {
-                    Tween.get(mask, mod).from({ alpha: 0 }, duration);
+                    Tween.get(mask, suncore.ModuleEnum.SYSTEM).from({ alpha: 0 }, duration);
                 }
                 else {
-                    Tween.get(mask, mod).from({ alpha: 0 }, Math.min(200, duration));
+                    Tween.get(mask, suncore.ModuleEnum.SYSTEM).from({ alpha: 0 }, Math.min(200, duration));
                 }
             }
             this.$applyShowProps(view, props, duration);
-            suncore.System.addTimer(mod, duration, this.$onPopupFinish, this, [info, view]);
+            suncore.System.addTimer(suncore.ModuleEnum.SYSTEM, duration, this.$onPopupFinish, this, [view]);
         }
 
         /**
          * 缓动结束
          */
-        private $onPopupFinish(info: IViewStackInfo, view: IView): void {
-            if (info.closed === false) {
+        private $onPopupFinish(view: IView): void {
+            const info: IViewStackInfo = M.viewLayer.getInfoByView(view);
+            if (info === null) {
+                console.warn(`${view}[${view.name}] popup finish, but pop info is not exist.`);
+            }
+            else if (info.closed === true) {
+                console.warn(`${view}[${view.name}] popup finish, but it is already closed.`);
+            }
+            else {
                 info.displayed = true;
                 M.viewLayer.onViewOpen(view);
             }

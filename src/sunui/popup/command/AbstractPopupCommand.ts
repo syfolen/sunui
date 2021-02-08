@@ -89,8 +89,7 @@ module sunui {
                 if (view instanceof fairygui.GComponent) {
                     data.update = suncom.Handler.create(this, this.$applyProps, [view, data], false);
                 }
-                const mod: suncore.ModuleEnum = props.autoDestroy === true ? suncore.ModuleEnum.CUSTOM : suncore.ModuleEnum.SYSTEM;
-                Tween.get(view, mod).to(data, duration, props.ease);
+                Tween.get(view, suncore.ModuleEnum.SYSTEM).to(data, duration, props.ease);
             }
         }
 
@@ -117,8 +116,7 @@ module sunui {
                 if (view instanceof fairygui.GComponent) {
                     data.update = suncom.Handler.create(this, this.$applyProps, [view, data], false);
                 }
-                const mod: suncore.ModuleEnum = props.autoDestroy === true ? suncore.ModuleEnum.CUSTOM : suncore.ModuleEnum.SYSTEM;
-                Tween.get(view, mod).to(data, duration);
+                Tween.get(view, suncore.ModuleEnum.SYSTEM).to(data, duration);
             }
         }
 
