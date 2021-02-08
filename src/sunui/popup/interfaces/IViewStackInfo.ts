@@ -40,6 +40,11 @@ module sunui {
         keepNode: boolean;
 
         /**
+         * 是否自动销毁
+         */
+        autoDestroy: boolean;
+
+        /**
          * 是否允许点击背景取消弹框
          */
         cancelAllowed: boolean;

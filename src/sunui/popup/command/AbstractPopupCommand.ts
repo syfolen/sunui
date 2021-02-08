@@ -28,15 +28,6 @@ module sunui {
                         break;
                 }
             }
-            // // 这里不确定是否这样做是合理的
-            // if (suncore.System.isModuleStopped(props.mod) === true) {
-            //     if (props.mod === suncore.ModuleEnum.TIMELINE && suncore.System.isModuleStopped(suncore.ModuleEnum.CUSTOM) === false) {
-            //         props.mod = suncore.ModuleEnum.CUSTOM;
-            //     }
-            //     else {
-            //         props.mod = suncore.ModuleEnum.SYSTEM;
-            //     }
-            // }
         }
 
         /**
@@ -98,7 +89,8 @@ module sunui {
                 if (view instanceof fairygui.GComponent) {
                     data.update = suncom.Handler.create(this, this.$applyProps, [view, data], false);
                 }
-                Tween.get(view, props.mod).to(data, duration, props.ease);
+                const mod: suncore.ModuleEnum = props.autoDestroy === true ? suncore.ModuleEnum.CUSTOM : suncore.ModuleEnum.SYSTEM;
+                Tween.get(view, mod).to(data, duration, props.ease);
             }
         }
 
@@ -125,7 +117,8 @@ module sunui {
                 if (view instanceof fairygui.GComponent) {
                     data.update = suncom.Handler.create(this, this.$applyProps, [view, data], false);
                 }
-                Tween.get(view, props.mod).to(data, duration);
+                const mod: suncore.ModuleEnum = props.autoDestroy === true ? suncore.ModuleEnum.CUSTOM : suncore.ModuleEnum.SYSTEM;
+                Tween.get(view, mod).to(data, duration);
             }
         }
 

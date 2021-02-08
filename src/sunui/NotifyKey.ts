@@ -91,31 +91,6 @@ module sunui {
         export const CLOSE_POPUP: string = "sunui.NotifyKey.CLOSE_POPUP";
 
         /**
-         * 弹框己关闭 { view: Laya.Sprite }
-         * 说明：
-         * 1. 此事件会在IPopupView的$onClose方法执行完毕之后被派发
-         */
-        export const ON_POPUP_CLOSED: string = "sunui.NotifyKey.ON_POPUP_CLOSED";
-
-        /**
-         * 弹框己移除 { view: Laya.Sprite }
-         * 说明：
-         * 1. 此事件会在IPopupView的$onRemove方法执行完毕之后被派发
-         * 2. 为了避免不同对象之间的销毁逻辑形成相互干扰，此命令被派发时，意味着弹框对象己被销毁
-         * export
-         */
-        export const ON_POPUP_REMOVED: string = "sunui.NotifyKey.ON_POPUP_REMOVED";
-
-        /**
-         * 对象被销毁事件 { caller: any }
-         * 说明：
-         * 1. 此事件主要被设计用来避免与非弹框对象存在联系的弹框在对象被销毁时可能意外残留的问题
-         * 2. 若某个非视图对象曾使用ViewContact与某个弹框建立过联系，则对象销毁时应当派发此事件
-         * export
-         */
-        export const ON_CALLER_DESTROYED: string = "sunui.NotifyKey.ON_CALLER_DESTROYED";
-
-        /**
          * 资源加载失败 { none }
          */
         export const ON_ASSET_SAFETY_LOADER_FAILED: string = "sunui.NotifyKey.ON_ASSET_SAFETY_LOADER_FAILED";
@@ -141,25 +116,14 @@ module sunui {
         export const REGISTER_TWEEN_OBJECT: string = "sunui.NotifyKey.REGISTER_TWEEN_OBJECT";
 
         /**
-         * 解锁下一个逻辑命令 { command: LogicCommand }
+         * 解锁下一个逻辑命令 { command: Command }
          */
-        export const NEXT_LOGIC_COMMAND: string = "sunui.NotifyKey.NEXT_LOGIC_COMMAND";
+        export const NEXT_COMMAND: string = "sunui.NotifyKey.NEXT_COMMAND";
 
         /**
-         * 依赖命令己解锁
+         * 释放监视器
          */
-        export const ON_INTERCEPTOR_RELIEVED: string = "sunui.NotifyKey.ON_INTERCEPTOR_RELIEVED";
-
-        /**
-         * 销毁逻辑命令 { hashId: number }
-         * export
-         */
-        export const DESTROY_LOGIC_RUNNABLE: string = "sunui.NotifyKey.DESTROY_LOGIC_RUNNABLE";
-
-        /**
-         * 销毁所有逻辑命令
-         */
-        export const DESTROY_ALL_LOGIC_RUNNABLE: string = "sunui.NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE";
+        export const RELEASE_MONITOR: string = "sunui.NotifyKey.RELEASE_MONITOR";
 
         /**
          * 场景己就绪 { ready: boolean }

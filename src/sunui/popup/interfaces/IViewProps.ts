@@ -40,16 +40,16 @@ module sunui {
         level?: UILevel;
 
         /**
+         * 是否自动销毁，默认为 true
+         * export
+         */
+        autoDestroy?: boolean;
+
+        /**
          * 是否允许取消
          * export
          */
         cancelAllowed?: boolean;
-
-        /**
-         * 是否自动销毁，默认为 true
-         * export
-         */
-        autoDestroyed?: boolean;
 
         /**
          * 弹框的左右自适应参数

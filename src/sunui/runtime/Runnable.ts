@@ -1,24 +1,24 @@
 
 module sunui {
     /**
-     * 逻辑消息拦截器
+     * 可运行对象
      * export
      */
-    export abstract class GUILogicInterceptor extends puremvc.Notifier {
+    export abstract class Runnable extends puremvc.Notifier {
         /**
          * 需要拦截的命令
          */
-        protected $var_command: string;
+        protected $var_command: string = null;
+
+        /**
+         * 是否己释放
+         */
+        protected $var_released: boolean = false;
 
         /**
          * 拦截条件（返回true时表示符合拦截条件）
          */
-        protected $var_condition: suncom.IHandler;
-
-        /**
-         * 是否解除拦截
-         */
-        protected $var_relieved: boolean = false;
+        protected $var_condition: suncom.IHandler = null;
 
         /**
          * @condition: 返回true时表示符合拦截条件
@@ -45,8 +45,8 @@ module sunui {
             return this.$var_command;
         }
 
-        get var_relieved(): boolean {
-            return this.$var_relieved;
+        get var_released(): boolean {
+            return this.$var_released;
         }
     }
 }

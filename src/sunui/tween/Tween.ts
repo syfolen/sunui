@@ -199,11 +199,13 @@ module sunui {
             const action: TweenAction = this.$var_actions[0];
 
             // 缓动对象可能己经被销毁了
-            if (this.$var_target.destroyed === true) {
-                this.cancel();
-                return 0;
+            if (this.$var_target instanceof fairygui.GObject) {
+                if (this.$var_target.isDisposed === true) {
+                    this.cancel();
+                    return 0;
+                }
             }
-            if (this.$var_target.isDisposed === true) {
+            else if (this.$var_target.destroyed === true) {
                 this.cancel();
                 return 0;
             }

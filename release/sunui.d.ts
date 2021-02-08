@@ -64,6 +64,31 @@ declare module sunui {
     }
 
     /**
+     * 弹框大小
+     */
+    enum PopupWinSizeEnum {
+        /**
+         * 正常（默认）
+         */
+        NORMAL,
+
+        /**
+         * 小
+         */
+        SMALL,
+
+        /**
+         * 中
+         */
+        MIDDLE,
+
+        /**
+         * 大
+         */
+        LARGE
+    }
+
+    /**
      * 下载速度限制
      */
     enum ResourceDownloadSpeedEnum {
@@ -226,6 +251,34 @@ declare module sunui {
     }
 
     /**
+     * 重试机制接口
+     */
+    interface IRetryer extends puremvc.INotifier {
+        /**
+         * 当前重试次数
+         */
+        readonly currentRetries: number;
+
+        /**
+         * 执行接口
+         * @delay: 重试延时
+         * @maxRetries: 最大重试次数，默认为：2
+         * @return: 返回true表示允许重试
+         */
+        run(delay: number, handler: suncom.IHandler, maxRetries?: number): void;
+
+        /**
+         * 取消重试
+         */
+        cancel(): void;
+
+        /**
+         * 重置（仅会重置次数统计）
+         */
+        reset(): void;
+    }
+
+    /**
      * 场景信息
      */
     interface ISceneInfo {
@@ -260,13 +313,6 @@ declare module sunui {
      */
     interface IViewProps {
         /**
-         * 弹框的时间模块，默认为：suncore.ModuleEnum.CUSTOM
-         * 说明：
-         * 1. 若当前mod为CUSTOM，但该模块处于停止状态，则此值自动变更为SYSTEM
-         */
-        mod?: suncore.ModuleEnum;
-
-        /**
          * 坐标
          */
         x?: number;
@@ -279,14 +325,6 @@ declare module sunui {
         ease?: Function;
 
         /**
-         * 背景是否通透，默认为：false
-         * 说明：
-         * 1. 此属性己弃用，将在未来的某个版本移除，请知悉
-         * 2. 优先级次于PopupFlagEnum.TRANSPARENT标记
-         */
-        trans?: boolean;
-
-        /**
          * 标记集合（多个标记允许并存）
          */
         flags?: PopupFlagEnum;
@@ -295,6 +333,11 @@ declare module sunui {
          * 显示层级
          */
         level?: UILevel;
+
+        /**
+         * 是否自动销毁，默认为 true
+         */
+        autoDestroy?: boolean;
 
         /**
          * 是否允许取消
@@ -362,40 +405,6 @@ declare module sunui {
     }
 
     /**
-     * 逻辑消息拦截器
-     */
-    abstract class GUILogicInterceptor extends puremvc.Notifier {
-
-        /**
-         * @condition: 返回true时表示符合拦截条件
-         */
-        constructor(command: string, condition: suncom.Handler);
-    }
-
-    /**
-     * 逻辑执行器，用于维护GUI层的命令执行序列
-     */
-    class GUILogicRunnable extends puremvc.Notifier {
-
-        /**
-         * @autoDestroy: 是否自动销毁，默认为：true
-         */
-        constructor(autoDestroy?: boolean);
-
-        /**
-         * 添加命令
-         * @condition: 拦截条件，返回true时进行拦截
-         * @dependencies：依赖列表
-         */
-        protected $addCommand(command: string, condition: suncom.Handler, dependencies: GUILogicDependence[]): void;
-
-        /**
-         * 获取Runnable的唯一ID（Runnable销毁时有用）
-         */
-        readonly hashId: number;
-    }
-
-    /**
      * 注册场景信息
      */
     class RegisterScenesCommand extends puremvc.SimpleCommand {
@@ -409,25 +418,21 @@ declare module sunui {
     /**
      * 重试机制
      */
-    class Retryer extends puremvc.Notifier {
+    class Retryer extends puremvc.Notifier implements IRetryer {
 
         /**
-         * @confirmHandler: 若重试超过最大次数，则会执行此回调
-         * @options: [ConfirmOptionValueEnum, string, ...]
-         * 说明：
-         * 1. method允许值为 RetryMethodEnum 或 suncore.ModuleEnum 或同时输入这两种值
-         * 2. 若未输入 RetryMethodEnum ，则默认值为 RetryMethodEnum.AUTO
-         * 3. 若未输入 suncore.ModuleEnum ，则默认值为 suncore.ModuleEnum.SYSTEM
+         * @confirmHandler: 若重试超过最大次数，则会执行此回调，默认为: null
+         * @options: [ConfirmOptionValueEnum, string, ...]，默认为: null
          */
-        constructor(modOrMethod: suncore.ModuleEnum | RetryMethodEnum, confirmHandler?: suncom.Handler, prompt?: string, ...options: Array<ConfirmOptionValueEnum | string>);
+        constructor(method: RetryMethodEnum, confirmHandler?: suncom.IHandler, prompt?: string, ...options: Array<ConfirmOptionValueEnum | string>);
 
         /**
          * 执行接口
-         * @delay: 重试延时
+         * @delay: 重试延时，单位为毫秒
          * @maxRetries: 最大重试次数，默认为：2
          * @return: 返回true表示允许重试
          */
-        run(delay: number, handler: suncom.Handler, maxRetries?: number): void;
+        run(delay: number, handler: suncom.IHandler, maxRetries?: number): void;
 
         /**
          * 取消重试
@@ -443,6 +448,36 @@ declare module sunui {
          * 当前重试次数
          */
         readonly currentRetries: number;
+    }
+
+    /**
+     * 可运行对象
+     */
+    abstract class Runnable extends puremvc.Notifier {
+
+        /**
+         * @condition: 返回true时表示符合拦截条件
+         */
+        constructor(command: string, condition: suncom.IHandler);
+    }
+
+    /**
+     * 运行时，可用于维护复杂的UI逻辑次序
+     * 适合处理即需要加载、卸载资源，又需要在网络中异步获取数据，且两者频繁交错发生的业务
+     */
+    class Runtime extends puremvc.Notifier {
+
+        /**
+         * @timeout: 超时时间，默认不会超时
+         */
+        constructor(timeout?: number);
+
+        /**
+         * 添加命令次序，运行时将拦截所有符合指定的条件的命令，并在条件满足后将它们重新派发
+         * @condition: 拦截条件，返回 true 时进行拦截
+         * @monitors[]：拦截将在所有监视结束的同时被解除
+         */
+        protected $addCommand(command: string, condition: Function, caller: Object, monitors: Monitor[]): void;
     }
 
     /**
@@ -502,24 +537,24 @@ declare module sunui {
          * @ease: 缓动函数，默认为: null
          * @complete: 缓动结束时的回调，默认为: null
          */
-        to(props: any, duration: number, ease?: Function, complete?: suncom.Handler): Tween;
+        to(props: any, duration: number, ease?: Function, complete?: suncom.IHandler): Tween;
 
         /**
          * 从props属性缓动至当前属性
          * @参数详细说明请参考Tween.to
          */
-        from(props: any, duration: number, ease?: Function, complete?: suncom.Handler): Tween;
+        from(props: any, duration: number, ease?: Function, complete?: suncom.IHandler): Tween;
 
         /**
          * 以props属性的幅度进行缓动
          * @参数详细说明请参考Tween.to
          */
-        by(props: any, duration: number, ease?: Function, complete?: suncom.Handler): Tween;
+        by(props: any, duration: number, ease?: Function, complete?: suncom.IHandler): Tween;
 
         /**
          * 等待指定时间
          */
-        wait(delay: number, complete?: suncom.Handler): Tween;
+        wait(delay: number, complete?: suncom.IHandler): Tween;
 
         /**
          * 是否使用对象池
@@ -569,9 +604,14 @@ declare module sunui {
         removeView(view: any): void;
 
         /**
+         * 场景是否己就绪
+         */
+        readonly ready: boolean;
+
+        /**
          * 获取2D场景对象
          */
-        readonly scene2d: Laya.Scene;
+        readonly scene2d: Laya.Scene | fairygui.GComponent;
 
         /**
          * 获取3D场景对象
@@ -582,30 +622,6 @@ declare module sunui {
          * 获取场景名字
          */
         readonly sceneName: number;
-    }
-
-    /**
-     * 视图关系对象
-     */
-    class ViewContact extends puremvc.Notifier {
-
-        /**
-         * @caller: 回调对象（脚本）
-         * @popup: 被监视的显示对象（必须为通过ViewFacade.popup弹出的显示对象）
-         * 说明：
-         * 1. 若caller为非弹出对象，则销毁前应当主动派发NotifyKey.ON_CALLER_DESTROYED事件，否则ViewContact不会自动回收
-         */
-        constructor(popup: any, caller: any);
-
-        /**
-         * 注册弹框被关闭时需要执行的回调（详见ON_POPUP_CLOSED）
-         */
-        onPopupClosed(method: Function, caller: any, args?: any[]): ViewContact;
-
-        /**
-         * 注册弹框被移除时需要执行的回调（详见ON_POPUP_REMOVED）
-         */
-        onPopupRemoved(method: Function, caller: any, args?: any[]): ViewContact;
     }
 
     /**
@@ -637,9 +653,9 @@ declare module sunui {
     }
 
     /**
-     * 逻辑依赖
+     * 监视器
      */
-    class GUILogicDependence extends GUILogicInterceptor {
+    class Monitor extends Runnable {
     }
 
     /**
@@ -647,7 +663,7 @@ declare module sunui {
      */
     namespace NotifyKey {
         /**
-         * 重试确认请求 { mod: suncore.ModuleEnum, prompt: string, options: IRetryOption[], handler: suncom.Handler }
+         * 重试确认请求 { prompt: string, options: IRetryOption[], handler: suncom.IHandler }
          */
         const RETRY_CONFIRM: string;
 
@@ -700,6 +716,11 @@ declare module sunui {
         const EXIT_SCENE: string;
 
         /**
+         * 离开场景之前
+         */
+        const BEFORE_LEAVE_SCENE: string;
+
+        /**
          * 离开场景命令 { none }
          * 说明：
          * 1. 此命令在完成uniCls的构建之后被派发（此时uniCls.run尚未执行）
@@ -708,25 +729,9 @@ declare module sunui {
         const LEAVE_SCENE: string;
 
         /**
-         * 弹框己移除 { view: Laya.Sprite }
-         * 说明：
-         * 1. 此事件会在IPopupView的$onRemove方法执行完毕之后被派发
-         * 2. 为了避免不同对象之间的销毁逻辑形成相互干扰，此命令被派发时，意味着弹框对象己被销毁
+         * 场景己就绪 { ready: boolean }
          */
-        const ON_POPUP_REMOVED: string;
-
-        /**
-         * 对象被销毁事件 { caller: any }
-         * 说明：
-         * 1. 此事件主要被设计用来避免与非弹框对象存在联系的弹框在对象被销毁时可能意外残留的问题
-         * 2. 若某个非视图对象曾使用ViewContact与某个弹框建立过联系，则对象销毁时应当派发此事件
-         */
-        const ON_CALLER_DESTROYED: string;
-
-        /**
-         * 销毁逻辑命令 { hashId: number }
-         */
-        const DESTROY_LOGIC_RUNNABLE: string;
+        const SCENE_IS_READY: string;
     }
 
     /**
@@ -744,20 +749,22 @@ declare module sunui {
         function setDownloadSpeed(speed: ResourceDownloadSpeedEnum): void;
 
         /**
-         * 锁定资源
+         * 锁定资源，此方法可确保正在使用的资源的安全性
          * 说明：
-         * 1. 每次请求锁定资源，则资源的引用次数会-1
-         * 2. 若为3d资源，则应当同时锁定资源包的配置文件
+         * 1. 每次请求锁定资源，资源的引用次数会+1
+         * 2. 若为3d资源，则会同时自动锁定关联的资源配置文件
+         * 3. 禁止直接调用此方法来单独锁定3d资源配置文件
          */
         function lock(url: string): void;
 
         /**
-         * 解锁资源
+         * 解锁资源，此方法可确保未在使用的资源不会出现内存泄露问题
          * 说明：
-         * 1. 每次请求解锁资源时，资源的引用次数会+1
-         * 2. 若为3d资源，则应当同时解锁资源包的配置文件
-         * 3. 当2d资源的引用次数为0时，资源会自动释放，当前的加载亦会取消
-         * 4. 3d资源只有在资源包的配置文件的引用次数为0时才会释放
+         * 1. 每次请求解锁资源时，资源的引用次数会-1
+         * 2. 若为3d资源，则会同时自动解锁关联的资源配置文件
+         * 3. 禁止直接调用此方法来单独解锁3d资源配置文件
+         * 4. 当2d资源的引用次数为0时，资源会自动释放，当前的加载亦会取消
+         * 5. 3d资源只有在资源包的配置文件的引用次数为0时才会释放
          */
         function unlock(url: string): void;
 
@@ -768,7 +775,7 @@ declare module sunui {
          * 说明：
          * 1. 建议将业务逻辑的初始化代码放在资源加载完成之后，这样的话，在加载被取消时，也不需要对初始化进行撤销
          */
-        function prepare(urls: string[], method: (id: number) => void, caller: Object): number;
+        function prepare(urls: string[], method: (id: number, progress?: number) => void, caller: Object): number;
 
         /**
          * 释放资源组
@@ -785,9 +792,9 @@ declare module sunui {
         function createSync(url: string, data?: any): any;
 
         /**
-         * 立即创建3d对象
+         * 立即创建 3d 对象
          * 说明：
-         * 1. 同createSync
+         * 1. 同 createSync
          */
         function createRes3dSync(name: string): any;
 
@@ -802,6 +809,11 @@ declare module sunui {
         function getRes3dJsonUrl(url: string): string;
 
         /**
+         * 判断是否为fairygui资源
+         */
+        function isFGuiUrl(url: string): boolean;
+
+        /**
          * 获取3D资源地址
          * @name: 如xxx或xxx.lh，若未指定扩展名，则认为是.lh
          * 说明：
@@ -812,6 +824,7 @@ declare module sunui {
 
         /**
          * 确认加载列表中的url正确性
+         * 注意：此方法修改和返回的数组均为数据源
          */
         function checkLoadList(urls: string[]): string[];
     }

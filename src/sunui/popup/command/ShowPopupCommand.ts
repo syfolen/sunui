@@ -14,22 +14,14 @@ module sunui {
             if (props.flags === void 0) { props.flags = PopupFlagEnum.NONE; }
             if (props.keepNode === void 0) { props.keepNode = false; }
 
-            if (props.autoDestroyed === void 0) {
-                if (props.autoDestroyed === void 0) {
-                    props.autoDestroyed = true;
-                }
-                else {
-                    props.autoDestroyed = view.autoDestroy;
-                }
+            let autoDestroy: boolean = true;
+            if (props.autoDestroy !== void 0) {
+                autoDestroy = props.autoDestroy;
             }
-
-            // 默认为: SIMPLY
-            if ((props.flags & PopupFlagEnum.SIMPLY) === PopupFlagEnum.SIMPLY) {
-                props.flags &= ~PopupFlagEnum.SIMPLY;
+            else if (view.autoDestroy !== void 0) {
+                autoDestroy = view.autoDestroy;
             }
-            else {
-                props.flags |= PopupFlagEnum.SIMPLY;
-            }
+            props.autoDestroy = autoDestroy;
 
             const args: any = props.args;
             const level: UILevel = props.level || view.zOrder || UILevel.POPUP;
@@ -44,14 +36,12 @@ module sunui {
                 const scale: number = suncom.Global.height / 720;
                 view["setScale"](scale, scale);
             }
-
+            // 第一次显示的时候，轴心点可能会不正确
+            if (view instanceof Laya.View) {
+                view.pivot(view.width * 0.5, view.height * 0.5);
+            }
             // 避免props的默认属性不存在
             this.$makeProps(view, props);
-            // 由于历史遗留问题，故需要考虑props.trans的值
-            if ((props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
-                suncom.Logger.warn(suncom.DebugMode.ANY, `ViewFacade：props的trans属性己弃用，请使用flags代替！！！`);
-                props.flags |= PopupFlagEnum.TRANSPARENT;
-            }
 
             const mask: Laya.Image | fairygui.GLoader = M.viewLayer.createMask(view, props);
             mask.name = `Mask$${view.name}`;
@@ -65,37 +55,33 @@ module sunui {
                 keepNode: keepNode,
                 displayed: false,
                 duration: duration,
-                cancelAllowed: true
+                cancelAllowed: true,
+                autoDestroy: autoDestroy
             };
             M.viewLayer.addToStack(info);
 
             M.viewLayer.addChild(mask as IView);
             M.viewLayer.addChild(view);
-
-            if (view instanceof Laya.View) {
-                // 第一次显示的时候，轴心点可能会不正确
-                view.pivot(view.width * 0.5, view.height * 0.5);
-            }
             M.viewLayer.onViewCreate(view, args);
 
+            const mod: suncore.ModuleEnum = autoDestroy === true ? suncore.ModuleEnum.CUSTOM : suncore.ModuleEnum.SYSTEM;
             if ((props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
                 if (props.flags & PopupFlagEnum.SYNC_FADE_TIME) {
-                    Tween.get(mask, info.props.mod).from({ alpha: 0 }, duration);
+                    Tween.get(mask, mod).from({ alpha: 0 }, duration);
                 }
                 else {
-                    Tween.get(mask, info.props.mod).from({ alpha: 0 }, duration > 200 ? 200 : duration);
+                    Tween.get(mask, mod).from({ alpha: 0 }, Math.min(200, duration));
                 }
             }
             this.$applyShowProps(view, props, duration);
-            suncore.System.addTrigger(info.props.mod, duration, this, this.$onPopupFinish, [view]);
+            suncore.System.addTimer(mod, duration, this.$onPopupFinish, this, [info, view]);
         }
 
         /**
          * 缓动结束
          */
-        private $onPopupFinish(view: Laya.Sprite): void {
-            const info: IViewStackInfo = M.viewLayer.getInfoByView(view);
-            if (info !== null && info.closed === false) {
+        private $onPopupFinish(info: IViewStackInfo, view: IView): void {
+            if (info.closed === false) {
                 info.displayed = true;
                 M.viewLayer.onViewOpen(view);
             }

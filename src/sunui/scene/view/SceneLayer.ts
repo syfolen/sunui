@@ -97,7 +97,6 @@ module sunui {
          */
         private $onLeaveScene(info: ISceneInfo): void {
             info.uniCls && suncore.System.addTask(suncore.ModuleEnum.SYSTEM, new info.uniCls(info, this.$data));
-            this.facade.sendNotification(NotifyKey.DESTROY_ALL_LOGIC_RUNNABLE);
             this.facade.sendNotification(NotifyKey.BEFORE_LEAVE_SCENE);
             this.facade.sendNotification(NotifyKey.LEAVE_SCENE);
             this.facade.sendNotification(NotifyKey.UNLOAD_SCENE, [this.$scene2d, this.$scene3d]);

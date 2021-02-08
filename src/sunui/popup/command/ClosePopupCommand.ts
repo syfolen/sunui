@@ -17,14 +17,11 @@ module sunui {
                 return;
             }
             info.closed = true;
-            // // 避免因模块停止引起缓动意外
-            // this.$makeProps(info.props);
-
             M.viewLayer.onViewClose(view);
-            this.facade.sendNotification(NotifyKey.ON_POPUP_CLOSED, view);
 
+            const mod: suncore.ModuleEnum = info.autoDestroy === true ? suncore.ModuleEnum.CUSTOM : suncore.ModuleEnum.SYSTEM;
             if ((info.props.flags & PopupFlagEnum.TRANSPARENT) === PopupFlagEnum.NONE) {
-                const tween: Tween = Tween.get(info.mask, info.props.mod);
+                const tween: Tween = Tween.get(info.mask, mod);
                 if (duration > 200 && (info.props.flags & PopupFlagEnum.SYNC_FADE_TIME) === PopupFlagEnum.NONE) {
                     tween.wait(duration - 200).to({ alpha: 0 }, 200);
                 }
@@ -33,7 +30,7 @@ module sunui {
                 }
             }
             this.$applyCloseProps(view, info.props, duration);
-            suncore.System.addTrigger(info.props.mod, duration, this, this.$onCloseFinish, [view]);
+            suncore.System.addTimer(mod, duration, this.$onCloseFinish, this, [info, view]);
         }
 
         /**
@@ -41,7 +38,7 @@ module sunui {
          */
         private $onCloseFinish(view: Laya.Sprite): void {
             // IPopupView的$onRemove方法在ViewLayer中实现
-            M.viewLayer.removeStackInfoByView(view);
+            M.viewLayer.removeInfoByView(view);
         }
     }
 }

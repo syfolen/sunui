@@ -95,7 +95,7 @@ module sunui {
          * export
          */
         removeView(view: any): void {
-            M.viewLayer.removeStackInfoByView(view);
+            M.viewLayer.removeInfoByView(view);
         }
 
         /**

@@ -67,9 +67,40 @@ module sunui {
             const array: IViewStackInfo[] = this.$stack.concat();
             for (let i: number = array.length - 1; i > -1; i--) {
                 const info: IViewStackInfo = array[i];
-                if (info.props.mod !== suncore.ModuleEnum.SYSTEM) {
-                    this.removeStackInfo(info);
+                if (info.autoDestroy === true) {
+                    this.removeFromStack(info);
                 }
+            }
+        }
+
+        /**
+         * 保存视图信息至栈中
+         * NOTE: 保存时应当按UILevel从小到大的顺序排列，同级别的，后来的先处理
+         */
+        addToStack(newInfo: IViewStackInfo): void {
+            this.$stack.push(newInfo);
+        }
+
+        /**
+         * 根据视图信息直接移除视图
+         */
+        removeFromStack(info: IViewStackInfo): void {
+            const index: number = this.$stack.indexOf(info);
+            if (index < 0) {
+                return;
+            }
+            this.$stack.splice(index, 1);
+
+            // 被直接移的视图视为己关闭
+            info.closed = true;
+            this.onViewRemove(info.view);
+
+            this.removeChild(info.view);
+            this.removeChild(info.mask as IView);
+
+            this.destroyMask(info.mask);
+            if (info.keepNode === false) {
+                this.destroyView(info.view);
             }
         }
 
@@ -87,43 +118,13 @@ module sunui {
         }
 
         /**
-         * 保存视图信息至栈中
-         * NOTE: 保存时应当按UILevel从小到大的顺序排列，同级别的，后来的先处理
-         */
-        addToStack(newInfo: IViewStackInfo): void {
-            this.$stack.push(newInfo);
-        }
-
-        /**
-         * 根据视图信息直接移除视图
-         */
-        removeStackInfo(info: IViewStackInfo): void {
-            const index: number = this.$stack.indexOf(info);
-            if (index < 0) {
-                return;
-            }
-            this.$stack.splice(index, 1);
-            this.onViewRemove(info.view);
-
-            this.removeChild(info.view);
-            this.removeChild(info.mask as IView);
-
-            if (info.keepNode === false) {
-                this.destroyView(info.view);
-                this.destroyMask(info.mask);
-            }
-            // 为了避免不同的弹框之间的销毁业务相互形成干扰，此事件被设计成在弹框对象被销毁之后被派发
-            this.facade.sendNotification(NotifyKey.ON_POPUP_REMOVED, info.view);
-        }
-
-        /**
          * 移除视图信息
          */
-        removeStackInfoByView(view: IView): void {
+        removeInfoByView(view: IView): void {
             for (let i: number = 0; i < this.$stack.length; i++) {
                 const info: IViewStackInfo = this.$stack[i];
                 if (info.view === view) {
-                    this.removeStackInfo(info);
+                    this.removeFromStack(info);
                     break;
                 }
             }

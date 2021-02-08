@@ -1,24 +1,24 @@
 
 module sunui {
     /**
-     * 逻辑依赖
+     * 监视器
      * export
      */
-    export class GUILogicDependence extends GUILogicInterceptor {
+    export class Monitor extends Runnable {
         /**
          * 是否己激活
          */
         private $var_active: boolean = false;
 
         protected $func_onCommandCallback(): void {
-            if (this.$var_active === true && this.$var_relieved === false) {
+            if (this.$var_active === true && this.$var_released === false) {
                 const args: any[] = [];
                 for (let i: number = 0; i < arguments.length; i++) {
                     args.push(arguments[i]);
                 }
                 if (this.$var_condition.runWith(args) === true) {
-                    this.$var_relieved = true;
-                    this.facade.sendNotification(NotifyKey.ON_INTERCEPTOR_RELIEVED, this, true);
+                    this.$var_released = true;
+                    this.facade.sendNotification(NotifyKey.RELEASE_MONITOR, this, true);
                 }
             }
         }

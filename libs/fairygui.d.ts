@@ -16,6 +16,7 @@ declare namespace fairygui {
         setSize(width: number, height: number): void;
         on(type: string, caller: any, method: Function, args?: any[]): void;
         off(type: string, caller: any, method: Function): void;
+        readonly isDisposed: boolean;
     }
 
     class GLoader extends GObject {
