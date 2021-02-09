@@ -24,6 +24,14 @@ module sunui {
             if (props.flags === void 0) { props.flags = PopupFlagEnum.NONE; }
             if (props.keepNode === void 0) { props.keepNode = false; }
 
+            // 默认为: SIMPLY
+            if ((props.flags & PopupFlagEnum.SIMPLY) === PopupFlagEnum.SIMPLY) {
+                props.flags &= ~PopupFlagEnum.SIMPLY;
+            }
+            else {
+                props.flags |= PopupFlagEnum.SIMPLY;
+            }
+
             const args: any = props.args;
             const level: UILevel = props.level || view.zOrder || UILevel.POPUP;
             const keepNode: boolean = props.keepNode;

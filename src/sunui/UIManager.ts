@@ -94,8 +94,17 @@ module sunui {
          * 移除视图
          * export
          */
-        removeView(view: any): void {
+        removeView(view: IView): void {
             M.viewLayer.removeInfoByView(view);
+        }
+
+        /**
+         * 是否存在视图信息
+         * export
+         */
+        isViewExist(view: IView): boolean {
+            const info: IViewStackInfo = M.viewLayer.getInfoByView(view);
+            return info !== null;
         }
 
         /**
