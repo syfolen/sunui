@@ -123,18 +123,20 @@ module sunui {
          */
         export function createSync(url: string, data?: any): any {
             let res: any = M.cacheMap[url] || null;
+            let item: any = null;
             if (suncom.Common.getFileExtension(url) === "sk") {
-                return res.buildArmature(data);
+                item = res && res.buildArmature(data);
             }
             else if (Resource.isRes3dUrl(url) === true) {
                 if (res === null) {
                     res = M.cacheMap[url] = Laya.loader.getRes(url);
                 }
-                return Laya.Sprite3D.instantiate(res);
+                item = res && Laya.Sprite3D.instantiate(res);
             }
             else {
-                return Laya.loader.getRes(url);
+                item = Laya.loader.getRes(url) || null;
             }
+            return item;
         }
 
         /**
