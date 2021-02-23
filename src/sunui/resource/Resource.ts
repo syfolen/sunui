@@ -123,9 +123,6 @@ module sunui {
          */
         export function createSync(url: string, data?: any): any {
             let res: any = M.cacheMap[url] || null;
-            if (res === null) {
-                return null;
-            }
             if (suncom.Common.getFileExtension(url) === "sk") {
                 return res.buildArmature(data);
             }
